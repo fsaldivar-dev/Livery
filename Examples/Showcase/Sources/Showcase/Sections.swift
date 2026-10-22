@@ -14,8 +14,7 @@ struct SectionTitle: View {
     let text: String
     var body: some View {
         Text(text)
-            .font(theme.type.caption)
-            .foregroundStyle(theme.color.onSurfaceSecondary)
+            .textStyle(.caption)
             .textCase(.uppercase)
             .padding(.bottom, theme.space.xs)
     }

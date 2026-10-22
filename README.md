@@ -137,11 +137,14 @@ Para lo que SwiftUI ya da —`Text`, `Button`, `Toggle`, iconos SF Symbols— el
 componentes: aplica los roles del tema y los estilos nativos. El acento se pone una vez con `.tint`
 y los controles del sistema lo siguen.
 
+Un estilo de texto junta fuente y color en una sola llamada, para no repetir `.font` y
+`.foregroundStyle` en cada `Text`. Vale para `Text`, `Label` y la etiqueta de un `Toggle`.
+
 ```swift
-Text("Título").font(theme.type.title).foregroundStyle(theme.color.onSurface)
-Label("Reproducir", systemImage: "play.circle.fill").foregroundStyle(theme.color.accent)
-Toggle("Notificaciones", isOn: $on)        // sigue el .tint(theme.color.accent) de la raíz
-ContentView().tint(theme.color.accent)
+Text("Título").textStyle(.title)
+Label("Reproducir", systemImage: "play.circle.fill").textStyle(.accent)
+Toggle("Notificaciones", isOn: $on).textStyle(.body)   // y sigue el .tint del tema
+ContentView().tint(theme.color.accent)                 // el acento, una vez, en la raíz
 ```
 
 Se construye un componente propio (como el campo de texto de arriba) solo cuando SwiftUI no

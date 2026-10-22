@@ -22,29 +22,19 @@ struct PrimitivesSection: View {
         VStack(alignment: .leading, spacing: theme.space.md) {
             SectionTitle(text: "Primitivos de SwiftUI, tematizados")
 
-            // Texto: roles de tipografía y color.
+            // Texto: un estilo semántico junta fuente y color.
             VStack(alignment: .leading, spacing: theme.space.xs) {
-                Text("Título")
-                    .font(theme.type.title)
-                    .foregroundStyle(theme.color.onSurface)
-                Text("Texto secundario, con su rol de color.")
-                    .font(theme.type.body)
-                    .foregroundStyle(theme.color.onSurfaceSecondary)
+                Text("Título").textStyle(.title)
+                Text("Texto secundario, con su rol de color.").textStyle(.secondary)
             }
 
             Divider()
 
             // Icono: un SF Symbol con color y tamaño del tema.
             HStack(spacing: theme.space.md) {
-                Label("Reproducir", systemImage: "play.circle.fill")
-                    .font(theme.type.title)
-                    .foregroundStyle(theme.color.accent)
-                Label("Favorito", systemImage: "star.fill")
-                    .font(theme.type.headline)
-                    .foregroundStyle(theme.color.accent)
-                Image(systemName: "bell.badge")
-                    .font(theme.type.title)
-                    .foregroundStyle(theme.color.danger)
+                Label("Reproducir", systemImage: "play.circle.fill").textStyle(.accent)
+                Label("Favorito", systemImage: "star.fill").textStyle(.accent)
+                Label("Alerta", systemImage: "bell.badge").textStyle(.danger)
             }
 
             Divider()
@@ -55,8 +45,7 @@ struct PrimitivesSection: View {
                 Toggle("Notificaciones", isOn: $activo)
                     .toggleStyle(.switch)
                     .fixedSize()
-                    .font(theme.type.body)
-                    .foregroundStyle(theme.color.onSurface)
+                    .textStyle(.body)
             }
         }
     }

@@ -15,16 +15,12 @@ struct SampleCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text("Sajaru Corner")
-                .font(theme.type.title)
-                .foregroundStyle(theme.color.onSurface)
+            Text("Sajaru Corner").textStyle(.title)
             Text("Round 3 · 2:14 · Sparring")
-                .font(theme.type.caption)
-                .foregroundStyle(theme.color.onSurfaceSecondary)
+                .textStyle(.caption)
                 .padding(.top, theme.space.xs)
             Text("Dos golpes limpios al cuerpo en los primeros veinte segundos; la guardia baja después del clinch.")
-                .font(theme.type.body)
-                .foregroundStyle(theme.color.onSurface)
+                .textStyle(.body)
                 .padding(.top, theme.space.md)
             HStack(spacing: theme.space.sm) {
                 Button { } label: { Label("Analizar", systemImage: "play.fill") }

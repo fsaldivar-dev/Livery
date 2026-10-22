@@ -311,8 +311,11 @@ barra amarilla); el campo se revisa en la app con ventana.
 
 Primitivos nativos: para `Text`, `Button`, `Toggle` e iconos SF Symbols, el
 sistema no construye componentes; aplica los roles del tema y los estilos
-nativos. El acento se pone una vez con `.tint(theme.color.accent)` en la raíz y
-los controles del sistema (`Toggle`, `Slider`…) lo siguen. Un componente propio
+nativos. Un estilo de texto, `.textStyle(.title)`, junta fuente y color en una
+llamada (un rol de tipografía no lleva color), para no escribir `.font` y
+`.foregroundStyle` en cada `Text`; vale para `Text`, `Label` y `Toggle`. El
+acento se pone una vez con `.tint(theme.color.accent)` en la raíz y los
+controles del sistema (`Toggle`, `Slider`…) lo siguen. Un componente propio
 solo cuando SwiftUI no da el control (p. ej. el campo de texto). La galería trae
 una sección de primitivos con los cuatro.
 
