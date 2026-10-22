@@ -249,6 +249,41 @@ valores son literales, en ambos modos. Pendiente (fase 2).
 Semántica para VoiceOver y objetivos táctiles mínimos: parte de los contratos de
 componente (fase 3).
 
+## 7c. Componentes (fase 0.3, prototipo del botón hecho)
+
+Un componente es un contrato, no una vista: partes, variantes y tamaños los
+declara el proyecto; los estados (`normal`, `pressed`, `disabled`, `focused`,
+`selected`) los fija el kernel. Un estilo es una tabla en roles, en cascada
+cerrada: base exhaustiva (una función de parte a atributos, que el compilador
+obliga a cubrir), y sobreescrituras parciales por variante, tamaño y estado, en
+ese orden. Como habla en roles, un estilo sirve para todos los temas: Carbon
+vuelve el primario ámbar sin tocar el estilo.
+
+Kernel (`Component.swift`): `ComponentPart`, `ComponentVariant`,
+`ComponentSize` (con `minimumHitTarget`, 44 por defecto), `ComponentState`,
+`PartAttributes`, `ComponentStyle<Part, Variant, Size, Attributes>` con
+`attributes(variant:size:state:)`, y `Theme.register(style:for:)` /
+`Theme.style(for:)`. `@Theme` registra toda conformance `X.Styler`.
+
+Prototipo en Showcase (`DesignSystem/Button.swift`, `ButtonStyle.swift`),
+escrito a mano con la forma que generará `@Component`:
+
+- `Button.Part/Kind/Size`, `Button.PartStyle` (campos en roles del proyecto:
+  `background: Colors?`, `font: Typography?`, `paddingVertical: Spacing?`…),
+  `Button.Style`, `Button.Styler`, `Button.unstyled` y `theme.button`.
+- `ThemedButtonStyle: ButtonStyle`, el adaptador a SwiftUI: hereda teclado,
+  VoiceOver y `Button(role:)`; estado desde `isEnabled` y `isPressed`; tamaño
+  desde `.controlSize` (sin modificador nuevo); `frame(minHeight:
+  minimumHitTarget)` y `contentShape`; `lineLimit(1)` y `fixedSize` horizontal.
+  Se aplica con `.buttonStyle(.primary)`, `.secondary`, `.destructive`; un
+  `Button(role: .destructive)` fuerza la variante destructiva.
+- La galería pinta la matriz variante × tamaño × normal/deshabilitado sola.
+
+Pendiente para cerrar 0.3: `@Component` que genere `PartStyle`, `Style`,
+`Styler`, `unstyled` y la extensión `theme.<componente>`; los estáticos de
+`ButtonStyle` por variante; `focused` y `selected` en los adaptadores; y decidir
+si `opacity` pasa a ser una categoría de roles en vez de un `Double` crudo.
+
 ## 8. Cambio y migración
 
 | Cambio | Qué pasa |

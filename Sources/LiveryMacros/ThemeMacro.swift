@@ -18,9 +18,16 @@ public struct ThemeMacro: ExtensionMacro {
             return []
         }
 
-        let roleSets = (declaration.inheritanceClause?.inheritedTypes ?? []).compactMap { inherited -> String? in
-            let components = inherited.type.trimmedDescription.split(separator: ".").map(String.init)
+        let inherited = (declaration.inheritanceClause?.inheritedTypes ?? []).map {
+            $0.type.trimmedDescription.split(separator: ".").map(String.init)
+        }
+        let roleSets = inherited.compactMap { components -> String? in
             guard components.count >= 2, components.last == "Resolver" else { return nil }
+            return components.dropLast().joined(separator: ".")
+        }
+        // `Button.Styler` exige `var button: Button.Style`; se registra con el tipo del contrato como clave.
+        let stylers = inherited.compactMap { components -> String? in
+            guard components.count >= 2, components.last == "Styler" else { return nil }
             return components.dropLast().joined(separator: ".")
         }
         guard !roleSets.isEmpty else {
@@ -32,8 +39,8 @@ public struct ThemeMacro: ExtensionMacro {
         guard !protocols.isEmpty else { return [] }
 
         let access = declaration.modifiers.accessPrefix
-        let registrations = roleSets
-            .map { "        theme.register(\($0).Values(self), for: \($0).self)" }
+        let registrations = (roleSets.map { "        theme.register(\($0).Values(self), for: \($0).self)" }
+            + stylers.map { "        theme.register(style: self.\(Self.propertyName(for: $0)), for: \($0).self)" })
             .joined(separator: "\n")
 
         return [
@@ -49,6 +56,15 @@ public struct ThemeMacro: ExtensionMacro {
                 """
             )
         ]
+    }
+}
+
+extension ThemeMacro {
+    /// `Button` → `button`, `DS.IconButton` → `iconButton`.
+    static func propertyName(for qualifiedType: String) -> String {
+        let name = qualifiedType.split(separator: ".").last.map(String.init) ?? qualifiedType
+        guard let first = name.first else { return name }
+        return first.lowercased() + name.dropFirst()
     }
 }
 

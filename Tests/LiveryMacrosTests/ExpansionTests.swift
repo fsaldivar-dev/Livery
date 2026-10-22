@@ -70,12 +70,12 @@ final class ExpansionTests: XCTestCase {
     func testThemeRegistersEachResolver() {
         assertMacroExpansion(
             """
-            @Theme public struct Light: Colors.Resolver, Spacing.Resolver, Sendable {
+            @Theme public struct Light: Colors.Resolver, Spacing.Resolver, Button.Styler, Sendable {
                 let surface = Color.white
             }
             """,
             expandedSource: """
-            public struct Light: Colors.Resolver, Spacing.Resolver, Sendable {
+            public struct Light: Colors.Resolver, Spacing.Resolver, Button.Styler, Sendable {
                 let surface = Color.white
             }
 
@@ -84,6 +84,7 @@ final class ExpansionTests: XCTestCase {
                     var theme = Livery.Theme()
                     theme.register(Colors.Values(self), for: Colors.self)
                     theme.register(Spacing.Values(self), for: Spacing.self)
+                    theme.register(style: self.button, for: Button.self)
                     return theme
                 }
             }

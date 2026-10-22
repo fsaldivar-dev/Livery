@@ -40,6 +40,9 @@ public macro Roles() = #externalMacro(module: "LiveryMacros", type: "RolesMacro"
 /// }
 /// ```
 ///
+/// Un tema también puede registrar estilos de componente conformando a `Button.Styler`, que exige
+/// `var button: Button.Style`; el macro lo registra con el contrato como clave.
+///
 /// Genera la conformance a ``ThemeProvider``. El acceso corto `Theme.light` lo genera el plugin
 /// de build `LiveryRegistry` para todo tema que se pueda construir sin argumentos, y se aplica
 /// con `.environment(\.theme, .light)`.

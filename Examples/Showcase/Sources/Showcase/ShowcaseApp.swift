@@ -102,6 +102,7 @@ struct GalleryView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: theme.space.xl) {
             SampleCard()
+            ButtonsSection()
             ColorsSection()
             TypographySection()
             SpacingSection()
@@ -121,7 +122,7 @@ enum Snapshot {
             for scheme in [ColorScheme.light, .dark] {
                 let view = GalleryView()
                     .frame(width: 900)
-                    .background(theme.color.surface)
+                    .background(choice.theme.color.surface)
                     .environment(\.theme, choice.theme)
                     .environment(\.colorScheme, scheme)
                 let renderer = ImageRenderer(content: view)

@@ -24,6 +24,14 @@ public struct Theme: Sendable {
         storage[ObjectIdentifier(set)] = values
     }
 
+    mutating func register(any value: any Sendable, key: ObjectIdentifier) {
+        storage[key] = value
+    }
+
+    func value(key: ObjectIdentifier) -> (any Sendable)? {
+        storage[key]
+    }
+
     /// Devuelve la resolución de un conjunto de roles.
     ///
     /// Si el subárbol activo no lo resuelve, en debug emite una advertencia de runtime y devuelve

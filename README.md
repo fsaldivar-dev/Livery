@@ -109,6 +109,20 @@ swift run --package-path Examples/Showcase
 - **Subárbol sin tema.** En debug, una advertencia de runtime y colores rosa; nunca un fallo en silencio.
 - **Valores sueltos en vistas.** Con el plugin activo en un target de UI, un `Color(red:…)`, un `.foregroundStyle(.blue)`, un `.font(.system(size: 14))` o un `.padding(12)` es un warning con archivo y línea. Los módulos que declaran roles, temas o primitivos quedan exentos.
 
+## Componentes
+
+Un componente es un contrato, y su estilo una tabla en roles que vive en el tema. El botón de
+Showcase es un `ButtonStyle` de SwiftUI de verdad: hereda teclado, VoiceOver y `Button(role:)`,
+toma el tamaño de `.controlSize` y garantiza 44 puntos de área táctil.
+
+```swift
+Button("Analizar") { … }.buttonStyle(.primary)
+Button("Borrar", role: .destructive) { … }.buttonStyle(.secondary)   // el rol gana
+```
+
+Cambiar de tema cambia los botones sin tocar el estilo, porque el estilo dice `accent`, no un
+color. Fase 0.3, en prototipo: el macro `@Component` que genera el contrato viene después.
+
 ## Migrar de un sistema a otro
 
 Cuando llega DS2 con más tokens, menos tokens y renombres, no se tocan vistas: se escribe un

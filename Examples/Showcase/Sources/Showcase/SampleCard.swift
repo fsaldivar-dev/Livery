@@ -26,18 +26,11 @@ struct SampleCard: View {
                 .font(theme.type.body)
                 .foregroundStyle(theme.color.onSurface)
                 .padding(.top, theme.space.md)
-            HStack(spacing: 0) {
-                Label("Analizar", systemImage: "play.fill")
-                    .font(theme.type.headline)
-                    .foregroundStyle(theme.color.onAccent)
-                    .padding(.vertical, theme.space.sm)
-                    .padding(.horizontal, theme.space.md)
-                    .background(theme.color.accent, in: .rect(cornerRadius: theme.shape.small))
-                Label("Descartar", systemImage: "trash")
-                    .font(theme.type.headline)
-                    .foregroundStyle(theme.color.danger)
-                    .padding(.vertical, theme.space.sm)
-                    .padding(.horizontal, theme.space.md)
+            HStack(spacing: theme.space.sm) {
+                Button { } label: { Label("Analizar", systemImage: "play.fill") }
+                    .buttonStyle(.primary)
+                Button(role: .destructive) { } label: { Label("Descartar", systemImage: "trash") }
+                    .buttonStyle(.secondary)
             }
             .padding(.top, theme.space.lg)
         }
