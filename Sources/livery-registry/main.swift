@@ -2,8 +2,9 @@
 //  main.swift
 //  livery-registry
 //
-//  Uso: livery-registry <salida.swift> <fuente1.swift> <fuente2.swift> …
-//  Lo invoca el plugin LiveryRegistry; también sirve a mano para inspeccionar la salida.
+//  Uso: livery-registry <salida.swift> <fuentes del módulo…> [--usages <fuentes de otros módulos…>]
+//  Lo invoca el plugin LiveryRegistry; también sirve a mano para inspeccionar la salida. Los
+//  fuentes tras `--usages` no declaran nada: solo se cuentan en el reporte de cada @Bridge.
 //
 
 import Foundation
@@ -16,13 +17,17 @@ guard let outputPath = arguments.first else {
 }
 
 var sources: [RegistryGenerator.Source] = []
+var usages: [RegistryGenerator.Source] = []
+var collectingUsages = false
 for path in arguments.dropFirst() {
+    if path == "--usages" { collectingUsages = true; continue }
     if let text = try? String(contentsOfFile: path, encoding: .utf8) {
-        sources.append(RegistryGenerator.Source(path: path, text: text))
+        let source = RegistryGenerator.Source(path: path, text: text)
+        if collectingUsages { usages.append(source) } else { sources.append(source) }
     }
 }
 
-let output = RegistryGenerator().generate(sources: sources)
+let output = RegistryGenerator().generate(sources: sources, usages: usages)
 for diagnostic in output.diagnostics {
     FileHandle.standardError.write(Data((diagnostic.description + "\n").utf8))
 }

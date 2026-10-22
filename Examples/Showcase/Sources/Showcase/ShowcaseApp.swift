@@ -102,6 +102,7 @@ struct GalleryView: View {
                 TypographySection()
                 SpacingSection()
                 ShapesSection()
+                LegacyCard()
             }
         }
         .padding(.theme.space.xl)

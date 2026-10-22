@@ -23,7 +23,7 @@
 /// `LiveryRegistry`, que debe estar activo en el target. Una categoría solo puede declararse
 /// una vez por módulo; el plugin lo verifica.
 @attached(member, names: named(Resolver), named(Values), named(unresolved))
-@attached(extension, conformances: RoleSet)
+@attached(extension, conformances: RoleSet, Sendable)
 public macro Roles() = #externalMacro(module: "LiveryMacros", type: "RolesMacro")
 
 /// Declara un tema: la resolución de uno o más conjuntos de roles.
@@ -60,3 +60,31 @@ public macro Theme() = #externalMacro(module: "LiveryMacros", type: "ThemeMacro"
 /// target que solo importen los temas.
 @attached(peer)
 public macro Primitives() = #externalMacro(module: "LiveryMacros", type: "PrimitivesMacro")
+
+/// Declara cómo se expresa cada rol de un conjunto viejo en términos de uno nuevo.
+///
+/// Es la tabla de migración entre dos sistemas de diseño, escrita una vez y verificada. Cada
+/// miembro cubre un rol del conjunto viejo: un `static let` lo renombra a un rol nuevo, y un
+/// `static func` lo calcula a partir de los valores nuevos. Un comentario de documentación sobre
+/// el `func` se convierte en el mensaje de deprecación.
+///
+/// ```swift
+/// @Bridge(from: ColorsV1.self, to: Colors.self)
+/// enum ColorsV1toV2 {
+///     static let primary        = Colors.brand            // renombrado: fix-it automático
+///     static let cardBackground = Colors.surfaceElevated
+///     /// DS2 eliminó el divisor; usa `outline` con opacidad.
+///     static func divider(_ colors: Colors.Values) -> Shade { colors.outline.opacity(0.4) }
+/// }
+/// ```
+///
+/// Con el plugin `LiveryRegistry` activo:
+/// - El puente debe cubrir todos los roles de `ColorsV1` que no existan ya en `Colors`; si falta
+///   uno, el build falla señalando el puente.
+/// - `Colors.Values` gana un reenvío deprecado por cada rol viejo. Las vistas que leen
+///   `.theme.color.primary` siguen compilando, reciben `brand`, y muestran un warning con fix-it.
+/// - `ColorsV1` deja de exponerse como `theme.color`; ese lugar lo ocupa `Colors`.
+/// - El plugin avisa en la línea del puente cuántos usos quedan por migrar. En cero, borra
+///   `ColorsV1` y el puente.
+@attached(peer)
+public macro Bridge<From, To>(from: From.Type, to: To.Type) = #externalMacro(module: "LiveryMacros", type: "BridgeMacro")

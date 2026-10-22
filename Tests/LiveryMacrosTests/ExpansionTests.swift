@@ -6,7 +6,7 @@ import XCTest
 
 final class ExpansionTests: XCTestCase {
     let specs: [String: MacroSpec] = [
-        "Roles": MacroSpec(type: RolesMacro.self, conformances: ["RoleSet"]),
+        "Roles": MacroSpec(type: RolesMacro.self, conformances: ["RoleSet", "Sendable"]),
         "Theme": MacroSpec(type: ThemeMacro.self, conformances: ["ThemeProvider"]),
     ]
 
@@ -60,7 +60,7 @@ final class ExpansionTests: XCTestCase {
                 static let unresolved = Values(surface: Livery.Shade.unresolved, accent: Livery.Shade.unresolved)
             }
 
-            extension Colors: Livery.RoleSet {
+            extension Colors: RoleSet, Sendable {
             }
             """,
             macroSpecs: specs
@@ -140,6 +140,53 @@ extension ExpansionTests {
                 message: "`Colors` debe declarar su categoría conformando exactamente a una de: ColorRoles, TypeRoles, SpaceRoles, ShapeRoles.",
                 line: 1, column: 13)],
             macroSpecs: specs
+        )
+    }
+}
+
+extension ExpansionTests {
+    func testBridgeAcceptsRenamesAndComputedMembers() {
+        assertMacroExpansion(
+            """
+            @Bridge(from: ColorsV1.self, to: Colors.self)
+            enum ColorsV1toV2 {
+                static let primary = Colors.brand
+                static func divider(_ colors: Colors.Values) -> Shade { colors.outline }
+            }
+            """,
+            expandedSource: """
+            enum ColorsV1toV2 {
+                static let primary = Colors.brand
+                static func divider(_ colors: Colors.Values) -> Shade { colors.outline }
+            }
+            """,
+            macroSpecs: ["Bridge": MacroSpec(type: BridgeMacro.self)]
+        )
+    }
+
+    func testBridgeRejectsBadMembers() {
+        assertMacroExpansion(
+            """
+            @Bridge(from: ColorsV1.self, to: Colors.self)
+            enum ColorsV1toV2 {
+                static let primary = Shade(.red)
+                let other = Colors.brand
+                case nope
+            }
+            """,
+            expandedSource: """
+            enum ColorsV1toV2 {
+                static let primary = Shade(.red)
+                let other = Colors.brand
+                case nope
+            }
+            """,
+            diagnostics: [
+                DiagnosticSpec(message: "El valor debe ser un rol de `Colors`, por ejemplo `Colors.brand`. Para calcularlo usa `static func`.", line: 3, column: 26),
+                DiagnosticSpec(message: "Un miembro del puente es `static let viejo = Colors.rol` o `static func viejo(_ values: Colors.Values) -> T`.", line: 4, column: 5),
+                DiagnosticSpec(message: "Un puente no declara casos; declara `static let` o `static func` por cada rol viejo.", line: 5, column: 5),
+            ],
+            macroSpecs: ["Bridge": MacroSpec(type: BridgeMacro.self)]
         )
     }
 }

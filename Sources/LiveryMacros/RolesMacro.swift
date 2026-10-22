@@ -4,12 +4,14 @@ import SwiftSyntaxMacros
 /// `@Roles enum Colors: ColorRoles { case … }`
 ///
 /// Genera `Resolver` (un protocolo con una propiedad por rol), `Values` (la resolución
-/// inmutable), `unresolved` y la conformance a `RoleSet`. La propiedad `theme.color` la
+/// inmutable), `unresolved` y las conformances a `RoleSet` y `Sendable` (un enum público no
+/// es `Sendable` implícito, y un tema se comparte entre vistas). La propiedad `theme.color` la
 /// genera el plugin de build `LiveryRegistry`, porque un macro no puede extender `Theme`.
 public struct RolesMacro: MemberMacro, ExtensionMacro {
     public static func expansion(
         of node: AttributeSyntax,
         providingMembersOf declaration: some DeclGroupSyntax,
+        conformingTo protocols: [TypeSyntax],
         in context: some MacroExpansionContext
     ) throws -> [DeclSyntax] {
         guard let role = validRole(of: declaration, node: node, in: context) else { return [] }
@@ -99,6 +101,8 @@ public struct RolesMacro: MemberMacro, ExtensionMacro {
         in context: some MacroExpansionContext
     ) throws -> [ExtensionDeclSyntax] {
         guard !protocols.isEmpty, validRole(of: declaration, node: node, in: nil) != nil else { return [] }
-        return [try ExtensionDeclSyntax("extension \(type.trimmed): Livery.RoleSet {}")]
+        // Solo las conformances que falten: el compilador omite las que el enum ya declara.
+        let conformances = protocols.map(\.trimmedDescription).joined(separator: ", ")
+        return [try ExtensionDeclSyntax("extension \(type.trimmed): \(raw: conformances) {}")]
     }
 }

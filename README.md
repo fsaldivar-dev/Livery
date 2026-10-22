@@ -80,10 +80,34 @@ swift run --package-path Examples/Showcase
 - **Roles mal declarados.** Un enum sin categoría, una categoría repetida o un caso con valores asociados son diagnósticos del macro.
 - **Subárbol sin tema.** En debug, una advertencia de runtime y colores rosa; nunca un fallo en silencio.
 
+## Migrar de un sistema a otro
+
+Cuando llega DS2 con más tokens, menos tokens y renombres, no se tocan vistas: se escribe un
+puente, una vez, y el compilador guía el resto.
+
+```swift
+@Roles enum ColorsV1: ColorRoles { case primary, cardBackground, divider }   // el viejo
+@Roles enum Colors: ColorRoles { case brand, action, surfaceElevated, outline } // el nuevo
+
+@Bridge(from: ColorsV1.self, to: Colors.self)
+enum ColorsV1toV2 {
+    static let primary        = Colors.brand              // renombrado: fix-it automático
+    static let cardBackground = Colors.surfaceElevated
+    /// DS2 eliminó el divisor; usa `outline` con opacidad.
+    static func divider(_ colors: Colors.Values) -> Shade { colors.outline.opacity(0.4) }
+}
+```
+
+Con eso, el plugin:
+
+- **Verifica que el puente cubra todos los roles viejos** que no existan en el nuevo. Si falta uno, el build falla en la línea del puente.
+- **Genera reenvíos deprecados** en `Colors.Values`. Una vista que lee `.theme.color.primary` sigue compilando, recibe `brand`, y muestra un warning con fix-it. Se cambia el tema de la raíz el día uno y toda la app se ve con DS2.
+- **Reporta el progreso** en la línea del puente: `Migración ColorsV1 → Colors: 23 usos pendientes en 9 archivos (primary: 12, divider: 11)`. Los warnings son la barra de progreso. En cero, se borra `ColorsV1` y el puente, y lo que quedara pasa de warning a error.
+
 ## Estado
 
-Fase 0.1: `@Roles`, `@Theme`, `@Primitives`, `Shade`, el plugin `LiveryRegistry`, `.theme(_:)`,
-`.theme(adding:)` y sobrecargas de modificadores para color, fuente, espaciado y radio.
+Fase 0.1: `@Roles`, `@Theme`, `@Primitives`, `@Bridge`, `Shade`, el plugin `LiveryRegistry`,
+`.theme(_:)`, `.theme(adding:)` y sobrecargas de modificadores para fuente, espaciado y radio.
 Swift 6.2, iOS 17 / macOS 14.
 
 El diseño completo, las fases y los riesgos están en [PLAN.md](PLAN.md).

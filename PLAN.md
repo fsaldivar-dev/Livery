@@ -263,12 +263,19 @@ mirar DS1; el puente dice cómo se expresa cada rol viejo en términos nuevos:
 ```swift
 @Bridge(from: ColorsV1.self, to: Colors.self)
 enum ColorsV1toV2 {
-    static let primary        = Colors.brand                 // renombrado
-    static let cardBackground = Colors.surfaceElevated       // renombrado
-    static let divider        = Colors.outline.opacity(0.4)  // eliminado en DS2
+    static let primary        = Colors.brand              // renombrado
+    static let cardBackground = Colors.surfaceElevated    // renombrado
+    /// DS2 eliminó el divisor; usa `outline` con opacidad.
+    static func divider(_ colors: Colors.Values) -> Shade { colors.outline.opacity(0.4) }
     // falta `textSecondary` → el plugin falla el build señalando esta línea
 }
 ```
+
+Hecho. El macro valida la forma (`static let viejo = Nuevo.rol` o
+`static func viejo(_: Nuevo.Values) -> T`); el plugin, que ve el módulo entero,
+verifica cobertura, marca `ColorsV1` como legado para que no ocupe `theme.color`,
+y genera los reenvíos. Un rol que existe con el mismo nombre en ambos no se
+puentea. El comentario `///` de un `func` es el mensaje de deprecación.
 
 El plugin verifica que el puente cubra todos los casos de `ColorsV1` y genera, en
 `Colors.Values`, un reenvío deprecado por cada rol viejo:
@@ -349,7 +356,7 @@ error.
 | Fase | Entrega | Criterio de hecho |
 |---|---|---|
 | 0.1 Núcleo | `@Primitives`, `@Roles`, `@Theme`, `Shade`, plugin `LiveryRegistry`, `.theme(_:)`, `.theme(adding:)`, `ThemeRef`, sobrecargas para fuente, padding, radio, tint. **Hecho** salvo `theme init`. | Sajaru Corner tiene su DS declarado y una pantalla migrada a key paths. |
-| 0.2 Cambio | `@Bridge` con reenvíos deprecados generados, `theme report` y lint en el plugin. | Migrar un conjunto de roles V1→V2 en Sajaru sin tocar vistas, y bajar warnings a cero. |
+| 0.2 Cambio | `@Bridge` con reenvíos deprecados y reporte de usos pendientes (**hecho**), lint en el plugin (pendiente). | Migrar un conjunto de roles V1→V2 en Sajaru sin tocar vistas, y bajar warnings a cero. |
 | 0.3 Componentes | `@Component`, `@Style`, catálogo base (Button, Card, TextField). | Botón de Sajaru declarado como contrato con estilo exhaustivo. |
 | 0.4 Diseño | `theme export` / `theme import` W3C, catálogo visual generado. | Tokens de Sajaru abren en Penpot. |
 

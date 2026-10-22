@@ -69,7 +69,7 @@ import Testing
             }
             """)
         #expect(!output.code.contains("local"))
-        #expect(output.code.contains("ningún @Roles ni @Theme"))
+        #expect(output.code.contains("ningún @Roles, @Theme ni @Bridge"))
     }
 
     @Test func duplicateCategoryIsAnError() {
@@ -91,7 +91,7 @@ import Testing
     @Test func rolesWithoutCategoryAreSkipped() {
         let output = generate("@Roles enum Colors { case surface }")
         #expect(output.diagnostics.isEmpty)
-        #expect(output.code.contains("ningún @Roles ni @Theme"))
+        #expect(output.code.contains("ningún @Roles, @Theme ni @Bridge"))
     }
 
     @Test func accessorNames() {
@@ -101,5 +101,115 @@ import Testing
         #expect(RegistryVisitor.accessorName(for: "ABC") == "abc")
         #expect(RegistryVisitor.accessorName(for: "Default") == "`default`")
         #expect(RegistryVisitor.accessorName(for: "light") == "light")
+    }
+}
+
+@Suite struct BridgeGeneratorTests {
+    let roles = """
+        @Roles enum ColorsV1: ColorRoles { case primary, cardBackground, divider, textSecondary }
+        @Roles public enum Colors: ColorRoles { case brand, action, surfaceElevated, outline, textSecondary }
+        """
+    let bridge = """
+        @Bridge(from: ColorsV1.self, to: Colors.self)
+        enum ColorsV1toV2 {
+            static let primary        = Colors.brand
+            static let cardBackground = Colors.surfaceElevated
+            /// DS2 eliminó el divisor; usa `outline` con opacidad.
+            static func divider(_ colors: Colors.Values) -> Shade { colors.outline.opacity(0.4) }
+        }
+        """
+
+    func generate(_ extra: [(String, String)] = []) -> RegistryGenerator.Output {
+        var sources = [RegistryGenerator.Source(path: "Roles.swift", text: roles), .init(path: "Bridge.swift", text: bridge)]
+        sources += extra.map { .init(path: $0.0, text: $0.1) }
+        return RegistryGenerator().generate(sources: sources)
+    }
+
+    @Test func legacySetGivesUpItsCategoryWithoutDuplicateError() {
+        let output = generate()
+        #expect(!output.hasErrors)
+        #expect(output.code.contains("public var color: Colors.Values { values(Colors.self) }"))
+        #expect(!output.code.contains("ColorsV1.Values { values"))
+    }
+
+    @Test func bridgeGeneratesDeprecatedForwardsOnNewValues() {
+        let code = generate().code
+        #expect(code.contains("extension Colors.Values {"))
+        #expect(code.contains("    @available(*, deprecated, renamed: \"brand\")\n    public var primary: Livery.Shade { brand }"))
+        #expect(code.contains("    @available(*, deprecated, renamed: \"surfaceElevated\")\n    public var cardBackground: Livery.Shade { surfaceElevated }"))
+        #expect(code.contains("`divider` ya no existe en Colors; lo calcula ColorsV1toV2.divider. DS2 eliminó el divisor; usa `outline` con opacidad."))
+        #expect(code.contains("    public var divider: Livery.Shade { ColorsV1toV2.divider(self) }"))
+        #expect(!code.contains("var textSecondary"), "un rol que existe en ambos no se reenvía")
+    }
+
+    @Test func reportCountsRemainingUsesOutsideTheBridge() {
+        let view = """
+            struct Card: View {
+                var body: some View {
+                    Text("x").foregroundStyle(.theme.color.primary).background(.theme.color.primary)
+                        .border(.theme.color.divider)
+                }
+            }
+            """
+        let output = generate([("Card.swift", view), ("Other.swift", "let x = theme.color.primary")])
+        let report = output.diagnostics.first { $0.severity == .warning }!
+        #expect(report.path == "Bridge.swift" && report.line == 2)
+        #expect(report.message == "Migración ColorsV1 → Colors: 4 usos pendientes en 2 archivos (primary: 3, divider: 1).")
+
+        let done = generate().diagnostics.first { $0.severity == .warning }!
+        #expect(done.message.hasPrefix("Migración ColorsV1 → Colors: 0 usos pendientes. Puedes borrar `ColorsV1` y este puente."))
+
+        // Los fuentes de otros módulos del paquete cuentan, pero no declaran nada.
+        let app = RegistryGenerator().generate(
+            sources: [.init(path: "Roles.swift", text: roles), .init(path: "Bridge.swift", text: bridge)],
+            usages: [.init(path: "App/Card.swift", text: view + "\n@Roles enum Ignored: SpaceRoles { case sm }")])
+        let appReport = app.diagnostics.first { $0.severity == .warning }!
+        #expect(appReport.message == "Migración ColorsV1 → Colors: 3 usos pendientes en 1 archivo (primary: 2, divider: 1).")
+        #expect(!app.code.contains("Ignored"))
+    }
+
+    @Test func missingRolesFailTheBuildAtTheBridge() {
+        let partial = """
+            @Bridge(from: ColorsV1.self, to: Colors.self)
+            enum ColorsV1toV2 {
+                static let primary = Colors.brand
+            }
+            """
+        let output = RegistryGenerator().generate(sources: [.init(path: "Roles.swift", text: roles), .init(path: "Bridge.swift", text: partial)])
+        #expect(output.hasErrors)
+        let error = output.diagnostics.first { $0.severity == .error }!
+        #expect(error.path == "Bridge.swift" && error.line == 2 && error.column == 6)
+        #expect(error.message.hasPrefix("El puente no cubre: cardBackground, divider."))
+        #expect(!output.code.contains("extension Colors.Values"))
+    }
+
+    @Test func wrongTargetsAndRedundantMembersAreErrors() {
+        let wrong = """
+            @Bridge(from: ColorsV1.self, to: Colors.self)
+            enum ColorsV1toV2 {
+                static let primary        = Colors.brand
+                static let cardBackground = Colors.card
+                static let divider        = Colors.outline
+                static let textSecondary  = Colors.textSecondary
+                static let ghost          = Colors.brand
+            }
+            """
+        let output = RegistryGenerator().generate(sources: [.init(path: "Roles.swift", text: roles), .init(path: "Bridge.swift", text: wrong)])
+        let messages = output.diagnostics.filter { $0.severity == .error }.map(\.message)
+        #expect(messages.contains("`Colors` no tiene el rol `card`."))
+        #expect(messages.contains("`textSecondary` existe en `Colors` con el mismo nombre; no necesita puente."))
+        #expect(messages.contains("`ghost` no es un rol de `ColorsV1`."))
+    }
+
+    @Test func bridgeNeedsBothSetsInTheSameCategory() {
+        let mixed = """
+            @Roles enum Spacing: SpaceRoles { case sm }
+            @Bridge(from: ColorsV1.self, to: Spacing.self) enum Wrong { static let primary = Spacing.sm }
+            @Bridge(from: Missing.self, to: Colors.self) enum Lost {}
+            """
+        let output = RegistryGenerator().generate(sources: [.init(path: "Roles.swift", text: roles), .init(path: "Bridge.swift", text: mixed)])
+        let messages = output.diagnostics.map(\.message)
+        #expect(messages.contains { $0.hasPrefix("`ColorsV1` es ColorRoles y `Spacing` es SpaceRoles") })
+        #expect(messages.contains("No hay ningún `@Roles enum Missing` en este módulo."))
     }
 }
