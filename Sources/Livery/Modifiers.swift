@@ -12,13 +12,13 @@ import SwiftUI
 
 extension View {
     /// `foregroundStyle` con un color del tema.
-    public func foregroundStyle(_ color: KeyPath<Theme, Color> & Sendable) -> some View {
+    public func foregroundStyle(_ color: KeyPath<Theme, Shade> & Sendable) -> some View {
         foregroundStyle(ThemeStyle(color))
     }
 
     /// `background` con un color del tema.
     public func background(
-        _ color: KeyPath<Theme, Color> & Sendable,
+        _ color: KeyPath<Theme, Shade> & Sendable,
         ignoresSafeAreaEdges edges: Edge.Set = .all
     ) -> some View {
         background(ThemeStyle(color), ignoresSafeAreaEdges: edges)
@@ -26,7 +26,7 @@ extension View {
 
     /// `background` con un color del tema recortado a una forma.
     public func background<S: Shape>(
-        _ color: KeyPath<Theme, Color> & Sendable,
+        _ color: KeyPath<Theme, Shade> & Sendable,
         in shape: S,
         fillStyle: FillStyle = FillStyle()
     ) -> some View {
@@ -35,7 +35,7 @@ extension View {
 
     /// `background` con un color y un radio del tema.
     public func background(
-        _ color: KeyPath<Theme, Color> & Sendable,
+        _ color: KeyPath<Theme, Shade> & Sendable,
         cornerRadius: KeyPath<Theme, CGFloat> & Sendable,
         style: RoundedCornerStyle = .continuous
     ) -> some View {
@@ -45,19 +45,19 @@ extension View {
     }
 
     /// `tint` con un color del tema.
-    public func tint(_ color: KeyPath<Theme, Color> & Sendable) -> some View {
+    public func tint(_ color: KeyPath<Theme, Shade> & Sendable) -> some View {
         tint(ThemeStyle(color))
     }
 }
 
 extension Shape {
     /// `fill` con un color del tema.
-    public func fill(_ color: KeyPath<Theme, Color> & Sendable, style: FillStyle = FillStyle()) -> some View {
+    public func fill(_ color: KeyPath<Theme, Shade> & Sendable, style: FillStyle = FillStyle()) -> some View {
         fill(ThemeStyle(color), style: style)
     }
 
     /// `stroke` con un color del tema.
-    public func stroke(_ color: KeyPath<Theme, Color> & Sendable, lineWidth: CGFloat = 1) -> some View {
+    public func stroke(_ color: KeyPath<Theme, Shade> & Sendable, lineWidth: CGFloat = 1) -> some View {
         stroke(ThemeStyle(color), lineWidth: lineWidth)
     }
 }

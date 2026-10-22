@@ -13,7 +13,7 @@ enum RoleCategory: String, CaseIterable {
     /// Tipo de cada rol, cualificado para no chocar con tipos anidados del usuario.
     var valueType: String {
         switch self {
-        case .color: "SwiftUI.Color"
+        case .color: "Livery.Shade"
         case .type: "SwiftUI.Font"
         case .space, .shape: "CoreFoundation.CGFloat"
         }
@@ -22,7 +22,7 @@ enum RoleCategory: String, CaseIterable {
     /// Valor de reserva, deliberadamente visible, cuando el tema activo no resuelve el conjunto.
     var placeholder: String {
         switch self {
-        case .color: "SwiftUI.Color.pink"
+        case .color: "Livery.Shade.unresolved"
         case .type: "SwiftUI.Font.body"
         case .space, .shape: "0"
         }

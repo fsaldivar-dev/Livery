@@ -26,7 +26,7 @@ public struct Theme: Sendable {
     /// Devuelve la resolución de un conjunto de roles.
     ///
     /// Si el subárbol activo no lo resuelve, en debug emite una advertencia de runtime y devuelve
-    /// ``RoleSet/unresolved`` (colores rosa, fuente `body`, medidas `0`) para que el fallo sea
+    /// ``RoleSet/unresolved`` (colores rosa en ambos modos, fuente `body`, medidas `0`) para que el fallo sea
     /// visible sin tumbar la app.
     public func values<R: RoleSet>(_ set: R.Type = R.self) -> R.Values {
         if let values = storage[ObjectIdentifier(set)] as? R.Values {
@@ -80,7 +80,8 @@ extension Theme: ThemeProvider {
 
 // MARK: - Categorías
 
-/// Marca un conjunto de roles de color. Se expone como `theme.color`; cada rol es un `Color`.
+/// Marca un conjunto de roles de color. Se expone como `theme.color`; cada rol es un ``Shade``,
+/// un color decidido para claro y oscuro.
 public protocol ColorRoles {}
 
 /// Marca un conjunto de roles tipográficos. Se expone como `theme.type`; cada rol es un `Font`.

@@ -17,7 +17,7 @@
 /// - `Colors.Resolver`: un protocolo con una propiedad por rol. Un tema lo conforma, y si olvida
 ///   un rol, el compilador lo señala en la línea del tema.
 /// - `Colors.Values`: la resolución inmutable que viaja en ``Theme``.
-/// - `Colors.unresolved`: valores de reserva visibles (rosa, `body`, `0`).
+/// - `Colors.unresolved`: valores de reserva visibles (rosa en ambos modos, `body`, `0`).
 ///
 /// La propiedad `theme.color` (o `type`, `space`, `shape`) la genera el plugin de build
 /// `LiveryRegistry`, que debe estar activo en el target. Una categoría solo puede declararse
@@ -33,9 +33,9 @@ public macro Roles() = #externalMacro(module: "LiveryMacros", type: "RolesMacro"
 ///
 /// ```swift
 /// @Theme struct Light: Colors.Resolver, Spacing.Resolver {
-///     let surface   = Palette.neutral50
-///     let onSurface = Palette.neutral900
-///     let accent    = Palette.jade500
+///     let surface   = Shade(light: Palette.neutral50, dark: Palette.neutral900)
+///     let onSurface = Shade(light: Palette.neutral900, dark: Palette.neutral50)
+///     let accent    = Shade(Palette.jade500)
 ///     let xs: CGFloat = 4, sm: CGFloat = 8, md: CGFloat = 16, lg: CGFloat = 24
 /// }
 /// ```

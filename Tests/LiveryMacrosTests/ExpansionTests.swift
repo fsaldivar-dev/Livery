@@ -23,31 +23,31 @@ final class ExpansionTests: XCTestCase {
 
                 /// Lo que un tema debe resolver para `Colors`. Si falta un rol, el compilador lo señala en el tema.
                 protocol Resolver: Sendable {
-                    var surface: SwiftUI.Color {
+                    var surface: Livery.Shade {
                         get
                     }
-                    var accent: SwiftUI.Color {
+                    var accent: Livery.Shade {
                         get
                     }
                 }
 
                 /// La resolución de `Colors` que viaja en `Theme`.
                 struct Values: Sendable {
-                    let surface: SwiftUI.Color
-                    let accent: SwiftUI.Color
+                    let surface: Livery.Shade
+                    let accent: Livery.Shade
 
                     init(_ resolver: some Resolver) {
                         self.surface = resolver.surface
                         self.accent = resolver.accent
                     }
 
-                    init(surface: SwiftUI.Color, accent: SwiftUI.Color) {
+                    init(surface: Livery.Shade, accent: Livery.Shade) {
                         self.surface = surface
                         self.accent = accent
                     }
                 }
 
-                static let unresolved = Values(surface: SwiftUI.Color.pink, accent: SwiftUI.Color.pink)
+                static let unresolved = Values(surface: Livery.Shade.unresolved, accent: Livery.Shade.unresolved)
             }
 
             extension Colors: Livery.RoleSet {

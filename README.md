@@ -24,8 +24,11 @@ import Livery
 @Roles enum Spacing: SpaceRoles { case sm, md, lg }
 
 // Cómo se resuelve. Si falta un rol, el compilador lo señala en esta línea.
+// Un color es un Shade: claro y oscuro decididos, contraste aumentado opcional.
 @Theme struct Carbon: Colors.Resolver, Spacing.Resolver {
-    let surface = Color.black, onSurface = Color.white, accent = Color.orange
+    let surface   = Shade(light: .white, dark: .black)
+    let onSurface = Shade(light: .black, dark: .white, darkIncreased: .white)
+    let accent    = Shade(.orange)
     let sm: CGFloat = 8, md: CGFloat = 16, lg: CGFloat = 24
 }
 
@@ -59,13 +62,14 @@ Un tema con parámetros no recibe acceso corto; se aplica con `.theme(Brand(acce
 ## Qué verifica el compilador
 
 - **Tema incompleto.** Un tema que olvida un rol es un error de conformance en la línea del tema, con fix-it.
+- **Modo olvidado.** Un rol de color es un `Shade`, no un `Color`: claro y oscuro se deciden siempre, y el contraste aumentado es opcional. Se resuelve al dibujar según el entorno, también para UIKit y AppKit.
 - **Vistas sin primitivos.** La paleta vive en un módulo que las vistas no importan. Leer `Palette.jade500` desde una vista no compila.
 - **Roles mal declarados.** Un enum sin categoría, una categoría repetida o un caso con valores asociados son diagnósticos del macro.
 - **Subárbol sin tema.** En debug, una advertencia de runtime y colores rosa; nunca un fallo en silencio.
 
 ## Estado
 
-Fase 0.1: `@Roles`, `@Theme`, `@Primitives`, el plugin `LiveryRegistry`, `.theme(_:)`,
+Fase 0.1: `@Roles`, `@Theme`, `@Primitives`, `Shade`, el plugin `LiveryRegistry`, `.theme(_:)`,
 `.theme(adding:)` y sobrecargas de modificadores para color, fuente, espaciado y radio.
 Swift 6.2, iOS 17 / macOS 14.
 

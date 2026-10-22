@@ -118,7 +118,7 @@ valor:
 
 | Categoría | Propiedad | Valor |
 |---|---|---|
-| `ColorRoles` | `theme.color` | `Color` |
+| `ColorRoles` | `theme.color` | `Shade`: claro y oscuro obligatorios, contraste aumentado opcional |
 | `TypeRoles` | `theme.type` | `Font` |
 | `SpaceRoles` | `theme.space` | `CGFloat` |
 | `ShapeRoles` | `theme.shape` | `CGFloat` (radio) |
@@ -136,9 +136,10 @@ valor:
 
 // Themes/Light.swift
 @Theme struct Light: Colors.Resolver, Spacing.Resolver {
-    let surface   = Palette.neutral50
-    let accent    = Palette.jade500
+    let surface   = Shade(light: Palette.neutral50, dark: Palette.neutral900)
+    let accent    = Shade(Palette.jade500)
     // falta `onSurface` → error de conformance en esta línea, con fix-it
+    // `let accent = Palette.jade500` sin Shade → error: falta decidir el oscuro
 }
 ```
 
@@ -180,7 +181,9 @@ Text(fighter.name)
 Mecanismo, en dos niveles:
 
 1. **Colores y rellenos**: `ThemeStyle` es un `ShapeStyle` que guarda el key path
-   y lo resuelve en `resolve(in environment:)` leyendo `environment.theme`.
+   al `Shade` y lo resuelve en `resolve(in environment:)` leyendo `environment.theme`,
+   `colorScheme` y `colorSchemeContrast`. `Shade` también es `ShapeStyle` por sí
+   mismo y expone `uiColor` y `nsColor` dinámicos para UIKit y AppKit.
    Sobrecargas de `foregroundStyle`, `background`, `tint`, `fill` y `stroke`
    aceptan el key path directamente; cualquier otra API que reciba un
    `ShapeStyle` usa `.theme(\.color.accent)`.
@@ -214,6 +217,26 @@ Lo que la raíz `Theme` expone es el vocabulario del proyecto: `theme.color`,
 `theme.type`, `theme.space`, `theme.shape`, `theme.elevation`, `theme.motion`.
 Los nombres de las categorías los fija el kernel; los roles dentro de cada una
 los pone el proyecto.
+
+## 7b. Modos y accesibilidad
+
+Los modos son una dimensión de la resolución, no temas distintos. Cada categoría
+decide con su tipo de valor a qué responde:
+
+| Ajuste del sistema | Quién responde | Estado |
+|---|---|---|
+| Claro / oscuro | `Shade`, obligatorio | Hecho |
+| Contraste aumentado | `Shade`, variantes opcionales | Hecho |
+| Dynamic Type | `TypeStyle` relativo a un estilo de texto | Pendiente (slice 2) |
+| Reducir movimiento | categoría `motion` con variante reducida | Pendiente |
+| Clase de tamaño | variantes de `space` | Pendiente |
+
+Reglas verificables en build, en el plugin: contraste WCAG entre pares por
+convención (`onSurface` sobre `surface`, `onAccent` sobre `accent`) cuando los
+valores son literales, en ambos modos. Pendiente (fase 2).
+
+Semántica para VoiceOver y objetivos táctiles mínimos: parte de los contratos de
+componente (fase 3).
 
 ## 8. Cambio y migración
 
@@ -315,7 +338,7 @@ error.
 
 | Fase | Entrega | Criterio de hecho |
 |---|---|---|
-| 0.1 Núcleo | `@Primitives`, `@Roles`, `@Theme`, plugin `LiveryRegistry`, `.theme(_:)`, `.theme(adding:)`, `ThemeStyle`, sobrecargas para color, fuente, padding, radio. **Hecho** salvo `theme init`. | Sajaru Corner tiene su DS declarado y una pantalla migrada a key paths. |
+| 0.1 Núcleo | `@Primitives`, `@Roles`, `@Theme`, `Shade`, plugin `LiveryRegistry`, `.theme(_:)`, `.theme(adding:)`, `ThemeStyle`, sobrecargas para color, fuente, padding, radio. **Hecho** salvo `theme init`. | Sajaru Corner tiene su DS declarado y una pantalla migrada a key paths. |
 | 0.2 Cambio | `@Bridge` con reenvíos deprecados generados, `theme report` y lint en el plugin. | Migrar un conjunto de roles V1→V2 en Sajaru sin tocar vistas, y bajar warnings a cero. |
 | 0.3 Componentes | `@Component`, `@Style`, catálogo base (Button, Card, TextField). | Botón de Sajaru declarado como contrato con estilo exhaustivo. |
 | 0.4 Diseño | `theme export` / `theme import` W3C, catálogo visual generado. | Tokens de Sajaru abren en Penpot. |
