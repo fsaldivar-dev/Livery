@@ -58,7 +58,7 @@ import Testing
 
     @Test func unresolvedSetFallsBackToVisiblePlaceholders() {
         let theme = Theme.light
-        #expect(theme.type.title == .body)
+        #expect(theme.type.title == TypeStyle.unresolved)
         #expect(theme.shape.medium == 0)
         #expect(Colors.unresolved.surface == Shade(.pink))
     }

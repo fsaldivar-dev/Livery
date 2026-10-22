@@ -258,7 +258,7 @@ enum RoleCategory: String, CaseIterable {
     var valueType: String {
         switch self {
         case .color: "Livery.Shade"
-        case .type: "SwiftUI.Font"
+        case .type: "Livery.TypeStyle"
         case .space, .shape: "CGFloat"
         case .motion: "Livery.Motion"
         }

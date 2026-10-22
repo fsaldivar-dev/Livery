@@ -15,7 +15,7 @@ enum RoleCategory: String, CaseIterable {
     var valueType: String {
         switch self {
         case .color: "Livery.Shade"
-        case .type: "SwiftUI.Font"
+        case .type: "Livery.TypeStyle"
         case .space, .shape: "CGFloat"
         case .motion: "Livery.Motion"
         }
@@ -25,7 +25,7 @@ enum RoleCategory: String, CaseIterable {
     var placeholder: String {
         switch self {
         case .color: "Livery.Shade.unresolved"
-        case .type: "SwiftUI.Font.body"
+        case .type: "Livery.TypeStyle.unresolved"
         case .space, .shape: "0"
         case .motion: "Livery.Motion.unresolved"
         }

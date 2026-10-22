@@ -117,7 +117,7 @@ valor:
 | Categoría | Propiedad | Valor |
 |---|---|---|
 | `ColorRoles` | `theme.color` | `Shade`: claro y oscuro obligatorios, contraste aumentado opcional |
-| `TypeRoles` | `theme.type` | `Font` |
+| `TypeRoles` | `theme.type` | `TypeStyle`: fuente que escala con Dynamic Type por construcción |
 | `SpaceRoles` | `theme.space` | `CGFloat` |
 | `ShapeRoles` | `theme.shape` | `CGFloat` (radio) |
 | `MotionRoles` | `theme.motion` | `Motion`: animación y variante para reducir movimiento |
@@ -239,7 +239,7 @@ decide con su tipo de valor a qué responde:
 |---|---|---|
 | Claro / oscuro | `Shade`, obligatorio | Hecho |
 | Contraste aumentado | `Shade`, variantes opcionales | Hecho |
-| Dynamic Type | `TypeStyle` relativo a un estilo de texto | Pendiente (slice 2) |
+| Dynamic Type | `TypeStyle`, relativo a un estilo de texto del sistema | Hecho |
 | Reducir movimiento | `Motion`, con variante reducida opcional; sin ella, no anima | Hecho |
 | Clase de tamaño | variantes de `space` | Pendiente |
 

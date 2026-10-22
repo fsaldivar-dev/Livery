@@ -280,10 +280,10 @@ public struct Scaffold {
             public let outline            = Shade(light: Palette.neutral200, dark: Palette.neutral800)
             public let danger             = Shade(light: Palette.danger600, dark: Palette.danger400)
 
-            public let title    = Font.title.weight(.semibold)
-            public let headline = Font.headline
-            public let body     = Font.body
-            public let caption  = Font.caption
+            public let title    = TypeStyle(.title, weight: .semibold)
+            public let headline = TypeStyle(.headline)
+            public let body     = TypeStyle(.body)
+            public let caption  = TypeStyle(.caption)
 
             public let xs = Metrics.unit
             public let sm = Metrics.unit * 2
