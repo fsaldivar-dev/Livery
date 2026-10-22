@@ -3,21 +3,21 @@ import PackageDescription
 import CompilerPluginSupport
 
 let package = Package(
-    name: "ThemeKit",
+    name: "Livery",
     platforms: [
         .iOS(.v17), .macOS(.v14), .tvOS(.v17), .watchOS(.v10), .macCatalyst(.v17), .visionOS(.v1),
     ],
     products: [
         /// Runtime (`Theme`, `.theme(_:)`, key paths como estilos) y las macros `@Roles`, `@Theme`, `@Primitives`.
-        .library(name: "ThemeKit", targets: ["ThemeKit"]),
+        .library(name: "Livery", targets: ["Livery"]),
     ],
     dependencies: [
         .package(url: "https://github.com/swiftlang/swift-syntax.git", "600.0.0"..<"605.0.0"),
     ],
     targets: [
-        // Plugin del compilador: el `aapt` de ThemeKit. Lee declaraciones, verifica y genera accesores.
+        // Plugin del compilador: el `aapt` de Livery. Lee declaraciones, verifica y genera accesores.
         .macro(
-            name: "ThemeKitMacros",
+            name: "LiveryMacros",
             dependencies: [
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
@@ -25,15 +25,15 @@ let package = Package(
             ]
         ),
         // Runtime público.
-        .target(name: "ThemeKit", dependencies: ["ThemeKitMacros"]),
+        .target(name: "Livery", dependencies: ["LiveryMacros"]),
 
         // Pruebas end-to-end: roles, temas y resolución desde el entorno.
-        .testTarget(name: "ThemeKitTests", dependencies: ["ThemeKit"]),
+        .testTarget(name: "LiveryTests", dependencies: ["Livery"]),
         // Pruebas de expansión y diagnósticos de las macros.
         .testTarget(
-            name: "ThemeKitMacrosTests",
+            name: "LiveryMacrosTests",
             dependencies: [
-                "ThemeKitMacros",
+                "LiveryMacros",
                 .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax"),
             ]
         ),

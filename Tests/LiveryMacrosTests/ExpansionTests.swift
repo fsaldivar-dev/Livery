@@ -2,7 +2,7 @@ import SwiftSyntaxMacroExpansion
 import SwiftSyntaxMacros
 import SwiftSyntaxMacrosTestSupport
 import XCTest
-@testable import ThemeKitMacros
+@testable import LiveryMacros
 
 final class ExpansionTests: XCTestCase {
     let specs: [String: MacroSpec] = [
@@ -87,7 +87,7 @@ final class ExpansionTests: XCTestCase {
                 static let unresolved = Values(surface: SwiftUI.Color.pink, accent: SwiftUI.Color.pink)
             }
 
-            extension Colors: ThemeKit.RoleSet {
+            extension Colors: Livery.RoleSet {
             }
             """,
             macroSpecs: specs
@@ -106,9 +106,9 @@ final class ExpansionTests: XCTestCase {
                 let surface = Color.white
             }
 
-            extension Light: ThemeKit.ThemeProvider {
-                public var resolvedTheme: ThemeKit.Theme {
-                    var theme = ThemeKit.Theme()
+            extension Light: Livery.ThemeProvider {
+                public var resolvedTheme: Livery.Theme {
+                    var theme = Livery.Theme()
                     theme.register(Theme.Colors.Values(self), for: Theme.Colors.self)
                     theme.register(Theme.Spacing.Values(self), for: Theme.Spacing.self)
                     return theme

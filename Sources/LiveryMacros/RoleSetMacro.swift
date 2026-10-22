@@ -90,6 +90,6 @@ public struct RoleSetMacro: MemberMacro, ExtensionMacro {
         in context: some MacroExpansionContext
     ) throws -> [ExtensionDeclSyntax] {
         guard !protocols.isEmpty, validRole(of: declaration, node: node, in: nil) != nil else { return [] }
-        return [try ExtensionDeclSyntax("extension \(type.trimmed): ThemeKit.RoleSet {}")]
+        return [try ExtensionDeclSyntax("extension \(type.trimmed): Livery.RoleSet {}")]
     }
 }

@@ -39,9 +39,9 @@ public struct ThemeMacro: ExtensionMacro {
         return [
             try ExtensionDeclSyntax(
                 """
-                extension \(type.trimmed): ThemeKit.ThemeProvider {
-                    \(raw: access)var resolvedTheme: ThemeKit.Theme {
-                        var theme = ThemeKit.Theme()
+                extension \(type.trimmed): Livery.ThemeProvider {
+                    \(raw: access)var resolvedTheme: Livery.Theme {
+                        var theme = Livery.Theme()
                 \(raw: registrations)
                         return theme
                     }

@@ -78,16 +78,16 @@ extension DeclModifierListSyntax {
     }
 }
 
-struct ThemeKitDiagnostic: DiagnosticMessage {
+struct LiveryDiagnostic: DiagnosticMessage {
     let message: String
     let id: String
     var severity: DiagnosticSeverity = .error
 
-    var diagnosticID: MessageID { MessageID(domain: "ThemeKit", id: id) }
+    var diagnosticID: MessageID { MessageID(domain: "Livery", id: id) }
 }
 
 extension MacroExpansionContext {
     func error(_ message: String, id: String, at node: some SyntaxProtocol) {
-        diagnose(Diagnostic(node: node, message: ThemeKitDiagnostic(message: message, id: id)))
+        diagnose(Diagnostic(node: node, message: LiveryDiagnostic(message: message, id: id)))
     }
 }

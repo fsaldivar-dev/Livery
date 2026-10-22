@@ -1,4 +1,6 @@
-# ThemeKit — plan de la librería
+# Livery — plan de la librería
+
+*One airframe. Any livery.*
 
 Un framework para construir sistemas de diseño en Swift. No trae un look; trae la
 estructura que Apple nunca dio: capas, reglas y migraciones, verificadas por el
@@ -17,7 +19,7 @@ el asset catalog, y los componentes leen primitivos directamente. Migrar de un D
 a otro es reescribir vistas una por una sin tabla de equivalencias ni progreso
 medible.
 
-ThemeKit asume que nadie va a leer la guía. La abstracción la carga el framework
+Livery asume que nadie va a leer la guía. La abstracción la carga el framework
 y la hace cumplir el compilador. Si algo depende de disciplina, no existe.
 
 ## 2. Qué es un sistema de diseño (lo que el kernel modela)
@@ -64,17 +66,19 @@ Reglas, pocas y rígidas:
 
 ## 4. Nombre y módulos
 
-Paquete `ThemeKit`. El namespace en las vistas es `theme`, nunca `ds`.
+Paquete `Livery`: la librea es la pintura que una aerolínea aplica a aviones idénticos.
+La estructura es el fuselaje; tu marca es la librea. El namespace en las vistas es
+`theme`, nunca `ds`.
 
 | Target | Tipo | Contenido |
 |---|---|---|
-| `ThemeKit` | librería | Runtime: `Theme` (raíz de key paths), `EnvironmentValues.theme`, `.theme(_:)` y `.theme(adding:)`, `ThemeStyle` (un `ShapeStyle` que resuelve un key path), sobrecargas de modificadores. |
-| `ThemeKitMacros` | macro | `@Primitives`, `@Roles`, `@Theme`, `@Component`, `@Style`, `@Bridge`. |
+| `Livery` | librería | Runtime: `Theme` (raíz de key paths), `EnvironmentValues.theme`, `.theme(_:)` y `.theme(adding:)`, `ThemeStyle` (un `ShapeStyle` que resuelve un key path), sobrecargas de modificadores. |
+| `LiveryMacros` | macro | `@Primitives`, `@Roles`, `@Theme`, `@Component`, `@Style`, `@Bridge`. |
 | `ThemeLint` | build plugin | Marca valores hardcodeados en targets de UI. |
 | `theme` | ejecutable | CLI: `init`, `export`, `import`, `report`. |
 
 Requisitos: Swift 6.2, iOS 17 / macOS 14 (por `ShapeStyle.resolve(in:)`). El módulo
-se llama `ThemeKit` y no `Theme` para que `Theme.Colors` nunca sea ambiguo entre
+se llama `Livery` y no `Theme` para que `Theme.Colors` nunca sea ambiguo entre
 módulo y tipo.
 
 ## 5. Estructura que genera `theme init`
@@ -276,13 +280,13 @@ error.
   en compilación. Se acepta fallo en debug y reserva en release. Alternativa
   futura: raíces por tema con genéricos, más seguro y mucho más ruidoso.
 - **R3. Peso de AnnotationSwift.** Resuelto: no se usa en 0.1. Sus macros
-  decoran funciones y propiedades; los de ThemeKit son de miembros y extensión.
+  decoran funciones y propiedades; los de Livery son de miembros y extensión.
   Podría volver en fase 3 para el lado del consumo.
 - **R4. `#colorLiteral` en Swift 6.2.** Verificar que sigue mostrando swatch y
   compila en targets de librería.
 - **R5. Macros y extensiones.** Un macro peer no puede generar `extension Theme`
   (comprobado). Por eso los roles viven dentro de `extension Theme`.
-- **D1.** Nombre del paquete: `ThemeKit`. Decidido.
+- **D1.** Nombre del paquete: `Livery` (antes `ThemeKit`). Decidido.
 - **D2.** Mínimo de plataforma: iOS 17 / macOS 14 por `resolve(in:)`. Decidido.
 
 ## 12. Fases

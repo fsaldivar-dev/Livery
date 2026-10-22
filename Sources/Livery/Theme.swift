@@ -1,6 +1,6 @@
 //
 //  Theme.swift
-//  ThemeKit
+//  Livery
 //
 
 import OSLog
@@ -55,7 +55,7 @@ public struct Theme: Sendable {
         return copy
     }
 
-    private static let logger = Logger(subsystem: "ThemeKit", category: "Theme")
+    private static let logger = Logger(subsystem: "Livery", category: "Theme")
 }
 
 /// Un conjunto de roles: un enum con un caso por decisión de diseño.

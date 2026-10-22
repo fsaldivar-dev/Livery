@@ -1,6 +1,6 @@
 //
 //  Modifiers.swift
-//  ThemeKit
+//  Livery
 //
 //  Sobrecargas de los modificadores de SwiftUI que aceptan un key path sobre `Theme` y lo
 //  resuelven contra el tema del subárbol. La vista nunca declara `@Environment`.

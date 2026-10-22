@@ -1,6 +1,6 @@
 //
 //  Macros.swift
-//  ThemeKit
+//  Livery
 //
 
 /// Declara los conjuntos de roles de un sistema de diseño.
@@ -25,12 +25,12 @@
 /// Una categoría solo puede declararse una vez por tema.
 @attached(member, names: named(color), named(type), named(space), named(shape))
 @attached(memberAttribute)
-public macro Roles() = #externalMacro(module: "ThemeKitMacros", type: "RolesMacro")
+public macro Roles() = #externalMacro(module: "LiveryMacros", type: "RolesMacro")
 
 /// Macro interna que ``Roles()`` adjunta a cada enum de roles. No la uses directamente.
 @attached(member, names: named(Resolver), named(Values), named(unresolved))
 @attached(extension, conformances: RoleSet)
-public macro _RoleSet() = #externalMacro(module: "ThemeKitMacros", type: "RoleSetMacro")
+public macro _RoleSet() = #externalMacro(module: "LiveryMacros", type: "RoleSetMacro")
 
 /// Declara un tema: la resolución de uno o más conjuntos de roles.
 ///
@@ -49,7 +49,7 @@ public macro _RoleSet() = #externalMacro(module: "ThemeKitMacros", type: "RoleSe
 /// Genera la conformance a ``ThemeProvider`` para poder aplicarlo con `.theme(Light())`.
 /// Las conformances a `Resolver` deben estar en la declaración, no en una extensión.
 @attached(extension, conformances: ThemeProvider, names: named(resolvedTheme))
-public macro Theme() = #externalMacro(module: "ThemeKitMacros", type: "ThemeMacro")
+public macro Theme() = #externalMacro(module: "LiveryMacros", type: "ThemeMacro")
 
 /// Marca la paleta de valores crudos de un sistema de diseño.
 ///
@@ -63,4 +63,4 @@ public macro Theme() = #externalMacro(module: "ThemeKitMacros", type: "ThemeMacr
 /// las vistas no lean primitivos se cumple por frontera de módulo: declara la paleta en un
 /// target que solo importen los temas.
 @attached(peer)
-public macro Primitives() = #externalMacro(module: "ThemeKitMacros", type: "PrimitivesMacro")
+public macro Primitives() = #externalMacro(module: "LiveryMacros", type: "PrimitivesMacro")
