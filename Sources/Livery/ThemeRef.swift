@@ -36,7 +36,11 @@ public struct ThemeRef<Value>: @unchecked Sendable {
 
 /// La raíz de toda referencia al tema activo: `theme.color.onSurface`, `theme.type.title`,
 /// `theme.space.md`, `theme.shape.medium`. Las propiedades por categoría las genera el plugin.
-public let theme = ThemeRef<Theme>(\.self)
+///
+/// El tipo va anotado a propósito: cuando Livery entra como paquete local, Xcode lo tipa desde
+/// el fuente y no evalúa inicializadores de globales al autocompletar; sin la anotación,
+/// `theme` aparece sin tipo y la cadena no sigue.
+public let theme: ThemeRef<Theme> = ThemeRef(\.self)
 
 extension Theme {
     /// El valor al que apunta una referencia, en este tema.

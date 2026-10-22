@@ -14,7 +14,7 @@ struct SampleCard: View {
         VStack(alignment: .leading, spacing: 0) {
             Text("Sajaru Corner")
                 .font(theme.type.title)
-                .foregroundStyle(theme.color.onSurface)
+                .foregroundStyle(them)
             Text("This is a some text")
             Text("Round 3 · 2:14 · Sparring")
                 .font(theme.type.caption)
