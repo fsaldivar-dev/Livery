@@ -45,6 +45,11 @@ import Testing
         #expect(!theme.resolves(Typography.self))
     }
 
+    @Test func valuesAreIndexableByRole() {
+        #expect(Theme.light.color[.accent] == Shade(.green))
+        #expect(Theme.light.space[.lg] == 24)
+    }
+
     @Test func registryGeneratesStaticAccessors() {
         #expect(Theme.light.color.accent == Shade(.green))
         #expect(Theme.dense.space.sm == 4)

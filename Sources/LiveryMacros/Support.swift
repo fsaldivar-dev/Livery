@@ -15,7 +15,7 @@ enum RoleCategory: String, CaseIterable {
         switch self {
         case .color: "Livery.Shade"
         case .type: "SwiftUI.Font"
-        case .space, .shape: "CoreFoundation.CGFloat"
+        case .space, .shape: "CGFloat"
         }
     }
 

@@ -45,6 +45,16 @@ final class ExpansionTests: XCTestCase {
                         self.surface = surface
                         self.accent = accent
                     }
+
+                    /// El valor de un rol elegido en runtime, para galerías, exportadores y pruebas.
+                    subscript(role: Colors) -> Livery.Shade {
+                        switch role {
+                        case .surface:
+                            surface
+                        case .accent:
+                            accent
+                        }
+                    }
                 }
 
                 static let unresolved = Values(surface: Livery.Shade.unresolved, accent: Livery.Shade.unresolved)

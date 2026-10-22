@@ -106,7 +106,7 @@ DesignSystem/
 ```
 
 La regla 1 (vistas no leen primitivos) se cumple por frontera de módulo: la app
-importa `Roles` y `Themes`, nunca `Primitives`. `Palette.jade500` no está en el
+importa `DesignSystem`, nunca `Primitives`. Showcase lo hace así. `Palette.jade500` no está en el
 alcance de una vista. No hay lint que mantener; no compila.
 
 ## 6. Declaración
@@ -324,8 +324,8 @@ error.
 - **R3. Peso de AnnotationSwift.** Resuelto: no se usa en 0.1. Sus macros
   decoran funciones y propiedades; los de Livery son de miembros y extensión.
   Podría volver en fase 3 para el lado del consumo.
-- **R4. `#colorLiteral` en Swift 6.2.** Verificar que sigue mostrando swatch y
-  compila en targets de librería.
+- **R4. `#colorLiteral` en Swift 6.2.** Pendiente. Showcase usa `Color(red:green:blue:)`
+  en la paleta mientras tanto.
 - **R5. Macros y extensiones.** Un macro no puede generar `extension Theme` desde
   otro tipo, ni como peer ni como extensión (comprobado dos veces: el compilador
   rechaza la primera y reescribe la segunda al tipo decorado). Por eso existe el
@@ -347,6 +347,11 @@ Fuera de alcance: patrones y principios como tipos (quedan como documentación),
 catálogo de componentes cerrado, soporte de UIKit más allá de lectura de roles.
 
 ## 13. App de validación
+
+`Examples/Showcase` (macOS, hecho): primitivos, roles y temas en módulos reales con
+el plugin activo, galería de roles por `CaseIterable` y el subscript `theme.color[.accent]`,
+cambio de tema, modo y densidad en vivo, y la opción "Sin tema" para ver la reserva
+rosa. Es donde se prueban las APIs antes de tocar una app de verdad.
 
 Sajaru Corner (iOS/iPadOS/macOS). Tiene tokens semánticos y componentes en
 Penpot, varias superficies con look distinto (reproductor de análisis denso y

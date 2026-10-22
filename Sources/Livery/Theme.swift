@@ -4,7 +4,8 @@
 //
 
 import OSLog
-import SwiftUI
+// Livery es una capa sobre SwiftUI: con `import Livery` basta para declarar roles y temas.
+@_exported import SwiftUI
 
 /// El tema activo en un subárbol de vistas: la resolución de cada conjunto de roles.
 ///

@@ -22,6 +22,7 @@ public struct RolesMacro: MemberMacro, ExtensionMacro {
         let memberwiseParams = role.cases.map { "\($0): \(type)" }.joined(separator: ", ")
         let memberwiseAssign = role.cases.map { "        self.\($0) = \($0)" }.joined(separator: "\n")
         let placeholders = role.cases.map { "\($0): \(role.category.placeholder)" }.joined(separator: ", ")
+        let byRole = role.cases.map { "        case .\($0): \($0)" }.joined(separator: "\n")
 
         return [
             """
@@ -41,6 +42,13 @@ public struct RolesMacro: MemberMacro, ExtensionMacro {
 
                 \(raw: access)init(\(raw: memberwiseParams)) {
             \(raw: memberwiseAssign)
+                }
+
+                /// El valor de un rol elegido en runtime, para galerías, exportadores y pruebas.
+                \(raw: access)subscript(role: \(raw: role.name)) -> \(raw: type) {
+                    switch role {
+            \(raw: byRole)
+                    }
                 }
             }
             """,

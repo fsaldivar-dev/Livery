@@ -45,7 +45,8 @@ struct Card: View {
 ContentView().theme(.carbon)
 ```
 
-`theme.color` y `.carbon` los genera el plugin de build `LiveryRegistry`, el `aapt` de Livery:
+Con `import Livery` basta: Livery reexporta SwiftUI. `theme.color` y `.carbon` los genera el
+plugin de build `LiveryRegistry`, el `aapt` de Livery:
 recorre los fuentes del target antes de compilar y escribe la extensión de `Theme` que un macro
 no puede escribir. Actívalo en el target que declara el sistema de diseño:
 
@@ -58,6 +59,16 @@ no puede escribir. Actívalo en el target que declara el sistema de diseño:
 ```
 
 Un tema con parámetros no recibe acceso corto; se aplica con `.theme(Brand(accent: .red))`.
+
+## Verlo funcionar
+
+`Examples/Showcase` es un sistema de diseño completo declarado con Livery, con la estructura que
+el framework propone: `Primitives` en un módulo que solo `DesignSystem` importa, y una app que
+no puede leer `Palette` ni queriendo. Cambia de tema, de modo y de densidad en vivo.
+
+```bash
+swift run --package-path Examples/Showcase
+```
 
 ## Qué verifica el compilador
 
