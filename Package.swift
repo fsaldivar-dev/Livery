@@ -10,8 +10,11 @@ let package = Package(
     products: [
         /// Runtime (`Theme`, `.theme(_:)`, key paths como estilos) y las macros `@Roles`, `@Theme`, `@Primitives`.
         .library(name: "Livery", targets: ["Livery"]),
-        /// Build-tool plugin: genera `theme.color` por cada `@Roles` y `.light` por cada `@Theme`.
+        /// Build-tool plugin: genera `theme.color` por cada `@Roles` y `.light` por cada `@Theme`,
+        /// o verifica el archivo generado en Sources si existe. También lint y reporte de puentes.
         .plugin(name: "LiveryRegistry", targets: ["LiveryRegistry"]),
+        /// Command plugin: escribe `Sources/<Target>/Generated/Livery+Registry.swift` para que Xcode lo vea.
+        .plugin(name: "LiveryGenerate", targets: ["LiveryGenerate"]),
         /// CLI: `theme init` genera la estructura de un sistema de diseño.
         .executable(name: "theme", targets: ["theme"]),
     ],
@@ -45,9 +48,18 @@ let package = Package(
             capability: .buildTool(),
             dependencies: ["livery-registry"]
         ),
+        .plugin(
+            name: "LiveryGenerate",
+            capability: .command(
+                intent: .custom(verb: "livery-generate", description: "Escribe Sources/<Target>/Generated/Livery+Registry.swift"),
+                permissions: [.writeToPackageDirectory(reason: "Escribir el archivo generado dentro de Sources del target")]
+            ),
+            dependencies: ["livery-registry"]
+        ),
 
-        // CLI: plantillas de `theme init` y el ejecutable.
-        .target(name: "LiveryScaffold"),
+        // CLI: plantillas de `theme init` y el ejecutable. Usa el generador para dejar escrito
+        // `Generated/Livery+Registry.swift`, así el paquete nuevo funciona en Xcode desde el primer momento.
+        .target(name: "LiveryScaffold", dependencies: ["LiveryRegistryCore"]),
         .executableTarget(name: "theme", dependencies: ["LiveryScaffold"]),
 
         // Pruebas end-to-end: roles y temas planos, con el plugin activo, resueltos desde el entorno.

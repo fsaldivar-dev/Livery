@@ -20,6 +20,7 @@ import Testing
             "Sources/SajaruPrimitives/Metrics.swift",
             "Sources/Sajaru/Roles.swift",
             "Sources/Sajaru/Themes.swift",
+            "Sources/Sajaru/Generated/Livery+Registry.swift",
             "Tests/SajaruTests/SajaruTests.swift",
             ".gitignore",
             "README.md",
@@ -30,6 +31,9 @@ import Testing
         #expect(package.contains("dependencies: [\"SajaruPrimitives\", .product(name: \"Livery\", package: \"Livery\")]"))
         #expect(scaffold.files[4].contents.contains("import SajaruPrimitives"))
         #expect(!scaffold.files[3].contents.contains("Primitives"), "los roles no conocen la paleta")
+        let registry = scaffold.files[5].contents
+        #expect(registry.contains("public var color: Colors.Values { values(Colors.self) }"))
+        #expect(registry.contains("public static var base: Livery.Theme { Base().resolvedTheme }"))
     }
 
     @Test func defaultDependencyIsGitHubMaster() {

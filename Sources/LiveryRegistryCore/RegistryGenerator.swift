@@ -45,7 +45,26 @@ public struct RegistryGenerator {
         public var code: String
         public var diagnostics: [Diagnostic]
         public var hasErrors: Bool { diagnostics.contains { $0.severity == .error } }
+
+        /// Si un archivo ya escrito en `Sources/…/Generated` coincide con lo que se generaría ahora.
+        /// Ignora espacios finales y saltos de línea sobrantes.
+        public func isUpToDate(comparedTo existing: String) -> Bool {
+            Self.normalized(code) == Self.normalized(existing)
+        }
+
+        static func normalized(_ text: String) -> String {
+            text.replacingOccurrences(of: "\r\n", with: "\n")
+                .split(separator: "\n", omittingEmptySubsequences: false)
+                .map { $0.trimmingCharacters(in: .whitespaces) }
+                .joined(separator: "\n")
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+        }
     }
+
+    /// Nombre del archivo generado, tanto en el directorio de build como en `Sources/<Target>/Generated/`.
+    public static let fileName = "Livery+Registry.swift"
+    /// Carpeta dentro del target donde `livery-generate` deja el archivo para que Xcode lo vea como fuente normal.
+    public static let generatedDirectory = "Generated"
 
     /// Un problema en el formato que Xcode y SwiftPM entienden: `ruta:línea:columna: error: mensaje`.
     public struct Diagnostic: Equatable, CustomStringConvertible {
@@ -56,6 +75,14 @@ public struct RegistryGenerator {
         public var severity: Severity
         public var message: String
         public var description: String { "\(path):\(line):\(column): \(severity.rawValue): \(message)" }
+
+        public init(path: String, line: Int, column: Int, severity: Severity, message: String) {
+            self.path = path
+            self.line = line
+            self.column = column
+            self.severity = severity
+            self.message = message
+        }
     }
 
     /// - Parameters:

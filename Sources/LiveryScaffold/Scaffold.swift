@@ -9,10 +9,12 @@
 //        Package.swift
 //        Sources/<Nombre>Primitives/   ← la paleta y las medidas crudas; solo <Nombre> lo importa
 //        Sources/<Nombre>/             ← roles y temas, con el plugin LiveryRegistry activo
+//        Sources/<Nombre>/Generated/   ← Livery+Registry.swift, ya escrito: Xcode lo ve como fuente
 //        Tests/<Nombre>Tests/          ← el tema resuelve lo que declara
 //
 
 import Foundation
+import LiveryRegistryCore
 
 public struct Scaffold {
     /// Nombre del paquete y del módulo de roles y temas. También prefijo del módulo de primitivos.
@@ -56,10 +58,19 @@ public struct Scaffold {
             ("Sources/\(primitivesModule)/Metrics.swift", metrics),
             ("Sources/\(name)/Roles.swift", roles),
             ("Sources/\(name)/Themes.swift", themes),
+            ("Sources/\(name)/\(RegistryGenerator.generatedDirectory)/\(RegistryGenerator.fileName)", registry),
             ("Tests/\(testsModule)/\(testsModule).swift", tests),
             (".gitignore", ".build/\n.swiftpm/\nxcuserdata/\n.DS_Store\n"),
             ("README.md", readme),
         ]
+    }
+
+    /// El archivo que el plugin generaría en el build, escrito en Sources desde el primer momento.
+    var registry: String {
+        RegistryGenerator().generate(sources: [
+            .init(path: "Sources/\(name)/Roles.swift", text: roles),
+            .init(path: "Sources/\(name)/Themes.swift", text: themes),
+        ]).code
     }
 
     /// Escribe el paquete en `directory/<name>`. Falla si la carpeta ya existe.
@@ -316,8 +327,11 @@ public struct Scaffold {
         Generado por `theme init`.
 
         - `Sources/\(primitivesModule)`: la paleta y las medidas crudas. Solo `\(name)` lo importa.
-        - `Sources/\(name)`: los roles (qué existe) y los temas (cómo se resuelve). El plugin
-          `LiveryRegistry` genera `theme.color`, `theme.space`, `.base`, etc.
+        - `Sources/\(name)`: los roles (qué existe) y los temas (cómo se resuelve).
+        - `Sources/\(name)/Generated/Livery+Registry.swift`: `theme.color`, `theme.space`, `.base`, etc.
+          Lo escribe `swift package --allow-writing-to-package-directory livery-generate` (o
+          LiveryGenerate desde Xcode) y el plugin `LiveryRegistry` comprueba en cada build que
+          siga al día. Cuando cambies roles o temas, vuelve a ejecutarlo.
         - `Tests/\(testsModule)`: el tema resuelve todo lo que declara.
 
         En la app:

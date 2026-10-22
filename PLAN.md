@@ -151,9 +151,12 @@ Quién genera qué:
   `ThemeProvider.resolvedTheme`, que registra cada `Values`. La completitud la
   verifica la conformance.
 - `@Primitives` solo marca la paleta para el exportador.
-- `LiveryRegistry` (plugin) escribe `extension Theme` con `var color: Colors.Values`
-  por cada `@Roles` y `static var light: Theme` por cada `@Theme` construible sin
-  argumentos. Diagnostica categorías repetidas con archivo y línea.
+- `livery-generate` (command plugin) escribe `Sources/<Target>/Generated/Livery+Registry.swift`
+  con `extension Theme`: `var color: Colors.Values` por cada `@Roles` y
+  `static var light: Theme` por cada `@Theme` construible sin argumentos.
+  `LiveryRegistry` (build plugin) verifica en cada build que siga al día y
+  diagnostica categorías repetidas con archivo y línea. `theme init` deja el
+  archivo escrito.
 - `@Component` / `@Style` (fase 3): generan la tabla de combinaciones y exigen
   switch exhaustivo.
 - `@Bridge(from:to:)` (fase 2): el plugin verifica cobertura de todos los roles
@@ -357,10 +360,13 @@ usos legítimos de layout para una regla sintáctica.
 - **R4. `#colorLiteral` en Swift 6.2.** Pendiente. Showcase usa `Color(red:green:blue:)`
   en la paleta mientras tanto.
 - **R5. Macros y extensiones.** Un macro no puede generar `extension Theme` desde
-  otro tipo, ni como peer ni como extensión (comprobado dos veces: el compilador
-  rechaza la primera y reescribe la segunda al tipo decorado). Por eso existe el
-  plugin de build. Costo: activar el plugin en el target, el diálogo de confianza
-  de Xcode la primera vez, y autocompletado de `.light` solo tras compilar.
+  otro tipo, ni como peer ni como extensión (comprobado dos veces). Por eso existe
+  el generador. Y las salidas de un build-tool plugin no son fiables para el
+  autocompletado de Xcode en paquetes locales (comprobado en sesión: índice fresco
+  y aun así "No Completions"). Por eso el archivo generado vive en
+  `Sources/<Target>/Generated/`, escrito por el command plugin `livery-generate`,
+  y el build-tool plugin solo verifica que esté al día. Un archivo en Sources es
+  código normal para cualquier editor.
 - **D1.** Nombre del paquete: `Livery` (antes `ThemeKit`). Decidido.
 - **D2.** Mínimo de plataforma: iOS 17 / macOS 14 por `resolve(in:)`. Decidido.
 

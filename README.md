@@ -65,8 +65,20 @@ ContentView().environment(\.theme, .carbon)
 
 Con `import Livery` basta: Livery reexporta SwiftUI. Para una vista pequeña que no quiera
 declarar la propiedad, el global `theme` ofrece las mismas cadenas (`.font(theme.type.body)`) y
-se resuelve al dibujar. `theme.color` y `.carbon` los genera el plugin de build `LiveryRegistry`,
-el `aapt` de Livery:
+se resuelve al dibujar.
+
+`theme.color` y `.carbon` no los escribe un macro, porque un macro no puede extender `Theme`
+desde otro tipo. Los escribe el generador de Livery, el `aapt` del framework, de dos formas:
+
+- `swift package --allow-writing-to-package-directory livery-generate` (o LiveryGenerate desde
+  Xcode, con clic derecho en el paquete) deja `Sources/<Target>/Generated/Livery+Registry.swift`.
+  Al vivir en Sources, Xcode lo trata como código normal: navegación y autocompletado sin depender
+  del índice de salidas de plugins. `theme init` ya lo deja escrito.
+- El build-tool plugin `LiveryRegistry` corre en cada build: si el archivo existe, comprueba que
+  esté al día y falla si no; si no existe, lo genera en el directorio de build. En ambos casos
+  verifica los puentes, emite el reporte de migración y hace el lint.
+
+Actívalo en el target que declara el sistema de diseño:
 recorre los fuentes del target antes de compilar y escribe la extensión de `Theme` que un macro
 no puede escribir. Actívalo en el target que declara el sistema de diseño:
 

@@ -213,3 +213,14 @@ import Testing
         #expect(messages.contains("No hay ningún `@Roles enum Missing` en este módulo."))
     }
 }
+
+@Suite struct GeneratedFileTests {
+    @Test func upToDateIgnoresWhitespaceButNotContent() {
+        let output = RegistryGenerator().generate(sources: [.init(path: "Roles.swift", text: "@Roles enum Colors: ColorRoles { case a }")])
+        #expect(output.isUpToDate(comparedTo: output.code))
+        #expect(output.isUpToDate(comparedTo: output.code + "\n\n"))
+        #expect(output.isUpToDate(comparedTo: output.code.replacingOccurrences(of: "\n", with: "  \r\n")))
+        #expect(!output.isUpToDate(comparedTo: output.code.replacingOccurrences(of: "var color", with: "var colour")))
+        #expect(!output.isUpToDate(comparedTo: ""))
+    }
+}
