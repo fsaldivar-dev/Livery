@@ -55,7 +55,7 @@ import Testing
             @Theme struct Nullable: Colors.Resolver { var note: String?; let surface = Color.white }
             """)
         #expect(!output.code.contains("static var brand"))
-        #expect(output.code.contains("// `Brand` necesita argumentos: aplícalo con `.livery(Brand(…))`."))
+        #expect(output.code.contains("// `Brand` necesita argumentos: aplícalo con `.environment(\\.theme, Brand(…).resolvedTheme)`."))
         #expect(!output.code.contains("static var tinted"))
         #expect(!output.code.contains("static var generic"))
         #expect(output.code.contains("static var defaulted: Livery.Theme { Defaulted().resolvedTheme }"))

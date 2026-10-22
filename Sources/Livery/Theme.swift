@@ -34,7 +34,7 @@ public struct Theme: Sendable {
             return values
         }
         #if DEBUG
-        Theme.logger.fault("\(String(reflecting: set), privacy: .public) no está resuelto por el tema activo. Aplica `.livery(_:)` con un tema que lo resuelva en un ancestro de esta vista.")
+        Theme.logger.fault("\(String(reflecting: set), privacy: .public) no está resuelto por el tema activo. Aplica `.environment(\\.theme, …)` con un tema que lo resuelva en un ancestro de esta vista.")
         #endif
         return R.unresolved
     }

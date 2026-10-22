@@ -25,7 +25,7 @@ swift run --package-path Livery theme init DesignSystem
 
 Produce `DesignSystem/` con `DesignSystemPrimitives` (la paleta, que solo el otro módulo
 importa) y `DesignSystem` (roles y temas), listo para enlazar en la app y aplicar con
-`.livery(.base)`. Con `--livery <ruta>` toma Livery de una copia local.
+`.environment(\\.theme, .base)`. Con `--livery <ruta>` toma Livery de una copia local.
 
 ## Cómo se ve
 
@@ -57,7 +57,7 @@ struct Card: View {
     }
 }
 
-ContentView().livery(.carbon)
+ContentView().environment(\.theme, .carbon)
 ```
 
 Con `import Livery` basta: Livery reexporta SwiftUI. `theme.color` y `.carbon` los genera el
@@ -73,7 +73,7 @@ no puede escribir. Actívalo en el target que declara el sistema de diseño:
 )
 ```
 
-Un tema con parámetros no recibe acceso corto; se aplica con `.livery(Brand(accent: .red))`.
+Un tema con parámetros no recibe acceso corto; se aplica con `.environment(\\.theme, adding: Brand(accent: .red))`.
 
 ## Verlo funcionar
 
@@ -121,7 +121,7 @@ Con eso, el plugin:
 ## Estado
 
 Fases 0.1 y 0.2: `@Roles`, `@Theme`, `@Primitives`, `@Bridge`, `Shade`, el plugin `LiveryRegistry`
-(registro, puentes, reporte y lint), la CLI `theme init`, `.livery(_:)`, `.livery(adding:)` y
+(registro, puentes, reporte y lint), la CLI `theme init`, `.environment(\.theme, …)`, `.environment(\.theme, adding:)` y
 sobrecargas de modificadores para fuente, espaciado y radio.
 Swift 6.2, iOS 17 / macOS 14.
 

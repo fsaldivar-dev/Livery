@@ -54,7 +54,7 @@ import SwiftUI
     public let danger             = Shade(light: Palette.rose600, dark: Palette.rose400)
 }
 
-/// Solo espaciado: se suma al tema activo con `.livery(adding: .dense)`.
+/// Solo espaciado: se suma al tema activo con `.environment(\.theme, adding: .dense)`.
 @Theme public struct Dense: Spacing.Resolver {
     public init() {}
 
@@ -65,7 +65,7 @@ import SwiftUI
     public let xl = Metrics.unit * 5
 }
 
-/// Un tema con parámetros: no recibe acceso corto; se aplica con `.livery(adding: Brand(accent:))`.
+/// Un tema con parámetros: no recibe acceso corto; se aplica con `.environment(\.theme, adding: Brand(accent:))`.
 @Theme public struct Brand: Colors.Resolver {
     public init(accent: Shade) {
         self.accent = accent

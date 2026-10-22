@@ -70,8 +70,8 @@ struct ShowcaseView: View {
             .background(theme.color.surface)
             .environment(\.colorScheme, scheme)
         }
-        .livery(choice.theme)
-        .livery(adding: dense ? .dense : Theme())
+        .environment(\.theme, choice.theme)
+        .environment(\.theme, adding: dense ? .dense : Theme())
     }
 
     private var controls: some View {
@@ -121,7 +121,7 @@ enum Snapshot {
                 let view = GalleryView()
                     .frame(width: 900)
                     .background(theme.color.surface)
-                    .livery(choice.theme)
+                    .environment(\.theme, choice.theme)
                     .environment(\.colorScheme, scheme)
                 let renderer = ImageRenderer(content: view)
                 renderer.scale = 2

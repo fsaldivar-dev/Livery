@@ -40,9 +40,9 @@ public macro Roles() = #externalMacro(module: "LiveryMacros", type: "RolesMacro"
 /// }
 /// ```
 ///
-/// Genera la conformance a ``ThemeProvider`` para poder aplicarlo con `.livery(Light())`.
-/// El acceso corto `.livery(.light)` lo genera el plugin de build `LiveryRegistry` para todo
-/// tema que se pueda construir sin argumentos.
+/// Genera la conformance a ``ThemeProvider``. El acceso corto `Theme.light` lo genera el plugin
+/// de build `LiveryRegistry` para todo tema que se pueda construir sin argumentos, y se aplica
+/// con `.environment(\.theme, .light)`.
 /// Las conformances a `Resolver` deben estar en la declaración, no en una extensión.
 @attached(extension, conformances: ThemeProvider, names: named(resolvedTheme))
 public macro Theme() = #externalMacro(module: "LiveryMacros", type: "ThemeMacro")

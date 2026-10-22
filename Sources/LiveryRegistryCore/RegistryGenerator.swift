@@ -94,7 +94,7 @@ public struct RegistryGenerator {
 
         for theme in themes {
             guard theme.isConstructible else {
-                members.append("    // `\(theme.qualifiedName)` necesita argumentos: aplícalo con `.livery(\(theme.qualifiedName)(…))`.")
+                members.append("    // `\(theme.qualifiedName)` necesita argumentos: aplícalo con `.environment(\\.theme, \(theme.qualifiedName)(…).resolvedTheme)`.")
                 continue
             }
             members.append("    \(theme.access)static var \(theme.accessorName): Livery.Theme { \(theme.qualifiedName)().resolvedTheme }")

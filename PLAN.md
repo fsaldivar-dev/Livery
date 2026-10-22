@@ -76,7 +76,7 @@ La estructura es el fuselaje; tu marca es la librea. El namespace en las vistas 
 
 | Target | Tipo | Contenido |
 |---|---|---|
-| `Livery` | librería | Runtime: `Theme`, `Shade`, `ThemeRef` (referencias `.theme…` con autocompletado, `ShapeStyle` para colores), `EnvironmentValues.theme`, `.livery(_:)` y `.livery(adding:)`, sobrecargas de modificadores. |
+| `Livery` | librería | Runtime: `Theme`, `Shade`, `ThemeRef` (referencias `.theme…` con autocompletado, `ShapeStyle` para colores), `EnvironmentValues.theme`, `.environment(\.theme, …)` y `.environment(\.theme, adding:)`, sobrecargas de modificadores. |
 | `LiveryMacros` | macro | `@Primitives`, `@Roles`, `@Theme`, `@Component`, `@Style`, `@Bridge`. |
 | `ThemeLint` | build plugin | Marca valores hardcodeados en targets de UI. |
 | `theme` | ejecutable | CLI: `init`, `export`, `import`, `report`. |
@@ -188,9 +188,11 @@ una vista (dentro de un `VStack` con una docena de modificadores):
 - `theme.type.title` (valor global): lista exactamente los roles en todas las
   posiciones, porque `theme.` se resuelve solo, sin mirar la llamada que lo rodea.
 
-De paso, el modificador para aplicar un tema pasó de `.theme(_:)` a
-`.livery(_:)`: dentro de una vista, `theme` resolvía al método antes que al
-global. Es además lo que decía la portada original.
+Aplicar un tema no tiene modificador propio: es el entorno nativo,
+`.environment(\.theme, .carbon)`, más una sobrecarga del mismo nombre para sumar
+un tema parcial, `.environment(\.theme, adding: .dense)`. Un modificador
+`.theme(_:)` colisionaba con el global dentro de las vistas, y un verbo propio
+(`.livery`) era vocabulario que la app no debería aprender.
 
 Mecanismo:
 
@@ -216,9 +218,9 @@ Un estilo se aplica por subárbol, con el acceso corto que genera el plugin o co
 una instancia cuando el tema tiene parámetros:
 
 ```swift
-ContentView().livery(.light)
-PlayerView().livery(adding: .playerDense)
-BrandedView().livery(adding: Brand(accent: Shade(.purple)))
+ContentView().environment(\\.theme, .light)
+PlayerView().environment(\\.theme, adding: .playerDense)
+BrandedView().environment(\\.theme, adding: Brand(accent: Shade(.purple)))
 ```
 
 Varios estilos por app: cada uno es un `@Theme` distinto. Un conjunto de roles
@@ -370,7 +372,7 @@ usos legítimos de layout para una regla sintáctica.
 
 | Fase | Entrega | Criterio de hecho |
 |---|---|---|
-| 0.1 Núcleo | `@Primitives`, `@Roles`, `@Theme`, `Shade`, plugin `LiveryRegistry`, `.livery(_:)`, `.livery(adding:)`, `ThemeRef`, sobrecargas para fuente, padding, radio, tint, `theme init`. **Hecho.** | Sajaru Corner tiene su DS declarado y una pantalla migrada a key paths. |
+| 0.1 Núcleo | `@Primitives`, `@Roles`, `@Theme`, `Shade`, plugin `LiveryRegistry`, `.environment(\.theme, …)`, `.environment(\.theme, adding:)`, `ThemeRef`, sobrecargas para fuente, padding, radio, tint, `theme init`. **Hecho.** | Sajaru Corner tiene su DS declarado y una pantalla migrada a key paths. |
 | 0.2 Cambio | `@Bridge` con reenvíos deprecados y reporte de usos pendientes, lint en el plugin. **Hecho.** | Migrar un conjunto de roles V1→V2 en Sajaru sin tocar vistas, y bajar warnings a cero. |
 | 0.3 Componentes | `@Component`, `@Style`, catálogo base (Button, Card, TextField). | Botón de Sajaru declarado como contrato con estilo exhaustivo. |
 | 0.4 Diseño | `theme export` / `theme import` W3C, catálogo visual generado. | Tokens de Sajaru abren en Penpot. |

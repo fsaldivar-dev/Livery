@@ -25,7 +25,7 @@ import Testing
     let lg: CGFloat = 12
 }
 
-/// Un tema con parámetros: sin acceso estático, se aplica con `.livery(Brand(accent:))`.
+/// Un tema con parámetros: sin acceso estático, se aplica con `.environment(\\.theme, Brand(accent:).resolvedTheme)`.
 @Theme struct Brand: Colors.Resolver {
     let surface = Shade(.white)
     let onSurface = Shade(.black)
@@ -130,11 +130,11 @@ import Testing
             .tint(theme.color.accent)
             .clipShape(cornerRadius: theme.shape.small)
             .border(theme.color.accent)
-            .livery(.light)
-            .livery(adding: .dense)
-            .livery(Brand(accent: Shade(.red)))
+            .environment(\.theme, .light)
+            .environment(\.theme, adding: .dense)
+            .environment(\.theme, Brand(accent: Shade(.red)).resolvedTheme)
             .foregroundStyle(Theme.light.color.accent)
-            .livery(adding: Dense())
+            .environment(\.theme, adding: Dense())
         _ = Circle().fill(theme.color.accent)
         _ = Circle().stroke(theme.color.accent, lineWidth: 2)
         _ = ThemeValue(theme.space.md) { VStack(spacing: $0) { Text("a") } }
