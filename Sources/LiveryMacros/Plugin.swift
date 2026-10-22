@@ -7,6 +7,7 @@ struct LiveryPlugin: CompilerPlugin {
         RolesMacro.self,
         ThemeMacro.self,
         PrimitivesMacro.self,
+        ComponentMacro.self,
         BridgeMacro.self,
     ]
 }

@@ -191,3 +191,53 @@ extension ExpansionTests {
         )
     }
 }
+
+extension ExpansionTests {
+    func testComponentGeneratesStylerProtocol() {
+        assertMacroExpansion(
+            """
+            @Component
+            public enum Button {
+                struct Style: Sendable {
+                    let tint: Int
+                }
+                static let unstyled = Style(tint: 0)
+            }
+            """,
+            expandedSource: """
+            public enum Button {
+                struct Style: Sendable {
+                    let tint: Int
+                }
+                static let unstyled = Style(tint: 0)
+
+                /// Lo que un tema promete para este componente. `@Theme` registra la conformance.
+                public protocol Styler {
+                    var button: Style {
+                        get
+                    }
+                }
+            }
+            """,
+            macroSpecs: ["Component": MacroSpec(type: ComponentMacro.self)]
+        )
+    }
+
+    func testComponentNeedsAStyleType() {
+        assertMacroExpansion(
+            """
+            @Component
+            enum Chip {
+                case a
+            }
+            """,
+            expandedSource: """
+            enum Chip {
+                case a
+            }
+            """,
+            diagnostics: [DiagnosticSpec(message: "`Chip` necesita un `struct Style` que describa su estilo.", line: 2, column: 6)],
+            macroSpecs: ["Component": MacroSpec(type: ComponentMacro.self)]
+        )
+    }
+}

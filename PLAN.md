@@ -77,7 +77,7 @@ La estructura es el fuselaje; tu marca es la librea. El namespace en las vistas 
 | Target | Tipo | Contenido |
 |---|---|---|
 | `Livery` | librería | Runtime: `Theme`, `Shade` (`ShapeStyle`), `EnvironmentValues.theme` y `.environment(\.theme, adding:)`. Sin `@dynamicMemberLookup`, globales ni sobrecargas de modificadores. |
-| `LiveryMacros` | macro | `@Primitives`, `@Roles`, `@Theme`, `@Component`, `@Style`, `@Bridge`. |
+| `LiveryMacros` | macro | `@Primitives`, `@Roles`, `@Theme`, `@Component`, `@Bridge`. |
 | `ThemeLint` | build plugin | Marca valores hardcodeados en targets de UI. |
 | `theme` | ejecutable | CLI: `init`, `export`, `import`, `report`. |
 
@@ -289,9 +289,14 @@ Kernel (Component.swift): ComponentVariant, ComponentSize (con minimumHitTarget,
 (DesignSystem/Button.swift, ButtonStyle.swift), a mano con la forma que generará
 @Component; ThemedButtonStyle es un ButtonStyle real.
 
-Pendiente para cerrar 0.3: @Component que genere Style, Styler, unstyled, los
-treatment/metrics/effect(for:) y theme.<componente>; focused y selected en el
-adaptador.
+`@Component` (hecho): el macro genera el protocolo `Styler` dentro del enum; el
+plugin genera `theme.<componente>` en la extensión de `Theme` (lo que un macro no
+puede). El autor escribe lo propio del diseño —los enums, el struct `Style`, el
+`unstyled`— y nada de pegamento. En Showcase, `@Component enum Button` reemplazó
+el `Styler` y el `theme.button` escritos a mano, sin cambiar cómo se ve ni se usa.
+
+Pendiente: `focused` y `selected` en el adaptador; un segundo componente que
+confirme el modelo.
 
 ## 8. Cambio y migración
 

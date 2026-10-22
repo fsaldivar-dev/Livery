@@ -69,7 +69,7 @@ import Testing
             }
             """)
         #expect(!output.code.contains("local"))
-        #expect(output.code.contains("ningún @Roles, @Theme ni @Bridge"))
+        #expect(output.code.contains("ningún @Roles, @Theme, @Component ni @Bridge"))
     }
 
     @Test func duplicateCategoryIsAnError() {
@@ -91,7 +91,7 @@ import Testing
     @Test func rolesWithoutCategoryAreSkipped() {
         let output = generate("@Roles enum Colors { case surface }")
         #expect(output.diagnostics.isEmpty)
-        #expect(output.code.contains("ningún @Roles, @Theme ni @Bridge"))
+        #expect(output.code.contains("ningún @Roles, @Theme, @Component ni @Bridge"))
     }
 
     @Test func accessorNames() {
@@ -222,5 +222,22 @@ import Testing
         #expect(output.isUpToDate(comparedTo: output.code.replacingOccurrences(of: "\n", with: "  \r\n")))
         #expect(!output.isUpToDate(comparedTo: output.code.replacingOccurrences(of: "var color", with: "var colour")))
         #expect(!output.isUpToDate(comparedTo: ""))
+    }
+}
+
+@Suite struct ComponentGeneratorTests {
+    @Test func componentGetsAThemeAccessor() {
+        let output = RegistryGenerator().generate(sources: [
+            .init(path: "Button.swift", text: "@Component public enum Button { struct Style: Sendable {}; static let unstyled = Style() }"),
+        ])
+        #expect(output.code.contains("public var button: Button.Style { style(for: Button.self) ?? Button.unstyled }"))
+        #expect(!output.hasErrors)
+    }
+
+    @Test func nestedComponentIsQualified() {
+        let output = RegistryGenerator().generate(sources: [
+            .init(path: "DS.swift", text: "enum DS { @Component enum IconButton { struct Style {}; static let unstyled = Style() } }"),
+        ])
+        #expect(output.code.contains("var iconButton: DS.IconButton.Style { style(for: DS.IconButton.self) ?? DS.IconButton.unstyled }"))
     }
 }

@@ -15,6 +15,7 @@
 
 import Livery
 
+@Component
 public enum Button {
     /// Los estilos de Apple. El tinte es el mismo; cambia cómo se pinta.
     public enum Variant: ComponentVariant { case prominent, bordered, plain }
@@ -114,9 +115,6 @@ public enum Button {
         }
     }
 
-    /// Lo que un tema promete para el botón. `@Theme` lo registra.
-    public protocol Styler { var button: Style { get } }
-
     /// Reserva, deliberadamente fea, para un tema que no registra estilo de botón.
     public static let unstyled = Style(
         tint: .danger, onTint: .onAccent,
@@ -124,9 +122,4 @@ public enum Button {
         medium: Metrics(font: .headline, vertical: .sm, horizontal: .lg),
         large: Metrics(font: .headline, vertical: .md, horizontal: .xl)
     )
-}
-
-extension Theme {
-    /// El estilo de botón del tema activo. Lo generará el plugin a partir de `Button.Styler`.
-    public var button: Button.Style { style(for: Button.self) ?? Button.unstyled }
 }

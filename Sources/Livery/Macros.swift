@@ -92,3 +92,21 @@ public macro Primitives() = #externalMacro(module: "LiveryMacros", type: "Primit
 ///   `ColorsV1` y el puente.
 @attached(peer)
 public macro Bridge<From, To>(from: From.Type, to: To.Type) = #externalMacro(module: "LiveryMacros", type: "BridgeMacro")
+
+
+/// Declara un componente: un contrato con su estilo, registrado en el tema.
+///
+/// ```swift
+/// @Component enum Button {
+///     enum Variant: ComponentVariant { case prominent, bordered, plain }
+///     enum Size: ComponentSize { case small, medium, large }
+///     struct Style: Sendable { … }           // el estilo, propio del diseño
+///     static let unstyled = Style(…)          // reserva si un tema no lo da
+/// }
+/// ```
+///
+/// El macro genera `Button.Styler`, el protocolo que un tema conforma (`@Theme struct Light:
+/// Button.Styler`) para dar `var button: Button.Style`. El accesor `theme.button` lo genera el
+/// plugin `LiveryRegistry`, porque extiende `Theme`. `@Theme` registra la conformance a `Styler`.
+@attached(member, names: named(Styler))
+public macro Component() = #externalMacro(module: "LiveryMacros", type: "ComponentMacro")

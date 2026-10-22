@@ -92,6 +92,7 @@ public struct RegistryGenerator {
         var roles: [RoleSetDecl] = []
         var themes: [ThemeDecl] = []
         var bridges: [BridgeDecl] = []
+        var components: [ComponentDecl] = []
         for source in sources {
             let tree = Parser.parse(source: source.text)
             let visitor = RegistryVisitor(path: source.path, converter: SourceLocationConverter(fileName: source.path, tree: tree))
@@ -99,6 +100,7 @@ public struct RegistryGenerator {
             roles.append(contentsOf: visitor.roles)
             themes.append(contentsOf: visitor.themes)
             bridges.append(contentsOf: visitor.bridges)
+            components.append(contentsOf: visitor.components)
         }
 
         var diagnostics: [Diagnostic] = []
@@ -117,6 +119,10 @@ public struct RegistryGenerator {
             }
             seen[role.category] = role
             members.append("    \(role.access)var \(role.category.property): \(role.qualifiedName).Values { values(\(role.qualifiedName).self) }")
+        }
+
+        for component in components {
+            members.append("    \(component.access)var \(component.property): \(component.qualifiedName).Style { style(for: \(component.qualifiedName).self) ?? \(component.qualifiedName).unstyled }")
         }
 
         for theme in themes {
@@ -146,7 +152,7 @@ public struct RegistryGenerator {
 
         """
         if members.isEmpty && extensions.isEmpty {
-            code += "// (ningún @Roles, @Theme ni @Bridge en este módulo)\n"
+            code += "// (ningún @Roles, @Theme, @Component ni @Bridge en este módulo)\n"
         }
         if !members.isEmpty {
             code += "extension Livery.Theme {\n" + members.joined(separator: "\n") + "\n}\n"
@@ -259,6 +265,12 @@ enum RoleCategory: String, CaseIterable {
     }
 }
 
+struct ComponentDecl {
+    var qualifiedName: String
+    var property: String
+    var access: String
+}
+
 struct BridgeDecl {
     struct Member {
         enum Kind { case rename(String), computed }
@@ -300,6 +312,7 @@ final class RegistryVisitor: SyntaxVisitor {
     var roles: [RoleSetDecl] = []
     var themes: [ThemeDecl] = []
     var bridges: [BridgeDecl] = []
+    var components: [ComponentDecl] = []
 
     private let path: String
     private let converter: SourceLocationConverter
@@ -315,10 +328,22 @@ final class RegistryVisitor: SyntaxVisitor {
         if hasAttribute("Roles", in: node.attributes) {
             collectRoles(node)
         }
+        if hasAttribute("Component", in: node.attributes) {
+            components.append(ComponentDecl(
+                qualifiedName: qualified(node.name.text),
+                property: Self.componentProperty(node.name.text),
+                access: node.modifiers.accessPrefix))
+        }
         if let bridge = attribute("Bridge", in: node.attributes) {
             collectBridge(node, attribute: bridge)
         }
         return enter(node.name.text)
+    }
+
+    /// `Button` → `button`, `IconButton` → `iconButton`.
+    static func componentProperty(_ name: String) -> String {
+        guard let first = name.first else { return name }
+        return first.lowercased() + name.dropFirst()
     }
 
     override func visitPost(_ node: EnumDeclSyntax) { leave() }
