@@ -28,7 +28,7 @@ enum ColorsV1toV2 {
 
     @available(*, deprecated)
     @Test func oldRefsWorkInModifiers() {
-        let ref: ThemeRef<Shade> = .theme.color.primary
+        let ref: ThemeRef<Shade> = theme.color.primary
         #expect(Theme.light[ref] == Theme.light.color.accent)
     }
 

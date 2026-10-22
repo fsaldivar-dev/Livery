@@ -65,7 +65,7 @@ Reglas, pocas y rígidas:
 - **Los estilos son por subárbol, no globales.** Una app puede tener varios
   estilos conviviendo, y un DS viejo y uno nuevo durante una migración.
 - **Cero ceremonia en la vista.** No se declara `@Environment`. Se escribe
-  `.foregroundStyle(.theme.color.onSurface)` y el tema se resuelve solo, con
+  `.foregroundStyle(theme.color.onSurface)` y el tema se resuelve solo, con
   autocompletado de los roles en cada paso.
 
 ## 4. Nombre y módulos
@@ -76,7 +76,7 @@ La estructura es el fuselaje; tu marca es la librea. El namespace en las vistas 
 
 | Target | Tipo | Contenido |
 |---|---|---|
-| `Livery` | librería | Runtime: `Theme`, `Shade`, `ThemeRef` (referencias `.theme…` con autocompletado, `ShapeStyle` para colores), `EnvironmentValues.theme`, `.theme(_:)` y `.theme(adding:)`, sobrecargas de modificadores. |
+| `Livery` | librería | Runtime: `Theme`, `Shade`, `ThemeRef` (referencias `.theme…` con autocompletado, `ShapeStyle` para colores), `EnvironmentValues.theme`, `.livery(_:)` y `.livery(adding:)`, sobrecargas de modificadores. |
 | `LiveryMacros` | macro | `@Primitives`, `@Roles`, `@Theme`, `@Component`, `@Style`, `@Bridge`. |
 | `ThemeLint` | build plugin | Marca valores hardcodeados en targets de UI. |
 | `theme` | ejecutable | CLI: `init`, `export`, `import`, `report`. |
@@ -165,25 +165,32 @@ queda para 0.2.
 
 ## 7. Consumo: inyección automática
 
-La vista nunca declara el entorno. Una referencia `.theme.<categoría>.<rol>` se
+La vista nunca declara el entorno. Una referencia `theme.<categoría>.<rol>` se
 resuelve contra el tema del subárbol al dibujar:
 
 ```swift
 Text(fighter.name)
-    .font(.theme.type.titleMedium)
-    .foregroundStyle(.theme.color.onSurface)
-    .padding(.theme.space.lg)
-    .background(.theme.color.surfaceElevated, cornerRadius: .theme.shape.medium)
+    .font(theme.type.titleMedium)
+    .foregroundStyle(theme.color.onSurface)
+    .padding(theme.space.lg)
+    .background(theme.color.surfaceElevated, cornerRadius: theme.shape.medium)
 ```
 
-Por qué referencias y no key paths (`\.color.onSurface`), que fue la primera idea:
-el autocompletado. Medido con `sourcekit-lsp` sobre el Showcase, el key path
-autocompleta en `foregroundStyle` pero da cero resultados en `font`, porque ahí
-compite con la sobrecarga nativa que recibe `Font?`; Xcode muestra basura. La
-cadena `.theme…` es un `ThemeRef<Value>` con `@dynamicMemberLookup`: cada paso
-tiene tipo concreto y la lista es exactamente los roles, en las siete posiciones
-probadas (`font`, `foregroundStyle`, `padding`, `tint`, `fill`, `background` con
-radio, y la raíz). Es la promesa de Android Studio con `@color/…`, cumplida.
+Por qué un valor global `theme` y no key paths ni miembros implícitos. Las tres
+formas se midieron con `sourcekit-lsp` sobre el Showcase, en la posición real de
+una vista (dentro de un `VStack` con una docena de modificadores):
+
+- `\.type.title` (key path): autocompleta en `foregroundStyle` y da cero en
+  `font`, donde compite con la sobrecarga nativa que recibe `Font?`.
+- `.theme.type.title` (miembro implícito): autocompleta en un archivo mínimo y da
+  cero dentro del `ViewBuilder` real; Xcode agota el presupuesto del solver y
+  muestra miembros de `String`.
+- `theme.type.title` (valor global): lista exactamente los roles en todas las
+  posiciones, porque `theme.` se resuelve solo, sin mirar la llamada que lo rodea.
+
+De paso, el modificador para aplicar un tema pasó de `.theme(_:)` a
+`.livery(_:)`: dentro de una vista, `theme` resolvía al método antes que al
+global. Es además lo que decía la portada original.
 
 Mecanismo:
 
@@ -201,7 +208,7 @@ Cuando hace falta el valor en lógica, no en un modificador:
 
 ```swift
 @Environment(\.theme) var theme
-let spacing = theme.space.md          // o theme[.theme.space.md]
+let spacing = theme.space.md          // o theme[theme.space.md]
 let shade = theme.color[.accent]      // subscript por caso, para galerías y exportadores
 ```
 
@@ -209,9 +216,9 @@ Un estilo se aplica por subárbol, con el acceso corto que genera el plugin o co
 una instancia cuando el tema tiene parámetros:
 
 ```swift
-ContentView().theme(.light)
-PlayerView().theme(adding: .playerDense)
-BrandedView().theme(adding: Brand(accent: Shade(.purple)))
+ContentView().livery(.light)
+PlayerView().livery(adding: .playerDense)
+BrandedView().livery(adding: Brand(accent: Shade(.purple)))
 ```
 
 Varios estilos por app: cada uno es un `@Theme` distinto. Un conjunto de roles
@@ -337,10 +344,11 @@ usos legítimos de layout para una regla sintáctica.
 
 ## 11. Riesgos y decisiones abiertas
 
-- **R1. Key paths en modificadores.** Descartados dos veces: `KeyPath` no puede
-  ser `ShapeStyle` (requisito oculto con `Self`), y su autocompletado es
-  inconsistente según la sobrecarga nativa con la que compite. La API es
-  `ThemeRef` con `@dynamicMemberLookup` (sección 7).
+- **R1. Key paths y miembros implícitos en modificadores.** Descartados: el
+  `KeyPath` no puede ser `ShapeStyle`, y tanto `\.x` como `.theme.x` autocompletan
+  mal según el contexto. La API es el global `theme` sobre `ThemeRef` con
+  `@dynamicMemberLookup` (sección 7). Al medir autocompletado, borrar antes
+  `.build/index-build`: un índice rancio da resultados de una API que ya no existe.
 - **R2. Seguridad de tipos entre subárboles.** Con una sola raíz `Theme`, un
   key path a un conjunto de roles que el tema activo no resuelve no puede fallar
   en compilación. Se acepta fallo en debug y reserva en release. Alternativa
@@ -362,7 +370,7 @@ usos legítimos de layout para una regla sintáctica.
 
 | Fase | Entrega | Criterio de hecho |
 |---|---|---|
-| 0.1 Núcleo | `@Primitives`, `@Roles`, `@Theme`, `Shade`, plugin `LiveryRegistry`, `.theme(_:)`, `.theme(adding:)`, `ThemeRef`, sobrecargas para fuente, padding, radio, tint, `theme init`. **Hecho.** | Sajaru Corner tiene su DS declarado y una pantalla migrada a key paths. |
+| 0.1 Núcleo | `@Primitives`, `@Roles`, `@Theme`, `Shade`, plugin `LiveryRegistry`, `.livery(_:)`, `.livery(adding:)`, `ThemeRef`, sobrecargas para fuente, padding, radio, tint, `theme init`. **Hecho.** | Sajaru Corner tiene su DS declarado y una pantalla migrada a key paths. |
 | 0.2 Cambio | `@Bridge` con reenvíos deprecados y reporte de usos pendientes, lint en el plugin. **Hecho.** | Migrar un conjunto de roles V1→V2 en Sajaru sin tocar vistas, y bajar warnings a cero. |
 | 0.3 Componentes | `@Component`, `@Style`, catálogo base (Button, Card, TextField). | Botón de Sajaru declarado como contrato con estilo exhaustivo. |
 | 0.4 Diseño | `theme export` / `theme import` W3C, catálogo visual generado. | Tokens de Sajaru abren en Penpot. |

@@ -67,15 +67,15 @@ struct ShowcaseView: View {
             ScrollView {
                 GalleryView()
             }
-            .background(.theme.color.surface)
+            .background(theme.color.surface)
             .environment(\.colorScheme, scheme)
         }
-        .theme(choice.theme)
-        .theme(adding: dense ? .dense : Theme())
+        .livery(choice.theme)
+        .livery(adding: dense ? .dense : Theme())
     }
 
     private var controls: some View {
-        ThemeValue(.theme.space.md) { gap in
+        ThemeValue(theme.space.md) { gap in
             HStack(spacing: gap) {
                 Picker("Tema", selection: $choice) {
                     ForEach(ThemeChoice.allCases) { Text($0.rawValue).tag($0) }
@@ -90,14 +90,14 @@ struct ShowcaseView: View {
                 Spacer()
             }
         }
-        .padding(.theme.space.md)
+        .padding(theme.space.md)
     }
 }
 
 /// La galería: una tarjeta real y las secciones de roles.
 struct GalleryView: View {
     var body: some View {
-        ThemeValue(.theme.space.xl) { gap in
+        ThemeValue(theme.space.xl) { gap in
             VStack(alignment: .leading, spacing: gap) {
                 SampleCard()
                 ColorsSection()
@@ -107,7 +107,7 @@ struct GalleryView: View {
                 LegacyCard()
             }
         }
-        .padding(.theme.space.xl)
+        .padding(theme.space.xl)
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
@@ -120,8 +120,8 @@ enum Snapshot {
             for scheme in [ColorScheme.light, .dark] {
                 let view = GalleryView()
                     .frame(width: 900)
-                    .background(.theme.color.surface)
-                    .theme(choice.theme)
+                    .background(theme.color.surface)
+                    .livery(choice.theme)
                     .environment(\.colorScheme, scheme)
                 let renderer = ImageRenderer(content: view)
                 renderer.scale = 2

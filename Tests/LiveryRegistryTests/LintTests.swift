@@ -12,7 +12,7 @@ import Testing
             let b = Color("brand")
             let c = Color(hex: 0xFF0000)
             let d = Color.red
-            let v = Text("x").foregroundStyle(.blue).background(.theme.color.surface)
+            let v = Text("x").foregroundStyle(.blue).background(theme.color.surface)
             """)
         #expect(findings.count == 5)
         #expect(findings[0].hasPrefix("1:9 Color construido en la vista."))
@@ -27,7 +27,7 @@ import Testing
             let a = Text("x").font(.system(size: 14))
             let b = Text("x").font(.title)
             let c = Font.system(size: 12, weight: .bold)
-            let ok = Text("x").font(.theme.type.title)
+            let ok = Text("x").font(theme.type.title)
             """)
         #expect(findings.count == 3)
         #expect(findings[0].hasPrefix("1:24 Fuente con tamaño fijo."))
@@ -37,11 +37,11 @@ import Testing
 
     @Test func flagsLooseLengthsButNotZero() {
         let findings = lint("""
-            let a = Text("x").padding(12).padding(.horizontal, 8).padding(0).padding(.theme.space.md)
+            let a = Text("x").padding(12).padding(.horizontal, 8).padding(0).padding(theme.space.md)
             let b = VStack(spacing: 16) { Text("x") }
             let c = HStack(spacing: 0) { Text("x") }
             let d = RoundedRectangle(cornerRadius: 6)
-            let e = Text("x").background(.theme.color.surface, cornerRadius: .theme.shape.small)
+            let e = Text("x").background(theme.color.surface, cornerRadius: theme.shape.small)
             """)
         #expect(findings.count == 4)
         #expect(findings[0].hasPrefix("1:27 Medida suelta en `padding`."))

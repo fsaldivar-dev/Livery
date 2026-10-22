@@ -40,8 +40,8 @@ public macro Roles() = #externalMacro(module: "LiveryMacros", type: "RolesMacro"
 /// }
 /// ```
 ///
-/// Genera la conformance a ``ThemeProvider`` para poder aplicarlo con `.theme(Light())`.
-/// El acceso corto `.theme(.light)` lo genera el plugin de build `LiveryRegistry` para todo
+/// Genera la conformance a ``ThemeProvider`` para poder aplicarlo con `.livery(Light())`.
+/// El acceso corto `.livery(.light)` lo genera el plugin de build `LiveryRegistry` para todo
 /// tema que se pueda construir sin argumentos.
 /// Las conformances a `Resolver` deben estar en la declaración, no en una extensión.
 @attached(extension, conformances: ThemeProvider, names: named(resolvedTheme))
@@ -82,7 +82,7 @@ public macro Primitives() = #externalMacro(module: "LiveryMacros", type: "Primit
 /// - El puente debe cubrir todos los roles de `ColorsV1` que no existan ya en `Colors`; si falta
 ///   uno, el build falla señalando el puente.
 /// - `Colors.Values` gana un reenvío deprecado por cada rol viejo. Las vistas que leen
-///   `.theme.color.primary` siguen compilando, reciben `brand`, y muestran un warning con fix-it.
+///   `theme.color.primary` siguen compilando, reciben `brand`, y muestran un warning con fix-it.
 /// - `ColorsV1` deja de exponerse como `theme.color`; ese lugar lo ocupa `Colors`.
 /// - El plugin avisa en la línea del puente cuántos usos quedan por migrar. En cero, borra
 ///   `ColorsV1` y el puente.

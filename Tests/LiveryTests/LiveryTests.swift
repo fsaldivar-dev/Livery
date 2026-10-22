@@ -25,7 +25,7 @@ import Testing
     let lg: CGFloat = 12
 }
 
-/// Un tema con parámetros: sin acceso estático, se aplica con `.theme(Brand(accent:))`.
+/// Un tema con parámetros: sin acceso estático, se aplica con `.livery(Brand(accent:))`.
 @Theme struct Brand: Colors.Resolver {
     let surface = Shade(.white)
     let onSurface = Shade(.black)
@@ -70,15 +70,15 @@ import Testing
     }
 
     @Test func refsResolveAgainstTheme() {
-        let accent: ThemeRef<Shade> = .theme.color.accent
+        let accent: ThemeRef<Shade> = theme.color.accent
         #expect(Theme.light[accent] == Shade(.green))
-        #expect(Theme.light[.theme.space.lg] == 24)
+        #expect(Theme.light[theme.space.lg] == 24)
     }
 
     @Test func refResolvesByColorSchemeAndContrast() {
         var environment = EnvironmentValues()
         environment.theme = .light
-        let style: ThemeRef<Shade> = .theme.color.surface
+        let style: ThemeRef<Shade> = theme.color.surface
 
         environment.colorScheme = .light
         #expect(style.resolve(in: environment) == .white)
@@ -120,24 +120,24 @@ import Testing
     /// Solo comprueba que las sobrecargas compilan con la forma prometida.
     @Test @MainActor func modifiersAcceptKeyPaths() {
         let view = Text("hola")
-            .font(.theme.type.title)
-            .foregroundStyle(.theme.color.onSurface)
-            .padding(.theme.space.lg)
-            .padding(.horizontal, .theme.space.sm)
-            .background(.theme.color.surface)
-            .background(.theme.color.surface, cornerRadius: .theme.shape.medium)
-            .background(.theme.color.surface, in: Capsule())
-            .tint(.theme.color.accent)
-            .clipShape(cornerRadius: .theme.shape.small)
-            .border(.theme.color.accent)
-            .theme(.light)
-            .theme(adding: .dense)
-            .theme(Brand(accent: Shade(.red)))
+            .font(theme.type.title)
+            .foregroundStyle(theme.color.onSurface)
+            .padding(theme.space.lg)
+            .padding(.horizontal, theme.space.sm)
+            .background(theme.color.surface)
+            .background(theme.color.surface, cornerRadius: theme.shape.medium)
+            .background(theme.color.surface, in: Capsule())
+            .tint(theme.color.accent)
+            .clipShape(cornerRadius: theme.shape.small)
+            .border(theme.color.accent)
+            .livery(.light)
+            .livery(adding: .dense)
+            .livery(Brand(accent: Shade(.red)))
             .foregroundStyle(Theme.light.color.accent)
-            .theme(adding: Dense())
-        _ = Circle().fill(.theme.color.accent)
-        _ = Circle().stroke(.theme.color.accent, lineWidth: 2)
-        _ = ThemeValue(.theme.space.md) { VStack(spacing: $0) { Text("a") } }
+            .livery(adding: Dense())
+        _ = Circle().fill(theme.color.accent)
+        _ = Circle().stroke(theme.color.accent, lineWidth: 2)
+        _ = ThemeValue(theme.space.md) { VStack(spacing: $0) { Text("a") } }
         #expect(type(of: view) != Never.self)
     }
 }

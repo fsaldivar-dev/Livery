@@ -16,20 +16,20 @@ struct LegacyCard: View {
         VStack(alignment: .leading, spacing: 0) {
             SectionTitle(text: "Migración · vista sin migrar (ColorsV1)")
             HStack(spacing: 0) {
-                Text("Leída con `.theme.color.primary`")
-                    .font(.theme.type.body)
-                    .foregroundStyle(.theme.color.primary)
+                Text("Leída con `theme.color.primary`")
+                    .font(theme.type.body)
+                    .foregroundStyle(theme.color.primary)
                 Rectangle()
-                    .fill(.theme.color.divider)
+                    .fill(theme.color.divider)
                     .frame(width: 1, height: 20)
-                    .padding(.horizontal, .theme.space.md)
-                Text("y `.theme.color.cardBackground`")
-                    .font(.theme.type.body)
-                    .foregroundStyle(.theme.color.onSurface)
-                    .padding(.theme.space.sm)
-                    .background(.theme.color.cardBackground, cornerRadius: .theme.shape.small)
+                    .padding(.horizontal, theme.space.md)
+                Text("y `theme.color.cardBackground`")
+                    .font(theme.type.body)
+                    .foregroundStyle(theme.color.onSurface)
+                    .padding(theme.space.sm)
+                    .background(theme.color.cardBackground, cornerRadius: theme.shape.small)
             }
-            .padding(.top, .theme.space.sm)
+            .padding(.top, theme.space.sm)
         }
     }
 }

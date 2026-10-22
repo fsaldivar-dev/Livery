@@ -17,7 +17,7 @@ import SwiftUI
 ///
 /// Las variantes de contraste aumentado son opcionales y caen en la base si no se dan. El
 /// `Shade` se resuelve a `Color` al dibujar, leyendo `colorScheme` y `colorSchemeContrast` del
-/// entorno, por lo que las vistas siguen escribiendo `.theme.color.surface` sin saber de modos.
+/// entorno, por lo que las vistas siguen escribiendo `theme.color.surface` sin saber de modos.
 public struct Shade: Hashable, Sendable {
     public var light: Color
     public var dark: Color

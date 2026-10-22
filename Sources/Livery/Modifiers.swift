@@ -58,7 +58,7 @@ extension View {
 /// Es la forma general de usar un rol que ningún modificador cubre todavía:
 ///
 /// ```swift
-/// ThemeValue(.theme.space.md) { spacing in
+/// ThemeValue(theme.space.md) { spacing in
 ///     VStack(spacing: spacing) { … }
 /// }
 /// ```

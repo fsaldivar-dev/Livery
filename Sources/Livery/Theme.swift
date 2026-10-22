@@ -9,7 +9,7 @@ import OSLog
 
 /// El tema activo en un subárbol de vistas: la resolución de cada conjunto de roles.
 ///
-/// `Theme` es la raíz de toda referencia (`.theme.color.onSurface`, `.theme.space.md`). Las
+/// `Theme` es la raíz de toda referencia (`theme.color.onSurface`, `theme.space.md`). Las
 /// propiedades por categoría (`color`, `type`, `space`, `shape`) las genera el plugin de build
 /// `LiveryRegistry` a partir de los enums `@Roles` del módulo. El kernel solo conoce las
 /// categorías; los nombres de cada rol los pone el proyecto.
@@ -34,7 +34,7 @@ public struct Theme: Sendable {
             return values
         }
         #if DEBUG
-        Theme.logger.fault("\(String(reflecting: set), privacy: .public) no está resuelto por el tema activo. Aplica `.theme(_:)` con un tema que lo resuelva en un ancestro de esta vista.")
+        Theme.logger.fault("\(String(reflecting: set), privacy: .public) no está resuelto por el tema activo. Aplica `.livery(_:)` con un tema que lo resuelva en un ancestro de esta vista.")
         #endif
         return R.unresolved
     }

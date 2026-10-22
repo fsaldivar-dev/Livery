@@ -89,13 +89,13 @@ public struct Scaffold {
                  import \(name)
                  import Livery
 
-                 ContentView().theme(.base)
+                 ContentView().livery(.base)
 
           3. Activa el plugin LiveryRegistry en los targets de UI para que el lint vigile
              colores, fuentes y medidas decididas fuera del sistema (Xcode: Build Phases ›
              Run Build Tool Plug-ins; SwiftPM: `plugins: [.plugin(name: "LiveryRegistry", package: "Livery")]`).
 
-        Las vistas hablan solo en roles: `.foregroundStyle(.theme.color.onSurface)`, `.padding(.theme.space.md)`.
+        Las vistas hablan solo en roles: `.foregroundStyle(theme.color.onSurface)`, `.padding(theme.space.md)`.
         Nunca importes \(primitivesModule) desde una vista: ahí viven los valores crudos.
         """
     }
@@ -246,7 +246,7 @@ public struct Scaffold {
         //
         //  Cómo se resuelve cada rol. Si un tema olvida uno, el compilador lo señala aquí.
         //  Un color es un `Shade`: claro y oscuro decididos siempre; contraste aumentado opcional.
-        //  Se aplica con `.theme(.base)`; el acceso corto lo genera el plugin.
+        //  Se aplica con `.livery(.base)`; el acceso corto lo genera el plugin.
         //
 
         import Livery
@@ -325,12 +325,12 @@ public struct Scaffold {
         import \(name)
         import Livery
 
-        ContentView().theme(.base)
+        ContentView().livery(.base)
 
         Text("Hola")
-            .font(.theme.type.body)
-            .foregroundStyle(.theme.color.onSurface)
-            .padding(.theme.space.md)
+            .font(theme.type.body)
+            .foregroundStyle(theme.color.onSurface)
+            .padding(theme.space.md)
         ```
 
         """

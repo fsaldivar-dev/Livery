@@ -25,7 +25,7 @@ swift run --package-path Livery theme init DesignSystem
 
 Produce `DesignSystem/` con `DesignSystemPrimitives` (la paleta, que solo el otro módulo
 importa) y `DesignSystem` (roles y temas), listo para enlazar en la app y aplicar con
-`.theme(.base)`. Con `--livery <ruta>` toma Livery de una copia local.
+`.livery(.base)`. Con `--livery <ruta>` toma Livery de una copia local.
 
 ## Cómo se ve
 
@@ -46,18 +46,18 @@ import Livery
 }
 
 // Las vistas hablan solo en roles. Sin `@Environment`, sin primitivos, sin strings.
-// Cada paso de `.theme…` autocompleta con los roles que existen.
+// `theme` es un valor global: cada paso autocompleta con los roles que existen.
 struct Card: View {
     var body: some View {
         Text("Hola")
-            .font(.theme.type.body)
-            .foregroundStyle(.theme.color.onSurface)
-            .padding(.theme.space.lg)
-            .background(.theme.color.surface, cornerRadius: .theme.shape.medium)
+            .font(theme.type.body)
+            .foregroundStyle(theme.color.onSurface)
+            .padding(theme.space.lg)
+            .background(theme.color.surface, cornerRadius: theme.shape.medium)
     }
 }
 
-ContentView().theme(.carbon)
+ContentView().livery(.carbon)
 ```
 
 Con `import Livery` basta: Livery reexporta SwiftUI. `theme.color` y `.carbon` los genera el
@@ -73,7 +73,7 @@ no puede escribir. Actívalo en el target que declara el sistema de diseño:
 )
 ```
 
-Un tema con parámetros no recibe acceso corto; se aplica con `.theme(Brand(accent: .red))`.
+Un tema con parámetros no recibe acceso corto; se aplica con `.livery(Brand(accent: .red))`.
 
 ## Verlo funcionar
 
@@ -115,13 +115,13 @@ enum ColorsV1toV2 {
 Con eso, el plugin:
 
 - **Verifica que el puente cubra todos los roles viejos** que no existan en el nuevo. Si falta uno, el build falla en la línea del puente.
-- **Genera reenvíos deprecados** en `Colors.Values`. Una vista que lee `.theme.color.primary` sigue compilando, recibe `brand`, y muestra un warning con fix-it. Se cambia el tema de la raíz el día uno y toda la app se ve con DS2.
+- **Genera reenvíos deprecados** en `Colors.Values`. Una vista que lee `theme.color.primary` sigue compilando, recibe `brand`, y muestra un warning con fix-it. Se cambia el tema de la raíz el día uno y toda la app se ve con DS2.
 - **Reporta el progreso** en la línea del puente: `Migración ColorsV1 → Colors: 23 usos pendientes en 9 archivos (primary: 12, divider: 11)`. Los warnings son la barra de progreso. En cero, se borra `ColorsV1` y el puente, y lo que quedara pasa de warning a error.
 
 ## Estado
 
 Fases 0.1 y 0.2: `@Roles`, `@Theme`, `@Primitives`, `@Bridge`, `Shade`, el plugin `LiveryRegistry`
-(registro, puentes, reporte y lint), la CLI `theme init`, `.theme(_:)`, `.theme(adding:)` y
+(registro, puentes, reporte y lint), la CLI `theme init`, `.livery(_:)`, `.livery(adding:)` y
 sobrecargas de modificadores para fuente, espaciado y radio.
 Swift 6.2, iOS 17 / macOS 14.
 

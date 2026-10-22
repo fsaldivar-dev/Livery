@@ -62,7 +62,7 @@ final class LintVisitor: SyntaxVisitor {
             let label = first?.label?.text
             let isLiteral = first?.expression.is(StringLiteralExprSyntax.self) == true
             if label == "red" || label == "hue" || label == "white" || label == "hex" || isLiteral || first?.expression.as(MemberAccessExprSyntax.self)?.declName.baseName.text == "sRGB" {
-                report(node, "Color construido en la vista. Declara un rol y usa `.theme.color.<rol>`; los valores crudos viven en la paleta.")
+                report(node, "Color construido en la vista. Declara un rol y usa `theme.color.<rol>`; los valores crudos viven en la paleta.")
             }
         }
         if let access = node.calledExpression.as(MemberAccessExprSyntax.self) {
@@ -70,37 +70,37 @@ final class LintVisitor: SyntaxVisitor {
             if Self.styleModifiers.contains(name), let argument = node.arguments.first?.expression {
                 if let member = argument.as(MemberAccessExprSyntax.self), member.base == nil,
                    Self.systemColors.contains(member.declName.baseName.text) {
-                    report(argument, "Color del sistema `.\(member.declName.baseName.text)` en la vista. Usa `.theme.color.<rol>`.")
+                    report(argument, "Color del sistema `.\(member.declName.baseName.text)` en la vista. Usa `theme.color.<rol>`.")
                 }
             }
             if name == "font", let argument = node.arguments.first?.expression {
                 if let member = argument.as(MemberAccessExprSyntax.self), member.base == nil, Self.textStyles.contains(member.declName.baseName.text) {
-                    report(argument, "Estilo de texto `.\(member.declName.baseName.text)` fuera del tema. Usa `.theme.type.<rol>`.")
+                    report(argument, "Estilo de texto `.\(member.declName.baseName.text)` fuera del tema. Usa `theme.type.<rol>`.")
                 }
                 if let call = argument.as(FunctionCallExprSyntax.self),
                    let callee = call.calledExpression.as(MemberAccessExprSyntax.self), callee.declName.baseName.text == "system",
                    call.arguments.contains(where: { $0.label?.text == "size" }) {
-                    report(argument, "Fuente con tamaño fijo. Usa `.theme.type.<rol>`, que escala con Dynamic Type.")
+                    report(argument, "Fuente con tamaño fijo. Usa `theme.type.<rol>`, que escala con Dynamic Type.")
                 }
             }
             if name == "system", access.base?.as(DeclReferenceExprSyntax.self)?.baseName.text == "Font",
                node.arguments.contains(where: { $0.label?.text == "size" }) {
-                report(node, "Fuente con tamaño fijo. Usa `.theme.type.<rol>`, que escala con Dynamic Type.")
+                report(node, "Fuente con tamaño fijo. Usa `theme.type.<rol>`, que escala con Dynamic Type.")
             }
             if Self.lengthModifiers.contains(name) {
                 for argument in node.arguments where isNonZeroNumber(argument.expression) {
-                    report(argument.expression, "Medida suelta en `\(name)`. Usa `.theme.space.<rol>`.")
+                    report(argument.expression, "Medida suelta en `\(name)`. Usa `theme.space.<rol>`.")
                 }
             }
         }
         if let member = node.calledExpression.as(MemberAccessExprSyntax.self),
            member.base?.as(DeclReferenceExprSyntax.self)?.baseName.text == "Color",
            Self.systemColors.contains(member.declName.baseName.text) {
-            report(node, "Color del sistema `Color.\(member.declName.baseName.text)` en la vista. Usa `.theme.color.<rol>`.")
+            report(node, "Color del sistema `Color.\(member.declName.baseName.text)` en la vista. Usa `theme.color.<rol>`.")
         }
         for argument in node.arguments {
             if let label = argument.label?.text, Self.lengthLabels.contains(label), isNonZeroNumber(argument.expression) {
-                let hint = label == "cornerRadius" ? "`.theme.shape.<rol>`" : "`.theme.space.<rol>`"
+                let hint = label == "cornerRadius" ? "`theme.shape.<rol>`" : "`theme.space.<rol>`"
                 report(argument.expression, "Medida suelta en `\(label):`. Usa \(hint).")
             }
         }
@@ -112,7 +112,7 @@ final class LintVisitor: SyntaxVisitor {
         if node.base?.as(DeclReferenceExprSyntax.self)?.baseName.text == "Color",
            Self.systemColors.contains(node.declName.baseName.text),
            node.parent?.as(FunctionCallExprSyntax.self) == nil {
-            report(node, "Color del sistema `Color.\(node.declName.baseName.text)` en la vista. Usa `.theme.color.<rol>`.")
+            report(node, "Color del sistema `Color.\(node.declName.baseName.text)` en la vista. Usa `theme.color.<rol>`.")
         }
         return .visitChildren
     }

@@ -12,7 +12,7 @@
 //      }
 //
 //  Y por cada `@Bridge(from: ColorsV1.self, to: Colors.self)`, los reenvíos deprecados que hacen
-//  que una vista que lee `.theme.color.primary` siga compilando y reciba `brand`:
+//  que una vista que lee `theme.color.primary` siga compilando y reciba `brand`:
 //
 //      extension Colors.Values {
 //          @available(*, deprecated, renamed: "brand")
@@ -94,7 +94,7 @@ public struct RegistryGenerator {
 
         for theme in themes {
             guard theme.isConstructible else {
-                members.append("    // `\(theme.qualifiedName)` necesita argumentos: aplícalo con `.theme(\(theme.qualifiedName)(…))`.")
+                members.append("    // `\(theme.qualifiedName)` necesita argumentos: aplícalo con `.livery(\(theme.qualifiedName)(…))`.")
                 continue
             }
             members.append("    \(theme.access)static var \(theme.accessorName): Livery.Theme { \(theme.qualifiedName)().resolvedTheme }")
