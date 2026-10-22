@@ -14,19 +14,16 @@ import SwiftUI
 @Theme public struct Daylight: Colors.Resolver, Typography.Resolver, Spacing.Resolver, Shapes.Resolver, Motions.Resolver, Button.Styler {
     public init() {}
 
-    /// El botón, en roles: sirve igual para Carbon, que solo cambia los colores.
+    /// El botón, siguiendo la HIG: un tinte (`accent`) y las medidas por tamaño. Los tres estilos
+    /// de Apple —prominente, con borde, plano— pintan ese mismo tinte de distinta forma, y el rol
+    /// destructivo lo cambia a rojo. Carbon hereda esto y solo cambia los colores.
     public var button: Button.Style {
         Button.Style(
-            primary:     Button.Look(background: .accent,  foreground: .onAccent, icon: .onAccent),
-            secondary:   Button.Look(background: .surface, foreground: .onSurface, icon: .accent),
-            destructive: Button.Look(background: .surface, foreground: .danger,    icon: .danger),
-
-            small:  Button.Metrics(font: .caption,  vertical: .xs, horizontal: .md, radius: .small),
-            medium: Button.Metrics(font: .headline, vertical: .sm, horizontal: .lg, radius: .medium),
-            large:  Button.Metrics(font: .headline, vertical: .md, horizontal: .xl, radius: .medium),
-
-            pressed:  Button.Effect(opacity: 0.85, scale: 0.97, motion: .quick),
-            disabled: Button.Effect(opacity: 0.4)
+            tint: .accent,
+            onTint: .onAccent,
+            small:  Button.Metrics(font: .caption,  vertical: .xs, horizontal: .md),
+            medium: Button.Metrics(font: .headline, vertical: .sm, horizontal: .lg),
+            large:  Button.Metrics(font: .headline, vertical: .md, horizontal: .xl)
         )
     }
 

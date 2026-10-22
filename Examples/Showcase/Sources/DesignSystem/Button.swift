@@ -2,53 +2,46 @@
 //  Button.swift
 //  DesignSystem
 //
-//  El contrato del botón. Escrito a mano como prototipo de lo que generará `@Component`.
+//  El botón, siguiendo las Human Interface Guidelines de Apple. Escrito a mano como prototipo de
+//  lo que generará `@Component`.
 //
-//  Un botón se describe con tres preguntas, cada una con su struct:
-//    · ¿De qué color es?   → un `Look` por variante (primary, secondary, destructive)
-//    · ¿Cuánto mide?       → un `Metrics` por tamaño (small, medium, large)
-//    · ¿Qué le pasa?       → un `Effect` por estado (pressed, disabled…)
-//  Todo en roles del sistema, nunca en valores: así el mismo estilo sirve para cualquier tema.
+//  Apple no tiene "primario/secundario". Tiene un TINTE (el color de la acción) y tres ESTILOS
+//  que deciden cómo se pinta ese tinte, igual que `.buttonStyle(...)` en SwiftUI:
+//    · prominent → relleno sólido del tinte      (como `.borderedProminent`: la acción principal)
+//    · bordered  → relleno suave del tinte        (como `.bordered`: la acción estándar)
+//    · plain     → solo texto, sin relleno        (como `.plain`: una acción terciaria)
+//  Lo destructivo no es un estilo, es un ROL: `Button(role: .destructive)` cambia el tinte a rojo.
 //
 
 import Livery
 
 public enum Button {
-    public enum Variant: ComponentVariant { case primary, secondary, destructive }
+    /// Los estilos de Apple. El tinte es el mismo; cambia cómo se pinta.
+    public enum Variant: ComponentVariant { case prominent, bordered, plain }
 
+    /// Sigue a `.controlSize` de SwiftUI. HIG pide 44 pt de área táctil, se vea pequeño o no.
     public enum Size: ComponentSize {
         case small, medium, large
-        /// Un botón pequeño se ve pequeño, pero su área táctil sigue siendo accesible.
-        public var minimumHitTarget: CGFloat { self == .large ? 52 : 44 }
+        public var minimumHitTarget: CGFloat { 44 }
     }
 
-    /// De qué color es una variante.
-    public struct Look: Sendable {
-        public var background: Colors
-        public var foreground: Colors
-        public var border: Colors?
-        public var icon: Colors?
-
-        public init(background: Colors, foreground: Colors, border: Colors? = nil, icon: Colors? = nil) {
-            self.background = background
-            self.foreground = foreground
-            self.border = border
-            self.icon = icon
-        }
+    /// Cómo se pinta el tinte en un estilo.
+    public enum Treatment: Sendable {
+        case solid   // relleno del tinte, texto `onTint`
+        case soft    // relleno del tinte al 15 %, texto del tinte
+        case text    // sin relleno, texto del tinte
     }
 
-    /// Cuánto mide un tamaño.
+    /// Cuánto mide un tamaño. La forma es siempre cápsula, como en iOS.
     public struct Metrics: Sendable {
         public var font: Typography
         public var vertical: Spacing
         public var horizontal: Spacing
-        public var radius: Shapes
 
-        public init(font: Typography, vertical: Spacing, horizontal: Spacing, radius: Shapes) {
+        public init(font: Typography, vertical: Spacing, horizontal: Spacing) {
             self.font = font
             self.vertical = vertical
             self.horizontal = horizontal
-            self.radius = radius
         }
     }
 
@@ -65,12 +58,16 @@ public enum Button {
         }
     }
 
-    /// El estilo completo: un `Look` por variante, un `Metrics` por tamaño, un `Effect` por estado.
-    /// Si falta una variante o un tamaño, no compila. Los estados tienen valor por defecto.
+    /// El estilo del botón del tema: un tinte, cómo lo pinta cada estilo de Apple, y las medidas.
     public struct Style: Sendable {
-        public var primary: Look
-        public var secondary: Look
-        public var destructive: Look
+        /// El color de la acción, como el `.tint()` de SwiftUI. El rol `.destructive` usa `danger`.
+        public var tint: Colors
+        /// El texto sobre el relleno sólido (estilo prominente).
+        public var onTint: Colors
+
+        public var prominent: Treatment
+        public var bordered: Treatment
+        public var plain: Treatment
 
         public var small: Metrics
         public var medium: Metrics
@@ -78,31 +75,25 @@ public enum Button {
 
         public var pressed: Effect
         public var disabled: Effect
-        public var focused: Effect
-        public var selected: Effect
 
         public init(
-            primary: Look,
-            secondary: Look,
-            destructive: Look,
-            small: Metrics,
-            medium: Metrics,
-            large: Metrics,
+            tint: Colors, onTint: Colors,
+            small: Metrics, medium: Metrics, large: Metrics,
+            prominent: Treatment = .solid, bordered: Treatment = .soft, plain: Treatment = .text,
             pressed: Effect = Effect(opacity: 0.85, scale: 0.97),
-            disabled: Effect = Effect(opacity: 0.4),
-            focused: Effect = Effect(),
-            selected: Effect = Effect()
+            disabled: Effect = Effect(opacity: 0.4)
         ) {
-            self.primary = primary; self.secondary = secondary; self.destructive = destructive
+            self.tint = tint; self.onTint = onTint
             self.small = small; self.medium = medium; self.large = large
-            self.pressed = pressed; self.disabled = disabled; self.focused = focused; self.selected = selected
+            self.prominent = prominent; self.bordered = bordered; self.plain = plain
+            self.pressed = pressed; self.disabled = disabled
         }
 
-        public func look(for variant: Variant) -> Look {
+        public func treatment(for variant: Variant) -> Treatment {
             switch variant {
-            case .primary: primary
-            case .secondary: secondary
-            case .destructive: destructive
+            case .prominent: prominent
+            case .bordered: bordered
+            case .plain: plain
             }
         }
 
@@ -116,11 +107,9 @@ public enum Button {
 
         public func effect(for state: ComponentState) -> Effect {
             switch state {
-            case .normal: Effect()
             case .pressed: pressed
             case .disabled: disabled
-            case .focused: focused
-            case .selected: selected
+            default: Effect()
             }
         }
     }
@@ -128,14 +117,12 @@ public enum Button {
     /// Lo que un tema promete para el botón. `@Theme` lo registra.
     public protocol Styler { var button: Style { get } }
 
-    /// Reserva, deliberadamente llamativa, para un tema que no registra estilo de botón.
+    /// Reserva, deliberadamente fea, para un tema que no registra estilo de botón.
     public static let unstyled = Style(
-        primary: Look(background: .danger, foreground: .onAccent),
-        secondary: Look(background: .danger, foreground: .onAccent),
-        destructive: Look(background: .danger, foreground: .onAccent),
-        small: Metrics(font: .caption, vertical: .xs, horizontal: .sm, radius: .large),
-        medium: Metrics(font: .headline, vertical: .sm, horizontal: .md, radius: .large),
-        large: Metrics(font: .headline, vertical: .md, horizontal: .lg, radius: .medium)
+        tint: .danger, onTint: .onAccent,
+        small: Metrics(font: .caption, vertical: .xs, horizontal: .md),
+        medium: Metrics(font: .headline, vertical: .sm, horizontal: .lg),
+        large: Metrics(font: .headline, vertical: .md, horizontal: .xl)
     )
 }
 

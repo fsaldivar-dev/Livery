@@ -112,17 +112,22 @@ swift run --package-path Examples/Showcase
 
 ## Componentes
 
-Un componente es un contrato, y su estilo una tabla en roles que vive en el tema. El botón de
-Showcase es un `ButtonStyle` de SwiftUI de verdad: hereda teclado, VoiceOver y `Button(role:)`,
-toma el tamaño de `.controlSize` y garantiza 44 puntos de área táctil.
+Un componente es un contrato, y su estilo una tabla en roles que vive en el tema. El botón del
+ejemplo sigue las Human Interface Guidelines de Apple: un tinte y los tres estilos del sistema,
+con lo destructivo como rol.
 
 ```swift
-Button("Analizar") { … }.buttonStyle(.primary)
-Button("Borrar", role: .destructive) { … }.buttonStyle(.secondary)   // el rol gana
+Button("Analizar") { … }.buttonStyle(.themed(.prominent))               // como .borderedProminent
+Button("Guardar")  { … }.buttonStyle(.themed(.bordered))                // como .bordered
+Button("Detalles") { … }.buttonStyle(.themed(.plain))                   // como .plain
+Button("Borrar", role: .destructive) { … }.buttonStyle(.themed(.bordered))   // el rol lo pinta de rojo
 ```
 
-Cambiar de tema cambia los botones sin tocar el estilo, porque el estilo dice `accent`, no un
-color. Fase 0.3, en prototipo: el macro `@Component` que genera el contrato viene después.
+Es un `ButtonStyle` de SwiftUI de verdad: hereda teclado, VoiceOver y `Button(role:)`, toma el
+tamaño de `.controlSize`, es una cápsula como en iOS, y garantiza 44 pt de área táctil. Cambiar
+de tema cambia el tinte sin tocar el estilo. El kernel deja modelar cualquier componente; el
+ejemplo enseña las convenciones de Apple. Fase 0.3, en prototipo: el macro `@Component` viene
+después.
 
 ## Migrar de un sistema a otro
 

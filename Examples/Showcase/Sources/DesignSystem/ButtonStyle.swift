@@ -2,12 +2,17 @@
 //  ButtonStyle.swift
 //  DesignSystem
 //
-//  El adaptador a SwiftUI. Es un `ButtonStyle` de verdad, así el botón hereda teclado, VoiceOver,
-//  `Button(role:)` y el estado presionado. Se usa como cualquier estilo de SwiftUI:
+//  El adaptador a SwiftUI. Es un `ButtonStyle` de verdad, con los nombres de Apple, así el botón
+//  hereda teclado, VoiceOver y `Button(role:)`, y se usa como cualquier estilo del sistema:
 //
-//      Button("Analizar") { … }.buttonStyle(.primary)
-//      Button("Borrar", role: .destructive) { … }.buttonStyle(.secondary)   // el rol gana
-//      HStack { … }.controlSize(.large)                                       // el tamaño es el de SwiftUI
+//      Button("Guardar") { … }.buttonStyle(.themed(.prominent))         // acción principal
+//      Button("Cancelar") { … }.buttonStyle(.themed(.bordered))         // acción estándar
+//      Button("Más") { … }.buttonStyle(.themed(.plain))                 // acción terciaria
+//      Button("Borrar", role: .destructive) { … }.buttonStyle(.themed(.prominent))  // el rol lo pinta de rojo
+//      HStack { … }.controlSize(.large)                                 // el tamaño es el de SwiftUI
+//
+//  Se llama `.themed(_:)` y no `.bordered`/`.plain` a secas porque esos nombres ya son estilos de
+//  botón de SwiftUI; la variante sí usa el vocabulario de Apple.
 //
 
 import Livery
@@ -21,45 +26,47 @@ public struct ThemedButtonStyle: ButtonStyle {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     public func makeBody(configuration: Configuration) -> some View {
-        // 1. Qué botón es: la variante pedida, salvo que SwiftUI diga que es destructivo.
-        let variant = configuration.role == .destructive ? .destructive : self.variant
-        let size = Button.Size(controlSize)
+        let style = theme.button
+        let metrics = style.metrics(for: Button.Size(controlSize))
         let state = ComponentState(isEnabled: isEnabled, isPressed: configuration.isPressed)
+        let effect = style.effect(for: state)
+        let paint = paint(style, destructive: configuration.role == .destructive)
 
-        // 2. Qué dice el tema para ese botón.
-        let look = theme.button.look(for: variant)
-        let metrics = theme.button.metrics(for: size)
-        let effect = theme.button.effect(for: state)
-
-        // 3. Pintarlo con modificadores nativos. El fondo mide lo que el contenido pide; el área
-        //    táctil llega a los 44 pt con un marco transparente, sin agrandar el botón visible.
-        let radius = theme.shape[metrics.radius]
         configuration.label
-            .labelStyle(.iconTinted(look.icon.map { theme.color[$0] }))
+            .labelStyle(.iconTinted(paint.content))
             .lineLimit(1)
             .fixedSize(horizontal: true, vertical: false)
             .font(theme.type[metrics.font])
-            .foregroundStyle(theme.color[look.foreground])
+            .foregroundStyle(paint.content)
             .padding(.vertical, theme.space[metrics.vertical])
             .padding(.horizontal, theme.space[metrics.horizontal])
-            .background(theme.color[look.background], in: .rect(cornerRadius: radius, style: .continuous))
-            .overlay {
-                if let border = look.border {
-                    RoundedRectangle(cornerRadius: radius, style: .continuous).stroke(theme.color[border])
-                }
-            }
+            .background(paint.background ?? Shade(.clear), in: .capsule)
             .opacity(effect.opacity)
             .scaleEffect(effect.scale)
-            .frame(minHeight: size.minimumHitTarget)
-            .contentShape(.rect(cornerRadius: radius))
+            .frame(minHeight: Button.Size(controlSize).minimumHitTarget)   // HIG: área táctil de 44 pt
+            .contentShape(.capsule)
             .animation(theme.motion[effect.motion].resolve(reduceMotion: reduceMotion), value: state)
+    }
+
+    /// El relleno y el color de contenido según el estilo. El tinte lo da el tema; el rol
+    /// destructivo lo cambia a rojo. Cada estilo de Apple lo pinta distinto.
+    private func paint(_ style: Button.Style, destructive: Bool) -> (background: Shade?, content: Shade) {
+        let tint = destructive ? theme.color.danger : theme.color[style.tint]
+        let onTint = theme.color[style.onTint]
+        switch style.treatment(for: variant) {
+        case .solid: return (tint, onTint)
+        case .soft:  return (tint.opacity(0.15), tint)
+        case .text:  return (nil, tint)
+        }
     }
 }
 
 extension ButtonStyle where Self == ThemedButtonStyle {
-    public static var primary: ThemedButtonStyle { ThemedButtonStyle(variant: .primary) }
-    public static var secondary: ThemedButtonStyle { ThemedButtonStyle(variant: .secondary) }
-    public static var destructive: ThemedButtonStyle { ThemedButtonStyle(variant: .destructive) }
+    /// El botón del sistema de diseño, con el estilo de Apple que pidas:
+    /// `.prominent` (acción principal), `.bordered` (estándar) o `.plain` (terciaria).
+    public static func themed(_ variant: Button.Variant) -> ThemedButtonStyle {
+        ThemedButtonStyle(variant: variant)
+    }
 }
 
 extension Button.Size {
@@ -80,17 +87,17 @@ extension ComponentState {
     }
 }
 
-/// Tiñe el icono de un `Label` sin tocar el texto. Sin color, el icono sigue al texto.
+/// Tiñe el icono de un `Label` con el color del contenido. Para que el icono siga al texto.
 private struct IconTintedLabelStyle: LabelStyle {
-    let icon: Shade?
+    let icon: Shade
     func makeBody(configuration: Configuration) -> some View {
         HStack(spacing: 6) {
-            if let icon { configuration.icon.foregroundStyle(icon) } else { configuration.icon }
+            configuration.icon.foregroundStyle(icon)
             configuration.title
         }
     }
 }
 
 extension LabelStyle where Self == IconTintedLabelStyle {
-    static func iconTinted(_ icon: Shade?) -> IconTintedLabelStyle { IconTintedLabelStyle(icon: icon) }
+    static func iconTinted(_ icon: Shade) -> IconTintedLabelStyle { IconTintedLabelStyle(icon: icon) }
 }

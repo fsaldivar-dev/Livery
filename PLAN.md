@@ -252,50 +252,46 @@ componente (fase 3).
 
 ## 7c. Componentes (fase 0.3, prototipo del botón hecho)
 
-Un componente es un contrato, no una vista. Su estilo responde tres preguntas
-por separado, y esa separación es lo que lo hace legible para quien llega:
+Un componente es un contrato, no una vista: variantes y tamaños los declara el
+proyecto; los estados (normal, pressed, disabled, focused, selected) los fija el
+kernel. El estilo vive en el tema, habla en roles, y por eso sirve para
+cualquier tema.
 
-| Pregunta | Struct | Una por… | Ejemplo |
-|---|---|---|---|
-| ¿De qué color es? | `Look` | variante | `Look(background: .accent, foreground: .onAccent)` |
-| ¿Cuánto mide? | `Metrics` | tamaño | `Metrics(font: .headline, vertical: .sm, horizontal: .md, radius: .small)` |
-| ¿Qué le pasa, y con qué movimiento? | `Effect` | estado | `Effect(opacity: 0.85, scale: 0.97, motion: .quick)` |
+El ejemplo sigue la HIG de Apple, no una jerarquía inventada. El kernel deja
+modelar cualquier cosa; el Example enseña las convenciones de Apple. Apple no
+tiene "primario/secundario": tiene un TINTE (el color de la acción) y tres
+ESTILOS que lo pintan distinto, más el ROL destructivo:
 
-Variantes y tamaños los declara el proyecto; los estados (`normal`, `pressed`,
-`disabled`, `focused`, `selected`) los fija el kernel. `Style` tiene un campo por
-variante, por tamaño y por estado, con un init memberwise: si falta una variante
-o un tamaño no compila; los estados tienen valor por defecto. Todo habla en
-roles, así un estilo sirve para cualquier tema: Carbon vuelve el primario ámbar
-sin tocar el estilo.
+| Estilo | Cómo pinta el tinte | SwiftUI nativo |
+|---|---|---|
+| prominent | relleno sólido | .borderedProminent |
+| bordered | relleno suave (tinte al 15 %) | .bordered |
+| plain | solo texto | .plain |
 
-Se descartó un modelo anterior de "partes" (`container`, `label`, `icon`) con
-una cascada de sobreescrituras parciales: era más general y mucho más feo de
-escribir y de explicar. Las partes quedan como campos del `Look` (`border`,
-`icon`), que es donde un junior las espera.
+Lo destructivo es un rol, no un estilo: Button(role: .destructive) cambia el
+tinte a danger. La forma es cápsula, como iOS 26. El tamaño sigue a
+.controlSize; el área táctil es 44 pt aunque el botón se vea pequeño.
 
-Kernel (`Component.swift`): `ComponentVariant`, `ComponentSize` (con
-`minimumHitTarget`, 44 por defecto), `ComponentState`, y
-`Theme.register(style:for:)` / `Theme.style(for:)`. `@Theme` registra toda
-conformance `X.Styler`.
+El tema declara solo el tinte y las medidas; los tres estilos vienen por defecto.
+La vista usa el estilo con .themed(_:) (los nombres .bordered y .plain ya son de
+SwiftUI, así que la variante los lleva dentro):
 
-Prototipo en Showcase (`DesignSystem/Button.swift`, `ButtonStyle.swift`),
-escrito a mano con la forma que generará `@Component`:
+    Button("Analizar") { … }.buttonStyle(.themed(.prominent))
+    Button("Borrar", role: .destructive) { … }.buttonStyle(.themed(.bordered))
 
-- `Button.Variant`, `Button.Size`, `Button.Look`, `Button.Metrics`,
-  `Button.Effect`, `Button.Style` con `look(for:)`, `metrics(for:)`,
-  `effect(for:)`, `Button.Styler`, `Button.unstyled` y `theme.button`.
-- `ThemedButtonStyle: ButtonStyle`, el adaptador a SwiftUI en tres pasos
-  legibles: qué botón es, qué dice el tema, pintarlo. Hereda teclado, VoiceOver
-  y `Button(role:)`; estado desde `isEnabled` y `isPressed`; tamaño desde
-  `.controlSize`; `frame(minHeight: minimumHitTarget)` y `contentShape`;
-  `lineLimit(1)` y `fixedSize` horizontal. Se aplica con
-  `.buttonStyle(.primary)`, `.secondary`, `.destructive`.
-- La galería pinta la matriz variante × tamaño × normal/deshabilitado sola.
+Se descartaron dos modelos anteriores: una cascada de "partes" con diccionarios
+(fea de escribir), y variantes inventadas primary/secondary/destructive (no es
+el vocabulario de Apple).
 
-Pendiente para cerrar 0.3: `@Component` que genere `Style`, `Styler`,
-`unstyled`, los `look/metrics/effect(for:)` y `theme.<componente>` a partir de
-los enums y los structs `Look`/`Metrics`/`Effect` declarados; los estáticos de
-`ButtonStyle` por variante; `focused` y `selected` en el adaptador.
+Kernel (Component.swift): ComponentVariant, ComponentSize (con minimumHitTarget,
+44 por defecto), ComponentState, Theme.register(style:for:) / Theme.style(for:).
+@Theme registra toda conformance X.Styler. Prototipo en Showcase
+(DesignSystem/Button.swift, ButtonStyle.swift), a mano con la forma que generará
+@Component; ThemedButtonStyle es un ButtonStyle real.
+
+Pendiente para cerrar 0.3: @Component que genere Style, Styler, unstyled, los
+treatment/metrics/effect(for:) y theme.<componente>; focused y selected en el
+adaptador.
 
 ## 8. Cambio y migración
 

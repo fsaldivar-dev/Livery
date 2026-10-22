@@ -28,9 +28,9 @@ struct SampleCard: View {
                 .padding(.top, theme.space.md)
             HStack(spacing: theme.space.sm) {
                 Button { } label: { Label("Analizar", systemImage: "play.fill") }
-                    .buttonStyle(.primary)
+                    .buttonStyle(.themed(.prominent))
                 Button(role: .destructive) { } label: { Label("Descartar", systemImage: "trash") }
-                    .buttonStyle(.secondary)
+                    .buttonStyle(.themed(.bordered))
             }
             .padding(.top, theme.space.lg)
         }

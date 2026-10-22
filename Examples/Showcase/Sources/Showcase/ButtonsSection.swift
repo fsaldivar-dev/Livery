@@ -15,7 +15,7 @@ struct ButtonsSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            SectionTitle(text: "Botón · variante × tamaño · normal / deshabilitado")
+            SectionTitle(text: "Botón · estilos de Apple × tamaño")
             ForEach([ControlSize.small, .regular, .large], id: \.self) { size in
                 HStack(alignment: .top, spacing: theme.space.md) {
                     Text(String(describing: size))
@@ -36,9 +36,10 @@ struct ButtonsSection: View {
 
     private func row(disabled: Bool) -> some View {
         HStack(spacing: theme.space.sm) {
-            Button { } label: { Label("Analizar", systemImage: "play.fill") }.buttonStyle(.primary)
-            Button("Guardar") { }.buttonStyle(.secondary)
-            Button("Borrar", role: .destructive) { }.buttonStyle(.secondary)
+            Button { } label: { Label("Analizar", systemImage: "play.fill") }.buttonStyle(.themed(.prominent))
+            Button("Guardar") { }.buttonStyle(.themed(.bordered))
+            Button("Detalles") { }.buttonStyle(.themed(.plain))
+            Button("Borrar", role: .destructive) { }.buttonStyle(.themed(.bordered))
         }
         .disabled(disabled)
     }
