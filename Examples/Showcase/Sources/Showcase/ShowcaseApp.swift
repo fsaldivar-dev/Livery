@@ -5,6 +5,10 @@
 //  La app solo importa DesignSystem y Livery. `Palette` no está en su alcance: una vista que
 //  intente escribir `Palette.slate900` no compila.
 //
+//  El tema se aplica UNA vez, arriba, y cada vista hija lo lee con `@Environment(\.theme)`. Es el
+//  patrón correcto: una vista que leyera el tema para pintarse a sí misma, en el mismo nivel donde
+//  lo aplica, vería el tema de su padre (vacío), no el suyo.
+//
 //  `swift run --package-path Examples/Showcase -- --snapshot <carpeta>` escribe un PNG por tema
 //  y modo en vez de abrir la ventana. Sirve para revisar la galería sin levantar la app.
 //
@@ -56,48 +60,66 @@ enum ThemeChoice: String, CaseIterable, Identifiable {
 }
 
 struct ShowcaseView: View {
-    @Environment(\.theme) private var theme
     @State private var choice: ThemeChoice = .daylight
     @State private var scheme: ColorScheme = .light
     @State private var dense = false
 
-    var body: some View {
-        VStack(spacing: 0) {
-            controls
-            Divider()
-            ScrollView {
-                GalleryView()
-            }
-            .background(theme.color.surface)
-            .environment(\.colorScheme, scheme)
-        }
-        .environment(\.theme, choice.theme)
-        .environment(\.theme, adding: dense ? .dense : Theme())
+    /// El tema activo: el elegido, más densidad si está activa. Se aplica una vez, aquí.
+    private var activeTheme: Theme {
+        dense ? choice.theme.merging(.dense) : choice.theme
     }
 
-    private var controls: some View {
-        Group {
-            HStack(spacing: theme.space.md) {
-                Picker("Tema", selection: $choice) {
-                    ForEach(ThemeChoice.allCases) { Text($0.rawValue).tag($0) }
-                }
-                Picker("Modo", selection: $scheme) {
-                    Text("Claro").tag(ColorScheme.light)
-                    Text("Oscuro").tag(ColorScheme.dark)
-                }
-                .pickerStyle(.segmented)
-                .frame(width: 160)
-                Toggle("Denso", isOn: $dense)
-                Spacer()
+    var body: some View {
+        VStack(spacing: 0) {
+            ControlBar(choice: $choice, scheme: $scheme, dense: $dense)
+            Divider()
+            Gallery()
+        }
+        .environment(\.theme, activeTheme)
+        .environment(\.colorScheme, scheme)
+    }
+}
+
+/// La barra de controles. Lee el tema ya resuelto del entorno.
+private struct ControlBar: View {
+    @Environment(\.theme) private var theme
+    @Binding var choice: ThemeChoice
+    @Binding var scheme: ColorScheme
+    @Binding var dense: Bool
+
+    var body: some View {
+        HStack(spacing: theme.space.md) {
+            Picker("Tema", selection: $choice) {
+                ForEach(ThemeChoice.allCases) { Text($0.rawValue).tag($0) }
             }
+            .frame(width: 220)
+            Picker("Modo", selection: $scheme) {
+                Text("Claro").tag(ColorScheme.light)
+                Text("Oscuro").tag(ColorScheme.dark)
+            }
+            .pickerStyle(.segmented)
+            .frame(width: 160)
+            Toggle("Denso", isOn: $dense)
+            Spacer()
         }
         .padding(theme.space.md)
         .background(theme.color.surfaceElevated)
     }
 }
 
-/// La galería: una tarjeta real y las secciones de roles.
-struct GalleryView: View {
+/// La galería con scroll, para la app. El contenido vive en `GalleryContent`, que también usa el
+/// renderizado a imagen (ahí no cabe un `ScrollView`, que sin alto colapsa a cero).
+private struct Gallery: View {
+    @Environment(\.theme) private var theme
+
+    var body: some View {
+        ScrollView { GalleryContent() }
+            .background(theme.color.surface)
+    }
+}
+
+/// Una tarjeta real y las secciones de roles, sobre el fondo del tema.
+struct GalleryContent: View {
     @Environment(\.theme) private var theme
 
     var body: some View {
@@ -114,6 +136,7 @@ struct GalleryView: View {
         }
         .padding(theme.space.xl)
         .frame(maxWidth: .infinity, alignment: .leading)
+        .background(theme.color.surface)
     }
 }
 
@@ -123,9 +146,8 @@ enum Snapshot {
         try? FileManager.default.createDirectory(atPath: directory, withIntermediateDirectories: true)
         for choice in ThemeChoice.allCases where choice != .none {
             for scheme in [ColorScheme.light, .dark] {
-                let view = GalleryView()
+                let view = GalleryContent()
                     .frame(width: 900)
-                    .background(choice.theme.color.surface)
                     .environment(\.theme, choice.theme)
                     .environment(\.colorScheme, scheme)
                 let renderer = ImageRenderer(content: view)
