@@ -14,6 +14,19 @@ Una aerolínea pinta aviones idénticos con libreas distintas. Aquí la estructu
 fuselaje y tu marca es la librea: los roles no cambian, cambia cómo se resuelven.
 Cambiar de marca, de modo o de sistema de diseño entero es repintar, no reconstruir.
 
+## Empezar
+
+La estructura no se documenta: se genera. `theme init` crea un paquete Swift con los
+primitivos en un módulo aparte, los roles y temas con el plugin activo, y un test.
+
+```bash
+swift run --package-path Livery theme init DesignSystem
+```
+
+Produce `DesignSystem/` con `DesignSystemPrimitives` (la paleta, que solo el otro módulo
+importa) y `DesignSystem` (roles y temas), listo para enlazar en la app y aplicar con
+`.theme(.base)`. Con `--livery <ruta>` toma Livery de una copia local.
+
 ## Cómo se ve
 
 ```swift
@@ -108,8 +121,8 @@ Con eso, el plugin:
 ## Estado
 
 Fases 0.1 y 0.2: `@Roles`, `@Theme`, `@Primitives`, `@Bridge`, `Shade`, el plugin `LiveryRegistry`
-(registro, puentes, reporte y lint), `.theme(_:)`, `.theme(adding:)` y sobrecargas de modificadores
-para fuente, espaciado y radio.
+(registro, puentes, reporte y lint), la CLI `theme init`, `.theme(_:)`, `.theme(adding:)` y
+sobrecargas de modificadores para fuente, espaciado y radio.
 Swift 6.2, iOS 17 / macOS 14.
 
 El diseño completo, las fases y los riesgos están en [PLAN.md](PLAN.md).

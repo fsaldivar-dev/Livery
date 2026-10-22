@@ -12,6 +12,8 @@ let package = Package(
         .library(name: "Livery", targets: ["Livery"]),
         /// Build-tool plugin: genera `theme.color` por cada `@Roles` y `.light` por cada `@Theme`.
         .plugin(name: "LiveryRegistry", targets: ["LiveryRegistry"]),
+        /// CLI: `theme init` genera la estructura de un sistema de diseño.
+        .executable(name: "theme", targets: ["theme"]),
     ],
     dependencies: [
         .package(url: "https://github.com/swiftlang/swift-syntax.git", "600.0.0"..<"605.0.0"),
@@ -44,10 +46,16 @@ let package = Package(
             dependencies: ["livery-registry"]
         ),
 
+        // CLI: plantillas de `theme init` y el ejecutable.
+        .target(name: "LiveryScaffold"),
+        .executableTarget(name: "theme", dependencies: ["LiveryScaffold"]),
+
         // Pruebas end-to-end: roles y temas planos, con el plugin activo, resueltos desde el entorno.
         .testTarget(name: "LiveryTests", dependencies: ["Livery"], plugins: ["LiveryRegistry"]),
         // Pruebas del generador del registro.
         .testTarget(name: "LiveryRegistryTests", dependencies: ["LiveryRegistryCore"]),
+        // Pruebas de las plantillas de `theme init`.
+        .testTarget(name: "LiveryScaffoldTests", dependencies: ["LiveryScaffold"]),
         // Pruebas de expansión y diagnósticos de las macros.
         .testTarget(
             name: "LiveryMacrosTests",

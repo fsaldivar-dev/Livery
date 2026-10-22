@@ -87,28 +87,25 @@ módulo y tipo.
 
 ## 5. Estructura que genera `theme init`
 
+Hecho. `theme init <Nombre> [--at <carpeta>] [--livery <url|ruta>] [--branch <rama>]`
+genera un paquete Swift:
+
 ```
-DesignSystem/
+<Nombre>/
   Package.swift
   Sources/
-    Primitives/        ← target propio. Solo Themes lo importa.
-      Palette.swift
-      Metrics.swift
-      Fonts.swift
-    Roles/             ← qué existe
-      Colors.swift
-      Typography.swift
-      Spacing.swift
-      Shapes.swift
-    Themes/            ← cómo se resuelve, uno por estilo
-      Light.swift
-      Dark.swift
-    Components/        ← contratos y estilos (fase 3)
+    <Nombre>Primitives/   ← Palette.swift, Metrics.swift. Solo <Nombre> lo importa.
+    <Nombre>/             ← Roles.swift, Themes.swift. Plugin LiveryRegistry activo.
+  Tests/<Nombre>Tests/    ← el tema resuelve lo que declara; la escala de espacio crece.
+  README.md
 ```
 
 La regla 1 (vistas no leen primitivos) se cumple por frontera de módulo: la app
-importa `DesignSystem`, nunca `Primitives`. Showcase lo hace así. `Palette.jade500` no está en el
-alcance de una vista. No hay lint que mantener; no compila.
+importa `<Nombre>`, nunca `<Nombre>Primitives`. Al terminar, la CLI imprime cómo
+enlazar el paquete y activar el plugin en los targets de UI para el lint.
+
+Las plantillas viven en `LiveryScaffold` como strings, probadas sin disco; el
+paquete generado se compiló y testeó de verdad contra la copia local de Livery.
 
 ## 6. Declaración
 
@@ -365,7 +362,7 @@ usos legítimos de layout para una regla sintáctica.
 
 | Fase | Entrega | Criterio de hecho |
 |---|---|---|
-| 0.1 Núcleo | `@Primitives`, `@Roles`, `@Theme`, `Shade`, plugin `LiveryRegistry`, `.theme(_:)`, `.theme(adding:)`, `ThemeRef`, sobrecargas para fuente, padding, radio, tint. **Hecho** salvo `theme init`. | Sajaru Corner tiene su DS declarado y una pantalla migrada a key paths. |
+| 0.1 Núcleo | `@Primitives`, `@Roles`, `@Theme`, `Shade`, plugin `LiveryRegistry`, `.theme(_:)`, `.theme(adding:)`, `ThemeRef`, sobrecargas para fuente, padding, radio, tint, `theme init`. **Hecho.** | Sajaru Corner tiene su DS declarado y una pantalla migrada a key paths. |
 | 0.2 Cambio | `@Bridge` con reenvíos deprecados y reporte de usos pendientes, lint en el plugin. **Hecho.** | Migrar un conjunto de roles V1→V2 en Sajaru sin tocar vistas, y bajar warnings a cero. |
 | 0.3 Componentes | `@Component`, `@Style`, catálogo base (Button, Card, TextField). | Botón de Sajaru declarado como contrato con estilo exhaustivo. |
 | 0.4 Diseño | `theme export` / `theme import` W3C, catálogo visual generado. | Tokens de Sajaru abren en Penpot. |
