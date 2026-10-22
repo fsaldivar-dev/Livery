@@ -295,8 +295,22 @@ puede). El autor escribe lo propio del diseño —los enums, el struct `Style`, 
 `unstyled`— y nada de pegamento. En Showcase, `@Component enum Button` reemplazó
 el `Styler` y el `theme.button` escritos a mano, sin cambiar cómo se ve ni se usa.
 
-Pendiente: `focused` y `selected` en el adaptador; un segundo componente que
-confirme el modelo.
+Segundo componente (hecho): **campo de texto**, que estresa el modelo distinto
+al botón. No tiene variantes, tiene estados: reposo, foco y error. `Field.Style`
+da la tipografía, los colores, dos bordes (reposo y foco) y las medidas; el
+borde de error reutiliza `invalid`. `FormField` es una vista propia (no un
+`ButtonStyle`, porque `TextField` no deja estilizar el contorno) que compone
+etiqueta + campo + mensaje, sigue el foco con `@FocusState` y lo anima con
+`theme.motion`. `@Component enum Field` generó el `Styler` y `theme.field` igual
+que el botón. Validó: el estado de foco (que el botón no usa), la validación como
+parámetro (no como estado del kernel) y un componente que no es un control de
+Apple.
+
+Nota: `ImageRenderer` no dibuja un `TextField` vivo en las capturas (sale una
+barra amarilla); el campo se revisa en la app con ventana.
+
+Pendiente opcional: `focused`/`selected` en el adaptador del botón; más
+componentes.
 
 ## 8. Cambio y migración
 

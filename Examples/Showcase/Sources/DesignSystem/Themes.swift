@@ -11,7 +11,7 @@ import Primitives
 import SwiftUI
 
 /// El tema de la app: papel y tinta, acento índigo.
-@Theme public struct Daylight: Colors.Resolver, Typography.Resolver, Spacing.Resolver, Shapes.Resolver, Motions.Resolver, Button.Styler {
+@Theme public struct Daylight: Colors.Resolver, Typography.Resolver, Spacing.Resolver, Shapes.Resolver, Motions.Resolver, Button.Styler, Field.Styler {
     public init() {}
 
     /// El botón, siguiendo la HIG: un tinte (`accent`) y las medidas por tamaño. Los tres estilos
@@ -24,6 +24,17 @@ import SwiftUI
             small:  Button.Metrics(font: .caption,  vertical: .xs, horizontal: .md),
             medium: Button.Metrics(font: .headline, vertical: .sm, horizontal: .lg),
             large:  Button.Metrics(font: .headline, vertical: .md, horizontal: .xl)
+        )
+    }
+
+    /// El campo, en roles: etiqueta tenue, relleno de superficie, borde que se enciende al enfocar.
+    public var field: Field.Style {
+        Field.Style(
+            label: .caption, text: .body, message: .caption,
+            labelColor: .onSurfaceSecondary, textColor: .onSurface, placeholder: .onSurfaceSecondary,
+            fill: .surface, messageColor: .onSurfaceSecondary, invalid: .danger,
+            border: .outline, borderFocused: .accent,
+            radius: .medium, vertical: .sm, horizontal: .md, gap: .xs, focus: .quick
         )
     }
 

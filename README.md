@@ -127,7 +127,9 @@ Es un `ButtonStyle` de SwiftUI de verdad: hereda teclado, VoiceOver y `Button(ro
 tamaño de `.controlSize`, es una cápsula como en iOS, y garantiza 44 pt de área táctil. Cambiar
 de tema cambia el tinte sin tocar el estilo. El kernel deja modelar cualquier componente; el
 ejemplo enseña las convenciones de Apple. `@Component` sobre el enum genera el protocolo que el
-tema conforma, y el plugin genera `theme.button`; el autor solo escribe el estilo.
+tema conforma, y el plugin genera `theme.button`; el autor solo escribe el estilo. El ejemplo
+trae también un campo de texto (`FormField`) con estados de foco y error, para mostrar que el
+modelo sirve más allá de un botón.
 
 ## Migrar de un sistema a otro
 

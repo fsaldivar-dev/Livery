@@ -126,6 +126,7 @@ struct GalleryContent: View {
         VStack(alignment: .leading, spacing: theme.space.lg) {
             SampleCard()
             Panel { ButtonsSection() }
+            Panel { FieldsSection() }
             Panel { ColorsSection() }
             Panel { TypographySection() }
             HStack(alignment: .top, spacing: theme.space.lg) {

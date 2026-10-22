@@ -9,6 +9,7 @@ extension Livery.Theme {
     public var shape: Shapes.Values { values(Shapes.self) }
     public var motion: Motions.Values { values(Motions.self) }
     public var button: Button.Style { style(for: Button.self) ?? Button.unstyled }
+    public var field: Field.Style { style(for: Field.self) ?? Field.unstyled }
     public static var daylight: Livery.Theme { Daylight().resolvedTheme }
     public static var carbon: Livery.Theme { Carbon().resolvedTheme }
     public static var dense: Livery.Theme { Dense().resolvedTheme }
