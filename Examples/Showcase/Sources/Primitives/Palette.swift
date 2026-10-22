@@ -10,22 +10,49 @@ import Livery
 import SwiftUI
 
 @Primitives public enum Palette {
-    public static let white    = Color.white
-    public static let mist     = Color(red: 0.96, green: 0.96, blue: 0.97)
-    public static let fog      = Color(red: 0.86, green: 0.87, blue: 0.90)
-    public static let slate    = Color(red: 0.45, green: 0.47, blue: 0.52)
-    public static let graphite = Color(red: 0.16, green: 0.17, blue: 0.20)
-    public static let ink      = Color(red: 0.09, green: 0.10, blue: 0.12)
+    // Neutros con un punto de azul, del papel a la tinta.
+    public static let slate50  = Color(hex: 0xF8FAFC)
+    public static let slate100 = Color(hex: 0xF1F5F9)
+    public static let slate200 = Color(hex: 0xE2E8F0)
+    public static let slate300 = Color(hex: 0xCBD5E1)
+    public static let slate400 = Color(hex: 0x94A3B8)
+    public static let slate500 = Color(hex: 0x64748B)
+    public static let slate600 = Color(hex: 0x475569)
+    public static let slate700 = Color(hex: 0x334155)
+    public static let slate800 = Color(hex: 0x1E293B)
+    public static let slate900 = Color(hex: 0x0F172A)
+    public static let slate950 = Color(hex: 0x020617)
 
-    public static let jade300   = Color(red: 0.40, green: 0.80, blue: 0.64)
-    public static let jade500   = Color(red: 0.00, green: 0.60, blue: 0.40)
-    public static let orange300 = Color(red: 1.00, green: 0.70, blue: 0.40)
-    public static let orange500 = Color(red: 0.95, green: 0.45, blue: 0.10)
-    public static let red300    = Color(red: 1.00, green: 0.55, blue: 0.55)
-    public static let red500    = Color(red: 0.85, green: 0.15, blue: 0.20)
+    public static let indigo300 = Color(hex: 0xA5B4FC)
+    public static let indigo400 = Color(hex: 0x818CF8)
+    public static let indigo500 = Color(hex: 0x6366F1)
+    public static let indigo600 = Color(hex: 0x4F46E5)
+
+    public static let amber300 = Color(hex: 0xFCD34D)
+    public static let amber400 = Color(hex: 0xFBBF24)
+    public static let amber500 = Color(hex: 0xF59E0B)
+
+    public static let violet400 = Color(hex: 0xA78BFA)
+    public static let violet500 = Color(hex: 0x8B5CF6)
+
+    public static let rose400 = Color(hex: 0xFB7185)
+    public static let rose600 = Color(hex: 0xE11D48)
+
+    public static let white = Color.white
 }
 
 @Primitives public enum Metrics {
     /// Unidad base de la escala de espaciado.
     public static let unit: CGFloat = 4
+}
+
+extension Color {
+    /// `0xRRGGBB`. Solo para la paleta: las vistas nunca ven un hex.
+    init(hex: UInt32) {
+        self.init(
+            red: Double((hex >> 16) & 0xFF) / 255,
+            green: Double((hex >> 8) & 0xFF) / 255,
+            blue: Double(hex & 0xFF) / 255
+        )
+    }
 }

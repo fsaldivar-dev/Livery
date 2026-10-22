@@ -33,12 +33,14 @@ import Livery
 }
 
 // Las vistas hablan solo en roles. Sin `@Environment`, sin primitivos, sin strings.
+// Cada paso de `.theme…` autocompleta con los roles que existen.
 struct Card: View {
     var body: some View {
         Text("Hola")
-            .foregroundStyle(\.color.onSurface)
-            .padding(\.space.lg)
-            .background(\.color.surface, cornerRadius: \.shape.medium)
+            .font(.theme.type.body)
+            .foregroundStyle(.theme.color.onSurface)
+            .padding(.theme.space.lg)
+            .background(.theme.color.surface, cornerRadius: .theme.shape.medium)
     }
 }
 

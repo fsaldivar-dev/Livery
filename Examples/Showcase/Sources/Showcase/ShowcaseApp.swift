@@ -3,7 +3,10 @@
 //  Showcase
 //
 //  La app solo importa DesignSystem y Livery. `Palette` no está en su alcance: una vista que
-//  intente escribir `Palette.jade500` no compila.
+//  intente escribir `Palette.slate900` no compila.
+//
+//  `swift run --package-path Examples/Showcase -- --snapshot <carpeta>` escribe un PNG por tema
+//  y modo en vez de abrir la ventana. Sirve para revisar la galería sin levantar la app.
 //
 
 import DesignSystem
@@ -17,6 +20,10 @@ import AppKit
 struct ShowcaseApp: App {
     init() {
         #if os(macOS)
+        if let index = CommandLine.arguments.firstIndex(of: "--snapshot"), index + 1 < CommandLine.arguments.count {
+            Snapshot.write(to: CommandLine.arguments[index + 1])
+            exit(0)
+        }
         NSApplication.shared.setActivationPolicy(.regular)
         NSApplication.shared.activate(ignoringOtherApps: true)
         #endif
@@ -42,7 +49,7 @@ enum ThemeChoice: String, CaseIterable, Identifiable {
         switch self {
         case .daylight: .daylight
         case .carbon: Theme.daylight.merging(.carbon)
-        case .brand: Theme.daylight.merging(Brand(accent: Shade(light: .purple, dark: .pink)).resolvedTheme)
+        case .brand: Theme.daylight.merging(Brand.violet.resolvedTheme)
         case .none: Theme()
         }
     }
@@ -57,10 +64,13 @@ struct ShowcaseView: View {
         VStack(spacing: 0) {
             controls
             Divider()
-            gallery
-                .theme(choice.theme)
-                .theme(adding: dense ? .dense : Theme())
-                .environment(\.colorScheme, scheme)
+            ScrollView {
+                GalleryView()
+            }
+            .background(.theme.color.surface)
+            .theme(choice.theme)
+            .theme(adding: dense ? .dense : Theme())
+            .environment(\.colorScheme, scheme)
         }
     }
 
@@ -80,21 +90,45 @@ struct ShowcaseView: View {
         }
         .padding(12)
     }
+}
 
-    private var gallery: some View {
-        ScrollView {
-            ThemeValue(keyPath: \.space.xl) { gap in
-                VStack(alignment: .leading, spacing: gap) {
-                    SampleCard()
-                    ColorsSection()
-                    TypographySection()
-                    SpacingSection()
-                    ShapesSection()
-                }
+/// La galería: una tarjeta real y las secciones de roles.
+struct GalleryView: View {
+    var body: some View {
+        ThemeValue(.theme.space.xl) { gap in
+            VStack(alignment: .leading, spacing: gap) {
+                SampleCard()
+                ColorsSection()
+                TypographySection()
+                SpacingSection()
+                ShapesSection()
             }
-            .padding(\.space.xl)
-            .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .background(\.color.surface)
+        .padding(.theme.space.xl)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
+
+#if os(macOS)
+enum Snapshot {
+    @MainActor static func write(to directory: String) {
+        try? FileManager.default.createDirectory(atPath: directory, withIntermediateDirectories: true)
+        for choice in ThemeChoice.allCases where choice != .none {
+            for scheme in [ColorScheme.light, .dark] {
+                let view = GalleryView()
+                    .frame(width: 900)
+                    .background(.theme.color.surface)
+                    .theme(choice.theme)
+                    .environment(\.colorScheme, scheme)
+                let renderer = ImageRenderer(content: view)
+                renderer.scale = 2
+                guard let cgImage = renderer.cgImage else { continue }
+                let rep = NSBitmapImageRep(cgImage: cgImage)
+                let name = "\(choice.rawValue.lowercased().filter(\.isLetter))-\(scheme == .dark ? "dark" : "light").png"
+                try? rep.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: directory).appending(path: name))
+                print("snapshot: \(name)")
+            }
+        }
+    }
+}
+#endif

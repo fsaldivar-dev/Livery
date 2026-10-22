@@ -2,125 +2,77 @@
 //  Modifiers.swift
 //  Livery
 //
-//  Sobrecargas de los modificadores de SwiftUI que aceptan un key path sobre `Theme` y lo
-//  resuelven contra el tema del subárbol. La vista nunca declara `@Environment`.
+//  Los colores no necesitan sobrecargas: `ThemeRef<Shade>` es un `ShapeStyle` y los modificadores
+//  nativos lo aceptan. Estas sobrecargas cubren lo que SwiftUI pide como valor concreto (fuente,
+//  medidas) y lo resuelven contra el tema del subárbol.
 //
 
 import SwiftUI
 
-// MARK: - Color
-
 extension View {
-    /// `foregroundStyle` con un color del tema.
-    public func foregroundStyle(_ color: KeyPath<Theme, Shade> & Sendable) -> some View {
-        foregroundStyle(ThemeStyle(color))
+    /// `font` con una fuente del tema.
+    public func font(_ font: ThemeRef<Font>) -> some View {
+        ThemeValue(font) { self.font($0) }
     }
 
-    /// `background` con un color del tema.
-    public func background(
-        _ color: KeyPath<Theme, Shade> & Sendable,
-        ignoresSafeAreaEdges edges: Edge.Set = .all
-    ) -> some View {
-        background(ThemeStyle(color), ignoresSafeAreaEdges: edges)
+    /// `padding` con un espacio del tema en todos los bordes.
+    public func padding(_ length: ThemeRef<CGFloat>) -> some View {
+        ThemeValue(length) { padding($0) }
     }
 
-    /// `background` con un color del tema recortado a una forma.
-    public func background<S: Shape>(
-        _ color: KeyPath<Theme, Shade> & Sendable,
-        in shape: S,
-        fillStyle: FillStyle = FillStyle()
-    ) -> some View {
-        background(ThemeStyle(color), in: shape, fillStyle: fillStyle)
+    /// `padding` con un espacio del tema en los bordes indicados.
+    public func padding(_ edges: Edge.Set, _ length: ThemeRef<CGFloat>) -> some View {
+        ThemeValue(length) { padding(edges, $0) }
+    }
+
+    /// `tint` con un color del tema. (El `tint` nativo recibe un opcional y la cadena `.theme…`
+    /// no se infiere a través de él.)
+    public func tint(_ color: ThemeRef<Shade>) -> some View {
+        tint(Optional(color))
     }
 
     /// `background` con un color y un radio del tema.
     public func background(
-        _ color: KeyPath<Theme, Shade> & Sendable,
-        cornerRadius: KeyPath<Theme, CGFloat> & Sendable,
+        _ color: ThemeRef<Shade>,
+        cornerRadius: ThemeRef<CGFloat>,
         style: RoundedCornerStyle = .continuous
     ) -> some View {
-        ThemeValue(keyPath: cornerRadius) { radius in
-            background(ThemeStyle(color), in: RoundedRectangle(cornerRadius: radius, style: style))
+        ThemeValue(cornerRadius) { radius in
+            background(color, in: RoundedRectangle(cornerRadius: radius, style: style))
         }
     }
 
-    /// `tint` con un color del tema.
-    public func tint(_ color: KeyPath<Theme, Shade> & Sendable) -> some View {
-        tint(ThemeStyle(color))
-    }
-}
-
-extension Shape {
-    /// `fill` con un color del tema.
-    public func fill(_ color: KeyPath<Theme, Shade> & Sendable, style: FillStyle = FillStyle()) -> some View {
-        fill(ThemeStyle(color), style: style)
-    }
-
-    /// `stroke` con un color del tema.
-    public func stroke(_ color: KeyPath<Theme, Shade> & Sendable, lineWidth: CGFloat = 1) -> some View {
-        stroke(ThemeStyle(color), lineWidth: lineWidth)
-    }
-}
-
-// MARK: - Tipografía
-
-extension View {
-    /// `font` con una fuente del tema.
-    public func font(_ font: KeyPath<Theme, Font> & Sendable) -> some View {
-        ThemeValue(keyPath: font) { self.font($0) }
-    }
-}
-
-// MARK: - Espaciado
-
-extension View {
-    /// `padding` con un espacio del tema en todos los bordes.
-    public func padding(_ length: KeyPath<Theme, CGFloat> & Sendable) -> some View {
-        ThemeValue(keyPath: length) { padding($0) }
-    }
-
-    /// `padding` con un espacio del tema en los bordes indicados.
-    public func padding(_ edges: Edge.Set, _ length: KeyPath<Theme, CGFloat> & Sendable) -> some View {
-        ThemeValue(keyPath: length) { padding(edges, $0) }
-    }
-}
-
-// MARK: - Forma
-
-extension View {
     /// Recorta la vista a un rectángulo redondeado con un radio del tema.
     public func clipShape(
-        cornerRadius: KeyPath<Theme, CGFloat> & Sendable,
+        cornerRadius: ThemeRef<CGFloat>,
         style: RoundedCornerStyle = .continuous
     ) -> some View {
-        ThemeValue(keyPath: cornerRadius) { radius in
+        ThemeValue(cornerRadius) { radius in
             clipShape(RoundedRectangle(cornerRadius: radius, style: style))
         }
     }
 }
-
-// MARK: - Soporte
 
 /// Lee un valor del tema activo y construye una vista con él.
 ///
 /// Es la forma general de usar un rol que ningún modificador cubre todavía:
 ///
 /// ```swift
-/// ThemeValue(keyPath: \.space.md) { spacing in
+/// ThemeValue(.theme.space.md) { spacing in
 ///     VStack(spacing: spacing) { … }
 /// }
 /// ```
 public struct ThemeValue<Value, Content: View>: View {
     @Environment(\.theme) private var theme
-    private let keyPath: KeyPath<Theme, Value> & Sendable
+    private let ref: ThemeRef<Value>
     private let content: (Value) -> Content
 
-    public init(keyPath: KeyPath<Theme, Value> & Sendable, @ViewBuilder content: @escaping (Value) -> Content) {
-        self.keyPath = keyPath
+    public init(_ ref: ThemeRef<Value>, @ViewBuilder content: @escaping (Value) -> Content) {
+        self.ref = ref
         self.content = content
     }
 
     public var body: some View {
-        content(theme[keyPath: keyPath])
+        content(theme[ref])
     }
 }

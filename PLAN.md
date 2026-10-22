@@ -65,7 +65,8 @@ Reglas, pocas y rígidas:
 - **Los estilos son por subárbol, no globales.** Una app puede tener varios
   estilos conviviendo, y un DS viejo y uno nuevo durante una migración.
 - **Cero ceremonia en la vista.** No se declara `@Environment`. Se escribe
-  `.foregroundStyle(\.color.onSurface)` y el tema se resuelve solo.
+  `.foregroundStyle(.theme.color.onSurface)` y el tema se resuelve solo, con
+  autocompletado de los roles en cada paso.
 
 ## 4. Nombre y módulos
 
@@ -75,7 +76,7 @@ La estructura es el fuselaje; tu marca es la librea. El namespace en las vistas 
 
 | Target | Tipo | Contenido |
 |---|---|---|
-| `Livery` | librería | Runtime: `Theme` (raíz de key paths), `EnvironmentValues.theme`, `.theme(_:)` y `.theme(adding:)`, `ThemeStyle` (un `ShapeStyle` que resuelve un key path), sobrecargas de modificadores. |
+| `Livery` | librería | Runtime: `Theme`, `Shade`, `ThemeRef` (referencias `.theme…` con autocompletado, `ShapeStyle` para colores), `EnvironmentValues.theme`, `.theme(_:)` y `.theme(adding:)`, sobrecargas de modificadores. |
 | `LiveryMacros` | macro | `@Primitives`, `@Roles`, `@Theme`, `@Component`, `@Style`, `@Bridge`. |
 | `ThemeLint` | build plugin | Marca valores hardcodeados en targets de UI. |
 | `theme` | ejecutable | CLI: `init`, `export`, `import`, `report`. |
@@ -167,36 +168,44 @@ queda para 0.2.
 
 ## 7. Consumo: inyección automática
 
-La vista nunca declara el entorno. Un key path sobre `Theme` se resuelve contra
-el tema del subárbol:
+La vista nunca declara el entorno. Una referencia `.theme.<categoría>.<rol>` se
+resuelve contra el tema del subárbol al dibujar:
 
 ```swift
 Text(fighter.name)
-    .font(\.type.titleMedium)
-    .foregroundStyle(\.color.onSurface)
-    .padding(\.space.lg)
-    .background(\.color.surfaceElevated, in: .rect(cornerRadius: \.shape.medium))
+    .font(.theme.type.titleMedium)
+    .foregroundStyle(.theme.color.onSurface)
+    .padding(.theme.space.lg)
+    .background(.theme.color.surfaceElevated, cornerRadius: .theme.shape.medium)
 ```
 
-Mecanismo, en dos niveles:
+Por qué referencias y no key paths (`\.color.onSurface`), que fue la primera idea:
+el autocompletado. Medido con `sourcekit-lsp` sobre el Showcase, el key path
+autocompleta en `foregroundStyle` pero da cero resultados en `font`, porque ahí
+compite con la sobrecarga nativa que recibe `Font?`; Xcode muestra basura. La
+cadena `.theme…` es un `ThemeRef<Value>` con `@dynamicMemberLookup`: cada paso
+tiene tipo concreto y la lista es exactamente los roles, en las siete posiciones
+probadas (`font`, `foregroundStyle`, `padding`, `tint`, `fill`, `background` con
+radio, y la raíz). Es la promesa de Android Studio con `@color/…`, cumplida.
 
-1. **Colores y rellenos**: `ThemeStyle` es un `ShapeStyle` que guarda el key path
-   al `Shade` y lo resuelve en `resolve(in environment:)` leyendo `environment.theme`,
-   `colorScheme` y `colorSchemeContrast`. `Shade` también es `ShapeStyle` por sí
-   mismo y expone `uiColor` y `nsColor` dinámicos para UIKit y AppKit.
-   Sobrecargas de `foregroundStyle`, `background`, `tint`, `fill` y `stroke`
-   aceptan el key path directamente; cualquier otra API que reciba un
-   `ShapeStyle` usa `.theme(\.color.accent)`.
-2. **Todo lo que no es `ShapeStyle`** (fuente, padding, radios): sobrecargas de
-   `View` que resuelven vía `ThemeValue`, una vista que lee el entorno y aplica
-   el valor. `ThemeValue` es público para los casos que ninguna sobrecarga cubre
-   (por ejemplo `spacing` de un `VStack`).
+Mecanismo:
 
-Cuando el acceso directo hace falta (lógica, no modificadores):
+1. **Colores**: `ThemeRef<Shade>` conforma a `ShapeStyle` y resuelve en
+   `resolve(in environment:)` leyendo `environment.theme`, `colorScheme` y
+   `colorSchemeContrast`. Vale en cualquier modificador nativo que acepte un
+   `ShapeStyle`: `foregroundStyle`, `background`, `fill`, `stroke`, `border`.
+   Sin sobrecargas.
+2. **Lo que SwiftUI pide como valor concreto** (fuente, padding, radios, y `tint`
+   porque recibe un opcional): sobrecargas de `View` que resuelven vía
+   `ThemeValue`, una vista que lee el entorno y aplica el valor. `ThemeValue` es
+   público para los casos que ninguna sobrecarga cubre (`spacing` de un `VStack`).
+
+Cuando hace falta el valor en lógica, no en un modificador:
 
 ```swift
 @Environment(\.theme) var theme
-let spacing = theme.space.md
+let spacing = theme.space.md          // o theme[.theme.space.md]
+let shade = theme.color[.accent]      // subscript por caso, para galerías y exportadores
 ```
 
 Un estilo se aplica por subárbol, con el acceso corto que genera el plugin o con
@@ -205,7 +214,7 @@ una instancia cuando el tema tiene parámetros:
 ```swift
 ContentView().theme(.light)
 PlayerView().theme(adding: .playerDense)
-BrandedView().theme(Brand(accent: .red))
+BrandedView().theme(adding: Brand(accent: Shade(.purple)))
 ```
 
 Varios estilos por app: cada uno es un `@Theme` distinto. Un conjunto de roles
@@ -314,9 +323,10 @@ error.
 
 ## 11. Riesgos y decisiones abiertas
 
-- **R1. `KeyPath` como `ShapeStyle`.** Descartado: `ShapeStyle` tiene un
-  requisito oculto con `Self` que una clase no final no puede cumplir. Se aplicó
-  el plan B (`ThemeStyle` + sobrecargas) y la sintaxis prometida se conserva.
+- **R1. Key paths en modificadores.** Descartados dos veces: `KeyPath` no puede
+  ser `ShapeStyle` (requisito oculto con `Self`), y su autocompletado es
+  inconsistente según la sobrecarga nativa con la que compite. La API es
+  `ThemeRef` con `@dynamicMemberLookup` (sección 7).
 - **R2. Seguridad de tipos entre subárboles.** Con una sola raíz `Theme`, un
   key path a un conjunto de roles que el tema activo no resuelve no puede fallar
   en compilación. Se acepta fallo en debug y reserva en release. Alternativa
@@ -338,7 +348,7 @@ error.
 
 | Fase | Entrega | Criterio de hecho |
 |---|---|---|
-| 0.1 Núcleo | `@Primitives`, `@Roles`, `@Theme`, `Shade`, plugin `LiveryRegistry`, `.theme(_:)`, `.theme(adding:)`, `ThemeStyle`, sobrecargas para color, fuente, padding, radio. **Hecho** salvo `theme init`. | Sajaru Corner tiene su DS declarado y una pantalla migrada a key paths. |
+| 0.1 Núcleo | `@Primitives`, `@Roles`, `@Theme`, `Shade`, plugin `LiveryRegistry`, `.theme(_:)`, `.theme(adding:)`, `ThemeRef`, sobrecargas para fuente, padding, radio, tint. **Hecho** salvo `theme init`. | Sajaru Corner tiene su DS declarado y una pantalla migrada a key paths. |
 | 0.2 Cambio | `@Bridge` con reenvíos deprecados generados, `theme report` y lint en el plugin. | Migrar un conjunto de roles V1→V2 en Sajaru sin tocar vistas, y bajar warnings a cero. |
 | 0.3 Componentes | `@Component`, `@Style`, catálogo base (Button, Card, TextField). | Botón de Sajaru declarado como contrato con estilo exhaustivo. |
 | 0.4 Diseño | `theme export` / `theme import` W3C, catálogo visual generado. | Tokens de Sajaru abren en Penpot. |
@@ -349,7 +359,7 @@ catálogo de componentes cerrado, soporte de UIKit más allá de lectura de role
 ## 13. App de validación
 
 `Examples/Showcase` (macOS, hecho): primitivos, roles y temas en módulos reales con
-el plugin activo, galería de roles por `CaseIterable` y el subscript `theme.color[.accent]`,
+el plugin activo, modo `--snapshot <carpeta>` que escribe un PNG por tema y modo, galería de roles por `CaseIterable` y el subscript `theme.color[.accent]`,
 cambio de tema, modo y densidad en vivo, y la opción "Sin tema" para ver la reserva
 rosa. Es donde se prueban las APIs antes de tocar una app de verdad.
 

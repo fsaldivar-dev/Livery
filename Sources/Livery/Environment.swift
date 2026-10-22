@@ -7,7 +7,7 @@ import SwiftUI
 
 extension EnvironmentValues {
     /// El tema activo en el subárbol. Léelo solo cuando necesites un valor fuera de un
-    /// modificador; para estilos usa key paths (`.foregroundStyle(\.color.onSurface)`).
+    /// modificador; para estilos usa referencias (`.foregroundStyle(.theme.color.onSurface)`).
     @Entry public var theme: Theme = Theme()
 }
 

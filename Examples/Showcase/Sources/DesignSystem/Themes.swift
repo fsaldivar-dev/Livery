@@ -10,18 +10,18 @@ import Livery
 import Primitives
 import SwiftUI
 
-/// El tema de la app: claro por defecto, oscuro sobrio.
+/// El tema de la app: papel y tinta, acento índigo.
 @Theme public struct Daylight: Colors.Resolver, Typography.Resolver, Spacing.Resolver, Shapes.Resolver {
     public init() {}
 
-    public let surface            = Shade(light: Palette.mist, dark: Palette.ink)
-    public let surfaceElevated    = Shade(light: Palette.white, dark: Palette.graphite)
-    public let onSurface          = Shade(light: Palette.ink, dark: Palette.mist)
-    public let onSurfaceSecondary = Shade(light: Palette.slate, dark: Palette.fog, darkIncreased: Palette.mist)
-    public let accent             = Shade(light: Palette.jade500, dark: Palette.jade300)
-    public let onAccent           = Shade(light: Palette.white, dark: Palette.ink)
-    public let outline            = Shade(light: Palette.fog, dark: Palette.slate)
-    public let danger             = Shade(light: Palette.red500, dark: Palette.red300)
+    public let surface            = Shade(light: Palette.slate50, dark: Palette.slate950)
+    public let surfaceElevated    = Shade(light: Palette.white, dark: Palette.slate900)
+    public let onSurface          = Shade(light: Palette.slate900, dark: Palette.slate100)
+    public let onSurfaceSecondary = Shade(light: Palette.slate500, dark: Palette.slate400, darkIncreased: Palette.slate300)
+    public let accent             = Shade(light: Palette.indigo600, dark: Palette.indigo400)
+    public let onAccent           = Shade(light: Palette.white, dark: Palette.slate950)
+    public let outline            = Shade(light: Palette.slate200, dark: Palette.slate800)
+    public let danger             = Shade(light: Palette.rose600, dark: Palette.rose400)
 
     public let title    = Font.title.weight(.semibold)
     public let headline = Font.headline
@@ -39,19 +39,19 @@ import SwiftUI
     public let large: CGFloat  = 20
 }
 
-/// Un rebrand completo: misma estructura, otra pintura. Hereda tipografía, espacio y forma
-/// de Daylight porque se aplica con `.theme(adding:)` sobre él.
+/// Un rebrand completo: misma estructura, otra pintura. Grafito y ámbar. Hereda tipografía,
+/// espacio y forma de Daylight porque se aplica sumado a él.
 @Theme public struct Carbon: Colors.Resolver {
     public init() {}
 
-    public let surface            = Shade(light: Palette.fog, dark: Palette.ink)
-    public let surfaceElevated    = Shade(light: Palette.mist, dark: Palette.graphite)
-    public let onSurface          = Shade(light: Palette.graphite, dark: Palette.white)
-    public let onSurfaceSecondary = Shade(light: Palette.slate, dark: Palette.fog)
-    public let accent             = Shade(light: Palette.orange500, dark: Palette.orange300)
-    public let onAccent           = Shade(Palette.ink)
-    public let outline            = Shade(light: Palette.slate, dark: Palette.slate)
-    public let danger             = Shade(light: Palette.red500, dark: Palette.red300)
+    public let surface            = Shade(light: Palette.slate200, dark: Palette.slate950)
+    public let surfaceElevated    = Shade(light: Palette.slate50, dark: Palette.slate800)
+    public let onSurface          = Shade(light: Palette.slate900, dark: Palette.slate50)
+    public let onSurfaceSecondary = Shade(light: Palette.slate600, dark: Palette.slate400)
+    public let accent             = Shade(light: Palette.amber500, dark: Palette.amber400)
+    public let onAccent           = Shade(Palette.slate950)
+    public let outline            = Shade(light: Palette.slate300, dark: Palette.slate700)
+    public let danger             = Shade(light: Palette.rose600, dark: Palette.rose400)
 }
 
 /// Solo espaciado: se suma al tema activo con `.theme(adding: .dense)`.
@@ -72,11 +72,16 @@ import SwiftUI
     }
 
     public let accent: Shade
-    public let surface            = Shade(light: Palette.mist, dark: Palette.ink)
-    public let surfaceElevated    = Shade(light: Palette.white, dark: Palette.graphite)
-    public let onSurface          = Shade(light: Palette.ink, dark: Palette.mist)
-    public let onSurfaceSecondary = Shade(light: Palette.slate, dark: Palette.fog)
+    public let surface            = Shade(light: Palette.slate50, dark: Palette.slate950)
+    public let surfaceElevated    = Shade(light: Palette.white, dark: Palette.slate900)
+    public let onSurface          = Shade(light: Palette.slate900, dark: Palette.slate100)
+    public let onSurfaceSecondary = Shade(light: Palette.slate500, dark: Palette.slate400)
     public let onAccent           = Shade(Palette.white)
-    public let outline            = Shade(light: Palette.fog, dark: Palette.slate)
-    public let danger             = Shade(light: Palette.red500, dark: Palette.red300)
+    public let outline            = Shade(light: Palette.slate200, dark: Palette.slate800)
+    public let danger             = Shade(light: Palette.rose600, dark: Palette.rose400)
+}
+
+/// Un acento de marca de ejemplo, para la galería.
+extension Brand {
+    public static let violet = Brand(accent: Shade(light: Palette.violet500, dark: Palette.violet400))
 }
