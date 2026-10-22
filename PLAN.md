@@ -53,9 +53,12 @@ Reglas, pocas y rígidas:
   Es lo único que Xcode entiende con autocompletado, rename, swatches
   (`#colorLiteral`) y errores por línea. El JSON (W3C Design Tokens) es una
   salida para Penpot y Figma, y una entrada de una sola vez.
-- **Los macros son el `aapt`.** Leen la declaración, verifican, generan accesores.
-  Son macros de swift-syntax directos; AnnotationSwift decora funciones y
-  propiedades y no aplica aquí (ver R3).
+- **Macros más un plugin de build son el `aapt`.** Un macro solo puede escribir
+  dentro del tipo que decora, así que verifica y genera `Resolver`, `Values` y
+  `ThemeProvider`. Lo que vive fuera (`theme.color`, `.light`, y en fase 2 los
+  reenvíos del puente) lo escribe el plugin `LiveryRegistry`, que parsea los
+  fuentes del target antes de compilar. Es el mismo patrón que `AnnotationRegistry`
+  en AnnotationSwift y `JadeRegistry` en JadeAPI.
 - **La verificación es la que Swift ya sabe hacer.** Completitud de un tema =
   conformance a un protocolo. Completitud de un estilo = switch exhaustivo.
   Rename = refactor de Xcode. Deprecación = `@available` con `renamed:` y fix-it.
@@ -108,9 +111,10 @@ alcance de una vista. No hay lint que mantener; no compila.
 
 ## 6. Declaración
 
-Los roles se declaran **dentro de `extension Theme`**, porque un macro no puede
-añadir miembros a un tipo distinto del que decora. La categoría se declara por
-conformance y fija el nombre de la propiedad y el tipo de valor:
+Las declaraciones son tipos planos, como en Android, donde `colors.xml` y
+`themes.xml` son archivos sueltos y `R` es generado. La categoría de un conjunto
+de roles se declara por conformance y fija el nombre de la propiedad y el tipo de
+valor:
 
 | Categoría | Propiedad | Valor |
 |---|---|---|
@@ -126,39 +130,37 @@ conformance y fija el nombre de la propiedad y el tipo de valor:
     static let neutral50 = #colorLiteral(red: 0.98, green: 0.98, blue: 0.98, alpha: 1)
 }
 
-// Roles/Roles.swift
-@Roles extension Theme {
-    enum Colors: ColorRoles  { case surface, onSurface, accent, onAccent }
-    enum Spacing: SpaceRoles { case xs, sm, md, lg, xl }
-}
+// Roles/Colors.swift
+@Roles enum Colors: ColorRoles  { case surface, onSurface, accent, onAccent }
+@Roles enum Spacing: SpaceRoles { case xs, sm, md, lg, xl }
 
 // Themes/Light.swift
-@Theme struct Light: Theme.Colors.Resolver, Theme.Spacing.Resolver {
+@Theme struct Light: Colors.Resolver, Spacing.Resolver {
     let surface   = Palette.neutral50
     let accent    = Palette.jade500
     // falta `onSurface` → error de conformance en esta línea, con fix-it
 }
 ```
 
-Qué hace cada macro:
+Quién genera qué:
 
-- `@Roles` (sobre la extensión) añade a `Theme` una propiedad por categoría
-  (`var color: Colors.Values`) y marca cada enum con `@_RoleSet`. Diagnostica
-  enums sin categoría y categorías repetidas.
-- `@_RoleSet` (interno, sobre cada enum) genera `Resolver` (un protocolo con una
-  propiedad por rol), `Values` (la resolución inmutable que viaja en `Theme`),
-  `unresolved` (valores de reserva visibles: rosa, `body`, `0`) y la conformance
-  a `RoleSet`. Rechaza casos con valores asociados o raw value.
-- `@Theme` (sobre el struct) lee las conformances `X.Resolver` de la declaración
-  y genera `ThemeProvider.resolvedTheme`, que registra cada `Values`. La
-  completitud la verifica la conformance.
+- `@Roles` (macro) genera `Resolver` (un protocolo con una propiedad por rol),
+  `Values` (la resolución inmutable que viaja en `Theme`), `unresolved` (valores
+  de reserva visibles: rosa, `body`, `0`) y la conformance a `RoleSet`. Rechaza
+  enums sin categoría y casos con valores asociados o raw value.
+- `@Theme` (macro) lee las conformances `X.Resolver` de la declaración y genera
+  `ThemeProvider.resolvedTheme`, que registra cada `Values`. La completitud la
+  verifica la conformance.
 - `@Primitives` solo marca la paleta para el exportador.
+- `LiveryRegistry` (plugin) escribe `extension Theme` con `var color: Colors.Values`
+  por cada `@Roles` y `static var light: Theme` por cada `@Theme` construible sin
+  argumentos. Diagnostica categorías repetidas con archivo y línea.
 - `@Component` / `@Style` (fase 3): generan la tabla de combinaciones y exigen
   switch exhaustivo.
-- `@Bridge(from:to:)` (fase 2): exige cobertura de todos los roles viejos y
-  genera la conformance del tema nuevo al resolver viejo.
+- `@Bridge(from:to:)` (fase 2): el plugin verifica cobertura de todos los roles
+  viejos y genera reenvíos deprecados en `Values` (ver sección 8).
 
-Límite actual: una categoría solo puede declararse una vez por tema. Un segundo
+Límite actual: una categoría solo puede declararse una vez por módulo. Un segundo
 conjunto de color para una sección (`PlayerColors`) necesita un namespace propio;
 queda para 0.2.
 
@@ -194,11 +196,13 @@ Cuando el acceso directo hace falta (lógica, no modificadores):
 let spacing = theme.space.md
 ```
 
-Un estilo se aplica por subárbol:
+Un estilo se aplica por subárbol, con el acceso corto que genera el plugin o con
+una instancia cuando el tema tiene parámetros:
 
 ```swift
-ContentView().theme(Light())
-PlayerView().theme(PlayerDense())
+ContentView().theme(.light)
+PlayerView().theme(adding: .playerDense)
+BrandedView().theme(Brand(accent: .red))
 ```
 
 Varios estilos por app: cada uno es un `@Theme` distinto. Un conjunto de roles
@@ -221,25 +225,40 @@ los pone el proyecto.
 | Se elimina un rol | El compilador lista cada vista que lo leía. |
 | Llega DS2 | Se escribe un `@Bridge`. Ver abajo. |
 
-Migración de DS1 a DS2 con el puente:
+Migración de DS1 a DS2 con el puente. DS2 se declara tal cual lo manda diseño, sin
+mirar DS1; el puente dice cómo se expresa cada rol viejo en términos nuevos:
 
 ```swift
-@Bridge(from: ColorsV1.self, to: ColorsV2.self)
+@Bridge(from: ColorsV1.self, to: Colors.self)
 enum ColorsV1toV2 {
-    static let primary        = ColorsV2.brand            // renombrado
-    static let cardBackground = ColorsV2.surfaceElevated  // renombrado
-    static let divider        = ColorsV2.outline          // fusionado
-    // falta `textSecondary` → error: el puente no cubre ColorsV1.textSecondary
+    static let primary        = Colors.brand                 // renombrado
+    static let cardBackground = Colors.surfaceElevated       // renombrado
+    static let divider        = Colors.outline.opacity(0.4)  // eliminado en DS2
+    // falta `textSecondary` → el plugin falla el build señalando esta línea
 }
 ```
 
-1. Con el puente, el tema DS2 resuelve también DS1. Se cambia el tema de la raíz
-   y toda la app se ve con DS2 sin tocar vistas.
+El plugin verifica que el puente cubra todos los casos de `ColorsV1` y genera, en
+`Colors.Values`, un reenvío deprecado por cada rol viejo:
+
+```swift
+extension Colors.Values {
+    @available(*, deprecated, renamed: "brand")
+    var primary: Color { brand }
+    @available(*, deprecated, message: "DS2 eliminó divider; usa outline con opacidad")
+    var divider: Color { outline.opacity(0.4) }
+}
+```
+
+1. Con el puente, las vistas que leen `\.color.primary` obtienen `brand`. Se cambia
+   el tema de la raíz a uno que resuelve DS2 y toda la app se ve con DS2 sin tocar
+   vistas. El puente no toca los temas.
 2. Cada rol de DS1 queda deprecado con reemplazo. Migrar una vista es aceptar
    fix-its. El conteo de warnings es la barra de progreso y un gate en CI: no
    sube, solo baja.
 3. DS1 y DS2 conviven en el mismo árbol, pantalla por pantalla.
-4. En cero warnings se borran DS1 y el puente.
+4. En cero warnings se borran DS1 y el puente. El plugin deja de generar los
+   reenvíos y cualquier uso viejo que quedara pasa de warning a error.
 
 Lo que queda manual: la ambigüedad semántica. Si DS1 `primary` se usaba para
 marca y acción y DS2 los separa, el puente elige un default y las vistas que
@@ -284,8 +303,11 @@ error.
   Podría volver en fase 3 para el lado del consumo.
 - **R4. `#colorLiteral` en Swift 6.2.** Verificar que sigue mostrando swatch y
   compila en targets de librería.
-- **R5. Macros y extensiones.** Un macro peer no puede generar `extension Theme`
-  (comprobado). Por eso los roles viven dentro de `extension Theme`.
+- **R5. Macros y extensiones.** Un macro no puede generar `extension Theme` desde
+  otro tipo, ni como peer ni como extensión (comprobado dos veces: el compilador
+  rechaza la primera y reescribe la segunda al tipo decorado). Por eso existe el
+  plugin de build. Costo: activar el plugin en el target, el diálogo de confianza
+  de Xcode la primera vez, y autocompletado de `.light` solo tras compilar.
 - **D1.** Nombre del paquete: `Livery` (antes `ThemeKit`). Decidido.
 - **D2.** Mínimo de plataforma: iOS 17 / macOS 14 por `resolve(in:)`. Decidido.
 
@@ -293,8 +315,8 @@ error.
 
 | Fase | Entrega | Criterio de hecho |
 |---|---|---|
-| 0.1 Núcleo | `@Primitives`, `@Roles`, `@Theme`, `.theme(_:)`, `.theme(adding:)`, `ThemeStyle`, sobrecargas para color, fuente, padding, radio. **Hecho** salvo `theme init`. | Sajaru Corner tiene su DS declarado y una pantalla migrada a key paths. |
-| 0.2 Cambio | `@Deprecated(renamed:)` sobre roles, `@Bridge`, `theme report`, `ThemeLint`. | Migrar un conjunto de roles V1→V2 en Sajaru sin tocar vistas, y bajar warnings a cero. |
+| 0.1 Núcleo | `@Primitives`, `@Roles`, `@Theme`, plugin `LiveryRegistry`, `.theme(_:)`, `.theme(adding:)`, `ThemeStyle`, sobrecargas para color, fuente, padding, radio. **Hecho** salvo `theme init`. | Sajaru Corner tiene su DS declarado y una pantalla migrada a key paths. |
+| 0.2 Cambio | `@Bridge` con reenvíos deprecados generados, `theme report` y lint en el plugin. | Migrar un conjunto de roles V1→V2 en Sajaru sin tocar vistas, y bajar warnings a cero. |
 | 0.3 Componentes | `@Component`, `@Style`, catálogo base (Button, Card, TextField). | Botón de Sajaru declarado como contrato con estilo exhaustivo. |
 | 0.4 Diseño | `theme export` / `theme import` W3C, catálogo visual generado. | Tokens de Sajaru abren en Penpot. |
 

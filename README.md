@@ -20,13 +20,11 @@ Cambiar de marca, de modo o de sistema de diseño entero es repintar, no reconst
 import Livery
 
 // Qué existe. Los nombres los pone tu proyecto; las categorías las fija Livery.
-@Roles extension Theme {
-    enum Colors: ColorRoles  { case surface, onSurface, accent }
-    enum Spacing: SpaceRoles { case sm, md, lg }
-}
+@Roles enum Colors: ColorRoles  { case surface, onSurface, accent }
+@Roles enum Spacing: SpaceRoles { case sm, md, lg }
 
 // Cómo se resuelve. Si falta un rol, el compilador lo señala en esta línea.
-@Theme struct Carbon: Theme.Colors.Resolver, Theme.Spacing.Resolver {
+@Theme struct Carbon: Colors.Resolver, Spacing.Resolver {
     let surface = Color.black, onSurface = Color.white, accent = Color.orange
     let sm: CGFloat = 8, md: CGFloat = 16, lg: CGFloat = 24
 }
@@ -41,8 +39,22 @@ struct Card: View {
     }
 }
 
-ContentView().theme(Carbon())
+ContentView().theme(.carbon)
 ```
+
+`theme.color` y `.carbon` los genera el plugin de build `LiveryRegistry`, el `aapt` de Livery:
+recorre los fuentes del target antes de compilar y escribe la extensión de `Theme` que un macro
+no puede escribir. Actívalo en el target que declara el sistema de diseño:
+
+```swift
+.target(
+    name: "App",
+    dependencies: [.product(name: "Livery", package: "Livery")],
+    plugins: [.plugin(name: "LiveryRegistry", package: "Livery")]
+)
+```
+
+Un tema con parámetros no recibe acceso corto; se aplica con `.theme(Brand(accent: .red))`.
 
 ## Qué verifica el compilador
 
@@ -53,7 +65,8 @@ ContentView().theme(Carbon())
 
 ## Estado
 
-Fase 0.1: `@Roles`, `@Theme`, `@Primitives`, `.theme(_:)`, `.theme(adding:)` y sobrecargas de
-modificadores para color, fuente, espaciado y radio. Swift 6.2, iOS 17 / macOS 14.
+Fase 0.1: `@Roles`, `@Theme`, `@Primitives`, el plugin `LiveryRegistry`, `.theme(_:)`,
+`.theme(adding:)` y sobrecargas de modificadores para color, fuente, espaciado y radio.
+Swift 6.2, iOS 17 / macOS 14.
 
 El diseño completo, las fases y los riesgos están en [PLAN.md](PLAN.md).

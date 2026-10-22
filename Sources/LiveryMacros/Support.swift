@@ -10,9 +10,6 @@ enum RoleCategory: String, CaseIterable {
     case space = "SpaceRoles"
     case shape = "ShapeRoles"
 
-    /// Nombre de la propiedad generada en `Theme`.
-    var property: String { String(describing: self) }
-
     /// Tipo de cada rol, cualificado para no chocar con tipos anidados del usuario.
     var valueType: String {
         switch self {

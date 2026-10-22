@@ -3,34 +3,28 @@
 //  Livery
 //
 
-/// Declara los conjuntos de roles de un sistema de diseño.
+/// Declara un conjunto de roles: un enum con un caso por decisión de diseño.
 ///
-/// Se aplica a una `extension Theme`. Cada enum dentro declara un conjunto de roles y su
-/// categoría por conformance: ``ColorRoles``, ``TypeRoles``, ``SpaceRoles`` o ``ShapeRoles``.
+/// La categoría se declara por conformance (``ColorRoles``, ``TypeRoles``, ``SpaceRoles`` o
+/// ``ShapeRoles``) y fija el tipo de cada rol y el nombre bajo el que se expone en ``Theme``.
 ///
 /// ```swift
-/// @Roles extension Theme {
-///     enum Colors: ColorRoles { case surface, onSurface, accent }
-///     enum Spacing: SpaceRoles { case xs, sm, md, lg }
-/// }
+/// @Roles enum Colors: ColorRoles { case surface, onSurface, accent }
+/// @Roles enum Spacing: SpaceRoles { case xs, sm, md, lg }
 /// ```
 ///
-/// Por cada enum genera:
+/// El macro genera:
 /// - `Colors.Resolver`: un protocolo con una propiedad por rol. Un tema lo conforma, y si olvida
 ///   un rol, el compilador lo señala en la línea del tema.
 /// - `Colors.Values`: la resolución inmutable que viaja en ``Theme``.
-/// - `Theme.color` (o `type`, `space`, `shape` según la categoría), para que `\.color.surface`
-///   exista como key path.
+/// - `Colors.unresolved`: valores de reserva visibles (rosa, `body`, `0`).
 ///
-/// Una categoría solo puede declararse una vez por tema.
-@attached(member, names: named(color), named(type), named(space), named(shape))
-@attached(memberAttribute)
-public macro Roles() = #externalMacro(module: "LiveryMacros", type: "RolesMacro")
-
-/// Macro interna que ``Roles()`` adjunta a cada enum de roles. No la uses directamente.
+/// La propiedad `theme.color` (o `type`, `space`, `shape`) la genera el plugin de build
+/// `LiveryRegistry`, que debe estar activo en el target. Una categoría solo puede declararse
+/// una vez por módulo; el plugin lo verifica.
 @attached(member, names: named(Resolver), named(Values), named(unresolved))
 @attached(extension, conformances: RoleSet)
-public macro _RoleSet() = #externalMacro(module: "LiveryMacros", type: "RoleSetMacro")
+public macro Roles() = #externalMacro(module: "LiveryMacros", type: "RolesMacro")
 
 /// Declara un tema: la resolución de uno o más conjuntos de roles.
 ///
@@ -38,7 +32,7 @@ public macro _RoleSet() = #externalMacro(module: "LiveryMacros", type: "RoleSetM
 /// verifica el compilador: si falta un rol, es un error de conformance con fix-it.
 ///
 /// ```swift
-/// @Theme struct Light: Theme.Colors.Resolver, Theme.Spacing.Resolver {
+/// @Theme struct Light: Colors.Resolver, Spacing.Resolver {
 ///     let surface   = Palette.neutral50
 ///     let onSurface = Palette.neutral900
 ///     let accent    = Palette.jade500
@@ -47,6 +41,8 @@ public macro _RoleSet() = #externalMacro(module: "LiveryMacros", type: "RoleSetM
 /// ```
 ///
 /// Genera la conformance a ``ThemeProvider`` para poder aplicarlo con `.theme(Light())`.
+/// El acceso corto `.theme(.light)` lo genera el plugin de build `LiveryRegistry` para todo
+/// tema que se pueda construir sin argumentos.
 /// Las conformances a `Resolver` deben estar en la declaración, no en una extensión.
 @attached(extension, conformances: ThemeProvider, names: named(resolvedTheme))
 public macro Theme() = #externalMacro(module: "LiveryMacros", type: "ThemeMacro")

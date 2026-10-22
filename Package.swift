@@ -10,12 +10,14 @@ let package = Package(
     products: [
         /// Runtime (`Theme`, `.theme(_:)`, key paths como estilos) y las macros `@Roles`, `@Theme`, `@Primitives`.
         .library(name: "Livery", targets: ["Livery"]),
+        /// Build-tool plugin: genera `theme.color` por cada `@Roles` y `.light` por cada `@Theme`.
+        .plugin(name: "LiveryRegistry", targets: ["LiveryRegistry"]),
     ],
     dependencies: [
         .package(url: "https://github.com/swiftlang/swift-syntax.git", "600.0.0"..<"605.0.0"),
     ],
     targets: [
-        // Plugin del compilador: el `aapt` de Livery. Lee declaraciones, verifica y genera accesores.
+        // Plugin del compilador: verifica declaraciones y genera lo que vive dentro del tipo decorado.
         .macro(
             name: "LiveryMacros",
             dependencies: [
@@ -27,8 +29,25 @@ let package = Package(
         // Runtime público.
         .target(name: "Livery", dependencies: ["LiveryMacros"]),
 
-        // Pruebas end-to-end: roles, temas y resolución desde el entorno.
-        .testTarget(name: "LiveryTests", dependencies: ["Livery"]),
+        // Registro: el `aapt` de Livery. Generador, herramienta y plugin de build.
+        .target(
+            name: "LiveryRegistryCore",
+            dependencies: [
+                .product(name: "SwiftSyntax", package: "swift-syntax"),
+                .product(name: "SwiftParser", package: "swift-syntax"),
+            ]
+        ),
+        .executableTarget(name: "livery-registry", dependencies: ["LiveryRegistryCore"]),
+        .plugin(
+            name: "LiveryRegistry",
+            capability: .buildTool(),
+            dependencies: ["livery-registry"]
+        ),
+
+        // Pruebas end-to-end: roles y temas planos, con el plugin activo, resueltos desde el entorno.
+        .testTarget(name: "LiveryTests", dependencies: ["Livery"], plugins: ["LiveryRegistry"]),
+        // Pruebas del generador del registro.
+        .testTarget(name: "LiveryRegistryTests", dependencies: ["LiveryRegistryCore"]),
         // Pruebas de expansión y diagnósticos de las macros.
         .testTarget(
             name: "LiveryMacrosTests",

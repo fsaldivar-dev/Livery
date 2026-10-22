@@ -2,16 +2,15 @@ import SwiftUI
 import Testing
 @testable import Livery
 
-// Un sistema de diseño mínimo, declarado como lo haría una app.
+// Un sistema de diseño mínimo, declarado como lo haría una app: tipos planos, sin `extension Theme`.
+// `theme.color`, `.light` y `.dense` los genera el plugin LiveryRegistry, activo en este target.
 
-@Roles extension Theme {
-    enum Colors: ColorRoles { case surface, onSurface, accent }
-    enum Typography: TypeRoles { case title, body }
-    enum Spacing: SpaceRoles { case sm, md, lg }
-    enum Shapes: ShapeRoles { case small, medium }
-}
+@Roles enum Colors: ColorRoles { case surface, onSurface, accent }
+@Roles enum Typography: TypeRoles { case title, body }
+@Roles enum Spacing: SpaceRoles { case sm, md, lg }
+@Roles enum Shapes: ShapeRoles { case small, medium }
 
-@Theme struct Light: Theme.Colors.Resolver, Theme.Spacing.Resolver {
+@Theme struct Light: Colors.Resolver, Spacing.Resolver {
     let surface = Color.white
     let onSurface = Color.black
     let accent = Color.green
@@ -20,10 +19,17 @@ import Testing
     let lg: CGFloat = 24
 }
 
-@Theme struct Dense: Theme.Spacing.Resolver {
+@Theme struct Dense: Spacing.Resolver {
     let sm: CGFloat = 4
     let md: CGFloat = 8
     let lg: CGFloat = 12
+}
+
+/// Un tema con parámetros: sin acceso estático, se aplica con `.theme(Brand(accent:))`.
+@Theme struct Brand: Colors.Resolver {
+    let surface = Color.white
+    let onSurface = Color.black
+    let accent: Color
 }
 
 @Primitives enum Palette {
@@ -35,32 +41,37 @@ import Testing
         let theme = Light().resolvedTheme
         #expect(theme.color.accent == .green)
         #expect(theme.space.md == 16)
-        #expect(theme.resolves(Theme.Colors.self))
-        #expect(!theme.resolves(Theme.Typography.self))
+        #expect(theme.resolves(Colors.self))
+        #expect(!theme.resolves(Typography.self))
+    }
+
+    @Test func registryGeneratesStaticAccessors() {
+        #expect(Theme.light.color.accent == .green)
+        #expect(Theme.dense.space.sm == 4)
+        #expect(Brand(accent: .red).resolvedTheme.color.accent == .red)
     }
 
     @Test func unresolvedSetFallsBackToVisiblePlaceholders() {
-        let theme = Light().resolvedTheme
+        let theme = Theme.light
         #expect(theme.type.title == .body)
         #expect(theme.shape.medium == 0)
-        #expect(Theme.Colors.unresolved.surface == .pink)
+        #expect(Colors.unresolved.surface == .pink)
     }
 
     @Test func mergingKeepsInheritedSetsAndOverridesProvided() {
-        let merged = Light().resolvedTheme.merging(Dense().resolvedTheme)
+        let merged = Theme.light.merging(.dense)
         #expect(merged.color.surface == .white)
         #expect(merged.space.md == 8)
     }
 
     @Test func keyPathsResolveAgainstTheme() {
-        let theme = Light().resolvedTheme
         let accent: KeyPath<Theme, Color> & Sendable = \.color.accent
-        #expect(theme[keyPath: accent] == .green)
+        #expect(Theme.light[keyPath: accent] == .green)
     }
 
     @Test func themeStyleResolvesFromEnvironment() {
         var environment = EnvironmentValues()
-        environment.theme = Light().resolvedTheme
+        environment.theme = .light
         #expect(ThemeStyle(\.color.onSurface).resolve(in: environment) == .black)
     }
 
@@ -75,7 +86,9 @@ import Testing
             .tint(\.color.accent)
             .clipShape(cornerRadius: \.shape.small)
             .border(.theme(\.color.accent))
-            .theme(Light())
+            .theme(.light)
+            .theme(adding: .dense)
+            .theme(Brand(accent: .red))
             .theme(adding: Dense())
         _ = Circle().fill(\.color.accent)
         _ = Circle().stroke(\.color.accent, lineWidth: 2)

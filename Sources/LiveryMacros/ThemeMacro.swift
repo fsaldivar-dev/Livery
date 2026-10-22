@@ -1,7 +1,7 @@
 import SwiftSyntax
 import SwiftSyntaxMacros
 
-/// `@Theme struct Light: Theme.Colors.Resolver, Theme.Spacing.Resolver { … }`
+/// `@Theme struct Light: Colors.Resolver, Spacing.Resolver { … }`
 ///
 /// Lee las conformances a `Resolver` y genera `ThemeProvider.resolvedTheme` registrando la
 /// resolución de cada conjunto.
@@ -25,7 +25,7 @@ public struct ThemeMacro: ExtensionMacro {
         }
         guard !roleSets.isEmpty else {
             context.error(
-                "@Theme necesita al menos una conformance a un `Resolver` en la declaración, por ejemplo `Theme.Colors.Resolver`.",
+                "@Theme necesita al menos una conformance a un `Resolver` en la declaración, por ejemplo `Colors.Resolver`.",
                 id: "theme.noResolvers", at: node)
             return []
         }
