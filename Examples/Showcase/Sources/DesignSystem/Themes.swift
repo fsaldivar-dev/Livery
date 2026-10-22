@@ -14,30 +14,19 @@ import SwiftUI
 @Theme public struct Daylight: Colors.Resolver, Typography.Resolver, Spacing.Resolver, Shapes.Resolver, Button.Styler {
     public init() {}
 
-    /// El estilo del botón, en roles: sirve igual para Carbon, que solo cambia los colores.
+    /// El botón, en roles: sirve igual para Carbon, que solo cambia los colores.
     public var button: Button.Style {
         Button.Style(
-            base: { part in
-                switch part {
-                case .container: Button.PartStyle(background: .surfaceElevated, border: .outline,
-                                                  paddingVertical: .sm, paddingHorizontal: .md, radius: .small)
-                case .label: Button.PartStyle(foreground: .onSurface, font: .headline)
-                case .icon: Button.PartStyle(foreground: .accent)
-                }
-            },
-            variants: [
-                .primary: [.container: .init(background: .accent, border: .accent),
-                           .label: .init(foreground: .onAccent), .icon: .init(foreground: .onAccent)],
-                .destructive: [.container: .init(border: .danger), .label: .init(foreground: .danger), .icon: .init(foreground: .danger)],
-            ],
-            sizes: [
-                .small: [.container: .init(paddingVertical: .xs, paddingHorizontal: .sm), .label: .init(font: .caption)],
-                .large: [.container: .init(paddingVertical: .md, paddingHorizontal: .lg, radius: .medium)],
-            ],
-            states: [
-                .pressed: [.container: .init(opacity: 0.7)],
-                .disabled: [.container: .init(opacity: 0.4)],
-            ]
+            primary:     Button.Look(background: .accent,          foreground: .onAccent),
+            secondary:   Button.Look(background: .surfaceElevated, foreground: .onSurface, border: .outline, icon: .accent),
+            destructive: Button.Look(background: .surfaceElevated, foreground: .danger,    border: .danger),
+
+            small:  Button.Metrics(font: .caption,  vertical: .xs, horizontal: .sm, radius: .small),
+            medium: Button.Metrics(font: .headline, vertical: .sm, horizontal: .md, radius: .small),
+            large:  Button.Metrics(font: .headline, vertical: .md, horizontal: .lg, radius: .medium),
+
+            pressed:  Button.Effect(opacity: 0.7),
+            disabled: Button.Effect(opacity: 0.4)
         )
     }
 

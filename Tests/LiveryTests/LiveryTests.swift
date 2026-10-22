@@ -134,61 +134,38 @@ import Testing
     }
 }
 
-// Un contrato de componente mínimo, como lo escribiría una app (y como lo generará @Component).
+// Un contrato de componente mínimo, con la forma que generará @Component: un Look por variante.
 enum Chip {
-    enum Part: ComponentPart { case container, label }
-    enum Kind: ComponentVariant { case neutral, accent }
+    enum Variant: ComponentVariant { case neutral, accent }
     enum Size: ComponentSize { case regular }
-
-    struct Attributes: PartAttributes, Equatable {
-        var background: Colors?
-        var opacity: Double?
-        func overriding(with other: Attributes) -> Attributes {
-            Attributes(background: other.background ?? background, opacity: other.opacity ?? opacity)
-        }
+    struct Look: Sendable, Equatable { var background: Colors; var foreground: Colors }
+    struct Style: Sendable {
+        var neutral: Look
+        var accent: Look
+        func look(for variant: Variant) -> Look { variant == .neutral ? neutral : accent }
     }
-    typealias Style = ComponentStyle<Part, Kind, Size, Attributes>
 }
 
-@Suite struct ComponentStyleTests {
-    let style = Chip.Style(
-        base: { part in
-            switch part {
-            case .container: Chip.Attributes(background: .surface, opacity: 1)
-            case .label: Chip.Attributes(background: nil, opacity: 1)
-            }
-        },
-        variants: [.accent: [.container: Chip.Attributes(background: .accent)]],
-        states: [.disabled: [.container: Chip.Attributes(opacity: 0.4)], .pressed: [.container: Chip.Attributes(background: .onSurface)]]
-    )
-
-    @Test func baseCoversEveryPart() {
-        let parts = style.attributes(variant: .neutral, size: .regular, state: .normal)
-        #expect(Set(parts.keys) == Set(Chip.Part.allCases))
-        #expect(parts[.container] == Chip.Attributes(background: .surface, opacity: 1))
-    }
-
-    @Test func cascadeAppliesVariantThenStateAndKeepsTheRest() {
-        let accent = style.attributes(variant: .accent, size: .regular, state: .normal)[.container]
-        #expect(accent == Chip.Attributes(background: .accent, opacity: 1))
-
-        let disabled = style.attributes(variant: .accent, size: .regular, state: .disabled)[.container]
-        #expect(disabled == Chip.Attributes(background: .accent, opacity: 0.4), "el estado solo toca lo que declara")
-
-        let pressed = style.attributes(variant: .accent, size: .regular, state: .pressed)[.container]
-        #expect(pressed?.background == .onSurface, "el estado gana sobre la variante")
-    }
+@Suite struct ComponentTests {
+    let style = Chip.Style(neutral: .init(background: .surface, foreground: .onSurface),
+                           accent: .init(background: .accent, foreground: .onSurface))
 
     @Test func themeStoresComponentStyles() {
         var theme = Theme.light
         #expect(theme.style(for: Chip.self, as: Chip.Style.self) == nil)
         theme.register(style: style, for: Chip.self)
         let stored: Chip.Style? = theme.style(for: Chip.self)
-        #expect(stored?.attributes(variant: .accent, size: .regular, state: .normal)[.container]?.background == .accent)
+        #expect(stored?.look(for: .accent).background == .accent)
         #expect(Theme.light.merging(theme).style(for: Chip.self, as: Chip.Style.self) != nil, "merging conserva los estilos")
+    }
+
+    @Test func looksResolveThroughTheTheme() {
+        let look = style.look(for: .accent)
+        #expect(Theme.light.color[look.background] == Shade(.green))
     }
 
     @Test func sizesDefaultToTheAccessibilityMinimum() {
         #expect(Chip.Size.regular.minimumHitTarget == 44)
+        #expect(ComponentState.allCases.count == 5)
     }
 }
