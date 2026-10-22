@@ -82,8 +82,12 @@ public enum Button {
         public var selected: Effect
 
         public init(
-            primary: Look, secondary: Look, destructive: Look,
-            small: Metrics, medium: Metrics, large: Metrics,
+            primary: Look,
+            secondary: Look,
+            destructive: Look,
+            small: Metrics,
+            medium: Metrics,
+            large: Metrics,
             pressed: Effect = Effect(opacity: 0.85, scale: 0.97),
             disabled: Effect = Effect(opacity: 0.4),
             focused: Effect = Effect(),
@@ -129,8 +133,8 @@ public enum Button {
         primary: Look(background: .danger, foreground: .onAccent),
         secondary: Look(background: .danger, foreground: .onAccent),
         destructive: Look(background: .danger, foreground: .onAccent),
-        small: Metrics(font: .caption, vertical: .xs, horizontal: .sm, radius: .small),
-        medium: Metrics(font: .headline, vertical: .sm, horizontal: .md, radius: .small),
+        small: Metrics(font: .caption, vertical: .xs, horizontal: .sm, radius: .large),
+        medium: Metrics(font: .headline, vertical: .sm, horizontal: .md, radius: .large),
         large: Metrics(font: .headline, vertical: .md, horizontal: .lg, radius: .medium)
     )
 }

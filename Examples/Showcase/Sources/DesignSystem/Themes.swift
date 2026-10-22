@@ -17,13 +17,13 @@ import SwiftUI
     /// El botón, en roles: sirve igual para Carbon, que solo cambia los colores.
     public var button: Button.Style {
         Button.Style(
-            primary:     Button.Look(background: .accent,          foreground: .onAccent),
-            secondary:   Button.Look(background: .surfaceElevated, foreground: .onSurface, border: .outline, icon: .accent),
-            destructive: Button.Look(background: .surfaceElevated, foreground: .danger,    border: .danger),
+            primary:     Button.Look(background: .accent,  foreground: .onAccent, icon: .onAccent),
+            secondary:   Button.Look(background: .surface, foreground: .onSurface, icon: .accent),
+            destructive: Button.Look(background: .surface, foreground: .danger,    icon: .danger),
 
-            small:  Button.Metrics(font: .caption,  vertical: .xs, horizontal: .sm, radius: .small),
-            medium: Button.Metrics(font: .headline, vertical: .sm, horizontal: .md, radius: .small),
-            large:  Button.Metrics(font: .headline, vertical: .md, horizontal: .lg, radius: .medium),
+            small:  Button.Metrics(font: .caption,  vertical: .xs, horizontal: .md, radius: .small),
+            medium: Button.Metrics(font: .headline, vertical: .sm, horizontal: .lg, radius: .medium),
+            large:  Button.Metrics(font: .headline, vertical: .md, horizontal: .xl, radius: .medium),
 
             pressed:  Button.Effect(opacity: 0.85, scale: 0.97, motion: .quick),
             disabled: Button.Effect(opacity: 0.4)

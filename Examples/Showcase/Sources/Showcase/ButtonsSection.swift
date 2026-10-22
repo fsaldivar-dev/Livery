@@ -22,7 +22,7 @@ struct ButtonsSection: View {
                         .font(theme.type.caption)
                         .foregroundStyle(theme.color.onSurfaceSecondary)
                         .frame(width: 64, alignment: .leading)
-                        .padding(.top, theme.space.sm)
+                        .frame(minHeight: 44)
                     VStack(alignment: .leading, spacing: theme.space.sm) {
                         row(disabled: false)
                         row(disabled: true)

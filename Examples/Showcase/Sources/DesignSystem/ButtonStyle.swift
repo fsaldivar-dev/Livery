@@ -31,7 +31,9 @@ public struct ThemedButtonStyle: ButtonStyle {
         let metrics = theme.button.metrics(for: size)
         let effect = theme.button.effect(for: state)
 
-        // 3. Pintarlo con modificadores nativos.
+        // 3. Pintarlo con modificadores nativos. El fondo mide lo que el contenido pide; el área
+        //    táctil llega a los 44 pt con un marco transparente, sin agrandar el botón visible.
+        let radius = theme.shape[metrics.radius]
         configuration.label
             .labelStyle(.iconTinted(look.icon.map { theme.color[$0] }))
             .lineLimit(1)
@@ -40,16 +42,16 @@ public struct ThemedButtonStyle: ButtonStyle {
             .foregroundStyle(theme.color[look.foreground])
             .padding(.vertical, theme.space[metrics.vertical])
             .padding(.horizontal, theme.space[metrics.horizontal])
-            .frame(minHeight: size.minimumHitTarget)
-            .background(theme.color[look.background], in: .rect(cornerRadius: theme.shape[metrics.radius]))
+            .background(theme.color[look.background], in: .rect(cornerRadius: radius, style: .continuous))
             .overlay {
                 if let border = look.border {
-                    RoundedRectangle(cornerRadius: theme.shape[metrics.radius]).stroke(theme.color[border])
+                    RoundedRectangle(cornerRadius: radius, style: .continuous).stroke(theme.color[border])
                 }
             }
-            .contentShape(.rect(cornerRadius: theme.shape[metrics.radius]))
             .opacity(effect.opacity)
             .scaleEffect(effect.scale)
+            .frame(minHeight: size.minimumHitTarget)
+            .contentShape(.rect(cornerRadius: radius))
             .animation(theme.motion[effect.motion].resolve(reduceMotion: reduceMotion), value: state)
     }
 }
