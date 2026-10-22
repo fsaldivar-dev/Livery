@@ -9,10 +9,10 @@ import OSLog
 
 /// El tema activo en un subárbol de vistas: la resolución de cada conjunto de roles.
 ///
-/// `Theme` es la raíz de toda referencia (`theme.color.onSurface`, `theme.space.md`). Las
-/// propiedades por categoría (`color`, `type`, `space`, `shape`) las genera el plugin de build
-/// `LiveryRegistry` a partir de los enums `@Roles` del módulo. El kernel solo conoce las
-/// categorías; los nombres de cada rol los pone el proyecto.
+/// Las vistas lo leen con `@Environment(\.theme) var theme` y hablan en roles:
+/// `theme.color.onSurface`, `theme.space.md`. Las propiedades por categoría (`color`, `type`,
+/// `space`, `shape`) las escribe el generador de Livery a partir de los enums `@Roles` del
+/// módulo. El kernel solo conoce las categorías; los nombres de cada rol los pone el proyecto.
 public struct Theme: Sendable {
     private var storage: [ObjectIdentifier: any Sendable] = [:]
 

@@ -14,8 +14,8 @@ extension EnvironmentValues {
     /// ContentView().environment(\.theme, .carbon)
     /// ```
     ///
-    /// Léelo solo cuando necesites un valor en lógica, no en un modificador; para estilos usa
-    /// referencias (`.foregroundStyle(theme.color.onSurface)`).
+    /// Las vistas lo leen con `@Environment(\.theme) private var theme` y usan sus valores en
+    /// modificadores nativos: `.font(theme.type.title)`, `.foregroundStyle(theme.color.onSurface)`.
     @Entry public var theme: Theme = Theme()
 }
 

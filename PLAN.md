@@ -76,7 +76,7 @@ La estructura es el fuselaje; tu marca es la librea. El namespace en las vistas 
 
 | Target | Tipo | Contenido |
 |---|---|---|
-| `Livery` | librería | Runtime: `Theme`, `Shade`, `ThemeRef` (referencias `.theme…` con autocompletado, `ShapeStyle` para colores), `EnvironmentValues.theme`, `.environment(\.theme, …)` y `.environment(\.theme, adding:)`, sobrecargas de modificadores. |
+| `Livery` | librería | Runtime: `Theme`, `Shade` (`ShapeStyle`), `EnvironmentValues.theme` y `.environment(\.theme, adding:)`. Sin `@dynamicMemberLookup`, globales ni sobrecargas de modificadores. |
 | `LiveryMacros` | macro | `@Primitives`, `@Roles`, `@Theme`, `@Component`, `@Style`, `@Bridge`. |
 | `ThemeLint` | build plugin | Marca valores hardcodeados en targets de UI. |
 | `theme` | ejecutable | CLI: `init`, `export`, `import`, `report`. |
@@ -195,16 +195,13 @@ Historia de esta decisión, medida con `sourcekit-lsp` y verificada en Xcode:
   `font`, donde compite con la sobrecarga nativa que recibe `Font?`.
 - `.theme.type.title` (miembro implícito): autocompleta en un archivo mínimo y da
   cero dentro de un `ViewBuilder` real.
-- `theme.type.title` con `theme` global: perfecto en `sourcekit-lsp`, pero en
-  Xcode, que tipa un paquete local desde el fuente, el global aparecía sin tipo
-  y la cadena no seguía, incluso con el tipo anotado.
-- `@Environment(\.theme) var theme`: tipo declarado en la vista, autocompletado
-  determinista en cualquier posición.
-
-El global `theme` (un `ThemeRef<Theme>` con `@dynamicMemberLookup`) se conserva
-como atajo para vistas que no quieran la línea del `@Environment`: las cadenas
-son las mismas y se resuelven al dibujar. `ThemeRef<Shade>` es `ShapeStyle` y
-hay sobrecargas finas para fuente, padding, radio y `tint`.
+- `theme.type.title` con `theme` global (`ThemeRef` con `@dynamicMemberLookup`):
+  perfecto en `sourcekit-lsp`, pero Xcode no completaba a través de él ni con el
+  tipo anotado, y su sola presencia en el mismo nombre interfería con la
+  propiedad de la vista. Eliminado: Livery ya no tiene `@dynamicMemberLookup`,
+  globales ni sobrecargas de modificadores.
+- `@Environment(\.theme) var theme`: tipo declarado en la vista, valores planos
+  (`Font`, `Shade`, `CGFloat`) en modificadores nativos. Es la única forma.
 
 Aplicar un tema es poner un valor en el entorno, una vez, en la raíz:
 
@@ -347,8 +344,9 @@ usos legítimos de layout para una regla sintáctica.
 
 - **R1. Key paths y miembros implícitos en modificadores.** Descartados: el
   `KeyPath` no puede ser `ShapeStyle`, y tanto `\.x` como `.theme.x` autocompletan
-  mal según el contexto. La API es el global `theme` sobre `ThemeRef` con
-  `@dynamicMemberLookup` (sección 7). Al medir autocompletado, borrar antes
+  mal según el contexto, y un global con `@dynamicMemberLookup` tampoco
+  completaba en Xcode. La API es `@Environment(\.theme) var theme` con valores
+  planos (sección 7). Al medir autocompletado, borrar antes
   `.build/index-build`: un índice rancio da resultados de una API que ya no existe.
 - **R2. Seguridad de tipos entre subárboles.** Con una sola raíz `Theme`, un
   key path a un conjunto de roles que el tema activo no resuelve no puede fallar
@@ -374,7 +372,7 @@ usos legítimos de layout para una regla sintáctica.
 
 | Fase | Entrega | Criterio de hecho |
 |---|---|---|
-| 0.1 Núcleo | `@Primitives`, `@Roles`, `@Theme`, `Shade`, plugin `LiveryRegistry`, `.environment(\.theme, …)`, `.environment(\.theme, adding:)`, `ThemeRef`, sobrecargas para fuente, padding, radio, tint, `theme init`. **Hecho.** | Sajaru Corner tiene su DS declarado y una pantalla migrada a key paths. |
+| 0.1 Núcleo | `@Primitives`, `@Roles`, `@Theme`, `Shade`, plugin `LiveryRegistry`, `livery-generate`, `.environment(\.theme, adding:)`, `theme init`. **Hecho.** | Sajaru Corner tiene su DS declarado y una pantalla migrada a `@Environment(\.theme)`. |
 | 0.2 Cambio | `@Bridge` con reenvíos deprecados y reporte de usos pendientes, lint en el plugin. **Hecho.** | Migrar un conjunto de roles V1→V2 en Sajaru sin tocar vistas, y bajar warnings a cero. |
 | 0.3 Componentes | `@Component`, `@Style`, catálogo base (Button, Card, TextField). | Botón de Sajaru declarado como contrato con estilo exhaustivo. |
 | 0.4 Diseño | `theme export` / `theme import` W3C, catálogo visual generado. | Tokens de Sajaru abren en Penpot. |

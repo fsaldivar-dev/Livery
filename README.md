@@ -63,9 +63,7 @@ struct Card: View {
 ContentView().environment(\.theme, .carbon)
 ```
 
-Con `import Livery` basta: Livery reexporta SwiftUI. Para una vista pequeña que no quiera
-declarar la propiedad, el global `theme` ofrece las mismas cadenas (`.font(theme.type.body)`) y
-se resuelve al dibujar.
+Con `import Livery` basta: Livery reexporta SwiftUI.
 
 `theme.color` y `.carbon` no los escribe un macro, porque un macro no puede extender `Theme`
 desde otro tipo. Los escribe el generador de Livery, el `aapt` del framework, de dos formas:

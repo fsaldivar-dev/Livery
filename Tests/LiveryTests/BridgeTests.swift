@@ -26,12 +26,6 @@ enum ColorsV1toV2 {
         #expect(colors.onSurface == Shade(light: .black, dark: .white), "un rol que existe en ambos no cambia")
     }
 
-    @available(*, deprecated)
-    @Test func oldRefsWorkInModifiers() {
-        let ref: ThemeRef<Shade> = theme.color.primary
-        #expect(Theme.light[ref] == Theme.light.color.accent)
-    }
-
     @Test func legacySetDoesNotOccupyTheCategory() {
         #expect(!Theme.light.resolves(ColorsV1.self))
         #expect(Theme.light.resolves(Colors.self))

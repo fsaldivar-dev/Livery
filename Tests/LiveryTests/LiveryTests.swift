@@ -69,16 +69,10 @@ import Testing
         #expect(merged.space.md == 8)
     }
 
-    @Test func refsResolveAgainstTheme() {
-        let accent: ThemeRef<Shade> = theme.color.accent
-        #expect(Theme.light[accent] == Shade(.green))
-        #expect(Theme.light[theme.space.lg] == 24)
-    }
-
-    @Test func refResolvesByColorSchemeAndContrast() {
+    @Test func shadeResolvesByColorSchemeAndContrast() {
         var environment = EnvironmentValues()
         environment.theme = .light
-        let style: ThemeRef<Shade> = theme.color.surface
+        let style = Theme.light.color.surface
 
         environment.colorScheme = .light
         #expect(style.resolve(in: environment) == .white)
@@ -117,27 +111,25 @@ import Testing
         #endif
     }
 
-    /// Solo comprueba que las sobrecargas compilan con la forma prometida.
-    @Test @MainActor func modifiersAcceptKeyPaths() {
+    /// Solo comprueba que la forma recomendada compila: valores planos en modificadores nativos.
+    @Test @MainActor func valuesWorkWithNativeModifiers() {
+        let theme = Theme.light
         let view = Text("hola")
             .font(theme.type.title)
             .foregroundStyle(theme.color.onSurface)
             .padding(theme.space.lg)
             .padding(.horizontal, theme.space.sm)
             .background(theme.color.surface)
-            .background(theme.color.surface, cornerRadius: theme.shape.medium)
-            .background(theme.color.surface, in: Capsule())
+            .background(theme.color.surface, in: .rect(cornerRadius: theme.shape.medium))
             .tint(theme.color.accent)
-            .clipShape(cornerRadius: theme.shape.small)
+            .clipShape(.rect(cornerRadius: theme.shape.small))
             .border(theme.color.accent)
             .environment(\.theme, .light)
             .environment(\.theme, adding: .dense)
             .environment(\.theme, Brand(accent: Shade(.red)).resolvedTheme)
-            .foregroundStyle(Theme.light.color.accent)
             .environment(\.theme, adding: Dense())
         _ = Circle().fill(theme.color.accent)
         _ = Circle().stroke(theme.color.accent, lineWidth: 2)
-        _ = ThemeValue(theme.space.md) { VStack(spacing: $0) { Text("a") } }
         #expect(type(of: view) != Never.self)
     }
 }
