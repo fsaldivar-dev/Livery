@@ -161,6 +161,9 @@ public struct RegistryGenerator {
         if !active.isEmpty {
             code += "\n" + Self.exporter(active)
         }
+        if let colors = active.first(where: { $0.category == .color }) {
+            code += "\n" + Self.contrastChecker(colors)
+        }
         for ext in extensions {
             code += "\n" + ext
         }
@@ -267,6 +270,19 @@ public struct RegistryGenerator {
         lines.append("    }")
         lines.append("}")
         return lines.joined(separator: "\n") + "\n"
+    }
+
+    /// Genera `Theme.contrastReport(_:)`, que mide el contraste WCAG de los pares `onX`/`X`.
+    static func contrastChecker(_ colors: RoleSetDecl) -> String {
+        """
+        extension Livery.Theme {
+            /// Pares de color `onX`/`X` que no llegan al contraste WCAG, en claro y oscuro.
+            public func contrastReport(_ level: Livery.WCAGLevel = .AA) -> [Livery.ContrastIssue] {
+                Livery.ContrastChecker.check(\(colors.qualifiedName).allCases.map { (String(describing: $0), self.color[$0]) }, level: level)
+            }
+        }
+
+        """
     }
 
     static func lastComponent(_ name: String) -> String {

@@ -29,6 +29,13 @@ extension Livery.Theme {
     }
 }
 
+extension Livery.Theme {
+    /// Pares de color `onX`/`X` que no llegan al contraste WCAG, en claro y oscuro.
+    public func contrastReport(_ level: Livery.WCAGLevel = .AA) -> [Livery.ContrastIssue] {
+        Livery.ContrastChecker.check(Colors.allCases.map { (String(describing: $0), self.color[$0]) }, level: level)
+    }
+}
+
 extension Colors.Values {
     @available(*, deprecated, renamed: "accent")
     public var primary: Livery.Shade { accent }

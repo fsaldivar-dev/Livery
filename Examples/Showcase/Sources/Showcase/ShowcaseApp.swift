@@ -32,6 +32,14 @@ struct ShowcaseApp: App {
             Export.write(to: CommandLine.arguments[index + 1])
             exit(0)
         }
+        if CommandLine.arguments.contains("--contrast") {
+            for (name, theme) in [("Daylight", Theme.daylight), ("Carbon", Theme.daylight.merging(.carbon))] {
+                let issues = theme.contrastReport()
+                print(issues.isEmpty ? "\(name): AA ✓" : "\(name): \(issues.count) problemas")
+                for issue in issues { print("  \(issue)") }
+            }
+            exit(0)
+        }
         NSApplication.shared.setActivationPolicy(.regular)
         NSApplication.shared.activate(ignoringOtherApps: true)
         #endif

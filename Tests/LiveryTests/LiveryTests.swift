@@ -204,3 +204,32 @@ enum Chip {
         #expect((object["spacing"] as! [String: Any])["md"] != nil)
     }
 }
+
+@Suite struct ContrastTests {
+    @Test func blackOnWhiteIsTheMaximumRatio() {
+        let ratio = Shade(.white).contrastRatio(against: Shade(.black), mode: .light)
+        #expect(abs(ratio - 21) < 0.5)
+    }
+
+    @Test func flagsLowContrastPairsButNotGoodOnes() {
+        let roles: [(name: String, shade: Shade)] = [
+            ("surface", Shade(.white)),
+            ("onSurface", Shade(Color(white: 0.75))),              // gris claro sobre blanco → falla
+            ("accent", Shade(Color(red: 0.1, green: 0.1, blue: 0.5))),
+            ("onAccent", Shade(.white)),                            // blanco sobre azul oscuro → pasa
+        ]
+        let issues = ContrastChecker.check(roles, level: .AA)
+        #expect(issues.contains { $0.foreground == "onSurface" }, "texto gris claro sobre blanco no llega a 4.5:1")
+        #expect(!issues.contains { $0.foreground == "onAccent" })
+    }
+
+    @Test func checksBothModes() {
+        // onSurface legible en claro pero no en oscuro (ambos fondos iguales a propósito).
+        let roles: [(name: String, shade: Shade)] = [
+            ("surface", Shade(light: .white, dark: .white)),
+            ("onSurface", Shade(light: .black, dark: Color(white: 0.8))),
+        ]
+        let issues = ContrastChecker.check(roles, level: .AA)
+        #expect(issues.map(\.mode) == [.dark], "solo el modo oscuro falla")
+    }
+}

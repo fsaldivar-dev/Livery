@@ -109,6 +109,7 @@ swift run --package-path Examples/Showcase
 - **Vistas sin primitivos.** La paleta vive en un módulo que las vistas no importan. Leer `Palette.jade500` desde una vista no compila.
 - **Roles mal declarados.** Un enum sin categoría, una categoría repetida o un caso con valores asociados son diagnósticos del macro.
 - **Subárbol sin tema.** En debug, una advertencia de runtime y colores rosa; nunca un fallo en silencio.
+- **Contraste insuficiente.** `theme.contrastReport()` lista los pares `onX`/`X` que no llegan al contraste WCAG AA, en claro y oscuro. Puesto en un test, CI verifica la accesibilidad en cada push.
 - **Valores sueltos en vistas.** Con el plugin activo en un target de UI, un `Color(red:…)`, un `.foregroundStyle(.blue)`, un `.font(.system(size: 14))` o un `.padding(12)` es un warning con archivo y línea. Los módulos que declaran roles, temas o primitivos quedan exentos.
 
 ## Componentes

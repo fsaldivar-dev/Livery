@@ -243,9 +243,10 @@ decide con su tipo de valor a qué responde:
 | Reducir movimiento | `Motion`, con variante reducida opcional; sin ella, no anima | Hecho |
 | Clase de tamaño | variantes de `space` | Pendiente |
 
-Reglas verificables en build, en el plugin: contraste WCAG entre pares por
-convención (`onSurface` sobre `surface`, `onAccent` sobre `accent`) cuando los
-valores son literales, en ambos modos. Pendiente (fase 2).
+Reglas verificables: `theme.contrastReport()` (runtime, como el export, porque
+necesita la luminancia resuelta) mide el contraste WCAG de los pares `onX`/`X` en
+claro y oscuro; el plugin lo genera. Puesto en un test, CI verifica la
+accesibilidad. Daylight y Carbon pasan AA. **Hecho.**
 
 Semántica para VoiceOver y objetivos táctiles mínimos: parte de los contratos de
 componente (fase 3).
