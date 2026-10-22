@@ -306,14 +306,24 @@ deprecado, en qué archivos se usa.
 
 ## 9. Lint
 
-`ThemeLint` corre en cada build sobre targets de UI y marca como warning:
+Hecho. El plugin `LiveryRegistry`, en un target donde no encuentra `@Roles`,
+`@Theme`, `@Bridge` ni `@Primitives`, trata el módulo como UI y marca como
+warning, con archivo y línea:
 
-- `Color(red:green:blue:)`, `Color(hex:)`, `Color("nombre")`
-- `.padding(13)`, `.frame(width: 240)`, `Font.system(size:)`
-- `.cornerRadius(8)`, `.shadow(radius:)`
+- Colores construidos en la vista: `Color(red:…)`, `Color("nombre")`,
+  `Color(hex:)`, `Color(.sRGB, …)`.
+- Colores del sistema: `Color.red`, `.foregroundStyle(.blue)`, en
+  `foregroundStyle`, `background`, `fill`, `stroke`, `tint`, `border`.
+- Fuentes fuera del tema: `Font.system(size:)` y estilos de texto directos
+  (`.font(.title)`).
+- Medidas sueltas distintas de cero en `padding`, `spacing:` y `cornerRadius:`.
 
-En CI el conteo no puede subir. Los `import Primitives` fuera de `Themes` son
-error.
+Los módulos del sistema de diseño quedan exentos por definición: ahí es donde
+los valores crudos deben vivir. El lint avisa, no rompe el build; la regla de
+"en CI el conteo no sube" es del pipeline, no del plugin.
+
+Fuera por ahora: `frame(width:height:)`, `shadow`, `lineWidth`. Tienen demasiados
+usos legítimos de layout para una regla sintáctica.
 
 ## 10. Interoperabilidad
 
@@ -356,7 +366,7 @@ error.
 | Fase | Entrega | Criterio de hecho |
 |---|---|---|
 | 0.1 Núcleo | `@Primitives`, `@Roles`, `@Theme`, `Shade`, plugin `LiveryRegistry`, `.theme(_:)`, `.theme(adding:)`, `ThemeRef`, sobrecargas para fuente, padding, radio, tint. **Hecho** salvo `theme init`. | Sajaru Corner tiene su DS declarado y una pantalla migrada a key paths. |
-| 0.2 Cambio | `@Bridge` con reenvíos deprecados y reporte de usos pendientes (**hecho**), lint en el plugin (pendiente). | Migrar un conjunto de roles V1→V2 en Sajaru sin tocar vistas, y bajar warnings a cero. |
+| 0.2 Cambio | `@Bridge` con reenvíos deprecados y reporte de usos pendientes, lint en el plugin. **Hecho.** | Migrar un conjunto de roles V1→V2 en Sajaru sin tocar vistas, y bajar warnings a cero. |
 | 0.3 Componentes | `@Component`, `@Style`, catálogo base (Button, Card, TextField). | Botón de Sajaru declarado como contrato con estilo exhaustivo. |
 | 0.4 Diseño | `theme export` / `theme import` W3C, catálogo visual generado. | Tokens de Sajaru abren en Penpot. |
 

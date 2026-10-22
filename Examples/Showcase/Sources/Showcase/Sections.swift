@@ -50,10 +50,12 @@ struct ColorsSection: View {
 private struct Swatch: View {
     let color: Color
     var body: some View {
-        RoundedRectangle(cornerRadius: 6, style: .continuous)
-            .fill(color)
-            .frame(width: 56, height: 28)
-            .overlay(RoundedRectangle(cornerRadius: 6, style: .continuous).stroke(.theme.color.outline))
+        ThemeValue(.theme.shape.small) { radius in
+            RoundedRectangle(cornerRadius: radius, style: .continuous)
+                .fill(color)
+                .frame(width: 56, height: 28)
+                .overlay(RoundedRectangle(cornerRadius: radius, style: .continuous).stroke(.theme.color.outline))
+        }
     }
 }
 

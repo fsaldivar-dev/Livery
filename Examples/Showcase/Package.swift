@@ -25,10 +25,12 @@ let package = Package(
             dependencies: ["Primitives", .product(name: "Livery", package: "Livery")],
             plugins: [.plugin(name: "LiveryRegistry", package: "Livery")]
         ),
-        // La app: importa DesignSystem y Livery, nunca Primitives.
+        // La app: importa DesignSystem y Livery, nunca Primitives. Con el plugin activo, el lint
+        // avisa de cualquier color, fuente o medida decidida fuera del sistema.
         .executableTarget(
             name: "Showcase",
-            dependencies: ["DesignSystem", .product(name: "Livery", package: "Livery")]
+            dependencies: ["DesignSystem", .product(name: "Livery", package: "Livery")],
+            plugins: [.plugin(name: "LiveryRegistry", package: "Livery")]
         ),
     ]
 )

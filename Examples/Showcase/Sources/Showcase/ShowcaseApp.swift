@@ -68,27 +68,29 @@ struct ShowcaseView: View {
                 GalleryView()
             }
             .background(.theme.color.surface)
-            .theme(choice.theme)
-            .theme(adding: dense ? .dense : Theme())
             .environment(\.colorScheme, scheme)
         }
+        .theme(choice.theme)
+        .theme(adding: dense ? .dense : Theme())
     }
 
     private var controls: some View {
-        HStack(spacing: 16) {
-            Picker("Tema", selection: $choice) {
-                ForEach(ThemeChoice.allCases) { Text($0.rawValue).tag($0) }
+        ThemeValue(.theme.space.md) { gap in
+            HStack(spacing: gap) {
+                Picker("Tema", selection: $choice) {
+                    ForEach(ThemeChoice.allCases) { Text($0.rawValue).tag($0) }
+                }
+                Picker("Modo", selection: $scheme) {
+                    Text("Claro").tag(ColorScheme.light)
+                    Text("Oscuro").tag(ColorScheme.dark)
+                }
+                .pickerStyle(.segmented)
+                .frame(width: 160)
+                Toggle("Denso", isOn: $dense)
+                Spacer()
             }
-            Picker("Modo", selection: $scheme) {
-                Text("Claro").tag(ColorScheme.light)
-                Text("Oscuro").tag(ColorScheme.dark)
-            }
-            .pickerStyle(.segmented)
-            .frame(width: 160)
-            Toggle("Denso", isOn: $dense)
-            Spacer()
         }
-        .padding(12)
+        .padding(.theme.space.md)
     }
 }
 

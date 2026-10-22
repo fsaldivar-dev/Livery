@@ -106,6 +106,11 @@ public struct RegistryGenerator {
             }
         }
 
+        // Un módulo sin declaraciones es un módulo de UI: se vigila que no decida valores por su cuenta.
+        if roles.isEmpty && themes.isEmpty && bridges.isEmpty && !sources.contains(where: { $0.text.contains("@Primitives") }) {
+            diagnostics.append(contentsOf: Lint().check(sources: sources))
+        }
+
         var code = """
         // Generado por Livery (plugin LiveryRegistry). No editar.
         // Una propiedad por conjunto de roles @Roles, un acceso estático por tema @Theme y los reenvíos de cada @Bridge del módulo.
