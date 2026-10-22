@@ -163,65 +163,61 @@ Límite actual: una categoría solo puede declararse una vez por módulo. Un seg
 conjunto de color para una sección (`PlayerColors`) necesita un namespace propio;
 queda para 0.2.
 
-## 7. Consumo: inyección automática
+## 7. Consumo
 
-La vista nunca declara el entorno. Una referencia `theme.<categoría>.<rol>` se
-resuelve contra el tema del subárbol al dibujar:
+La forma recomendada es la de SwiftUI: la vista declara el tema como propiedad
+del entorno y habla solo en roles, con modificadores nativos.
 
 ```swift
-Text(fighter.name)
-    .font(theme.type.titleMedium)
-    .foregroundStyle(theme.color.onSurface)
-    .padding(theme.space.lg)
-    .background(theme.color.surfaceElevated, cornerRadius: theme.shape.medium)
+struct Card: View {
+    @Environment(\.theme) private var theme
+
+    var body: some View {
+        Text(fighter.name)
+            .font(theme.type.titleMedium)
+            .foregroundStyle(theme.color.onSurface)
+            .padding(theme.space.lg)
+            .background(theme.color.surfaceElevated, in: .rect(cornerRadius: theme.shape.medium))
+    }
+}
 ```
 
-Por qué un valor global `theme` y no key paths ni miembros implícitos. Las tres
-formas se midieron con `sourcekit-lsp` sobre el Showcase, en la posición real de
-una vista (dentro de un `VStack` con una docena de modificadores):
+`theme` es un `Theme` con tipo declarado en el mismo archivo: `theme.type.x` es un
+`Font`, `theme.color.x` un `Shade` (que es `ShapeStyle`), `theme.space.x` un
+`CGFloat`. No hay nada que inferir, y por eso el autocompletado no puede fallar.
+
+Historia de esta decisión, medida con `sourcekit-lsp` y verificada en Xcode:
 
 - `\.type.title` (key path): autocompleta en `foregroundStyle` y da cero en
   `font`, donde compite con la sobrecarga nativa que recibe `Font?`.
 - `.theme.type.title` (miembro implícito): autocompleta en un archivo mínimo y da
-  cero dentro del `ViewBuilder` real; Xcode agota el presupuesto del solver y
-  muestra miembros de `String`.
-- `theme.type.title` (valor global): lista exactamente los roles en todas las
-  posiciones, porque `theme.` se resuelve solo, sin mirar la llamada que lo rodea.
+  cero dentro de un `ViewBuilder` real.
+- `theme.type.title` con `theme` global: perfecto en `sourcekit-lsp`, pero en
+  Xcode, que tipa un paquete local desde el fuente, el global aparecía sin tipo
+  y la cadena no seguía, incluso con el tipo anotado.
+- `@Environment(\.theme) var theme`: tipo declarado en la vista, autocompletado
+  determinista en cualquier posición.
 
-Aplicar un tema no tiene modificador propio: es el entorno nativo,
-`.environment(\.theme, .carbon)`, más una sobrecarga del mismo nombre para sumar
-un tema parcial, `.environment(\.theme, adding: .dense)`. Un modificador
-`.theme(_:)` colisionaba con el global dentro de las vistas, y un verbo propio
-(`.livery`) era vocabulario que la app no debería aprender.
+El global `theme` (un `ThemeRef<Theme>` con `@dynamicMemberLookup`) se conserva
+como atajo para vistas que no quieran la línea del `@Environment`: las cadenas
+son las mismas y se resuelven al dibujar. `ThemeRef<Shade>` es `ShapeStyle` y
+hay sobrecargas finas para fuente, padding, radio y `tint`.
 
-Mecanismo:
-
-1. **Colores**: `ThemeRef<Shade>` conforma a `ShapeStyle` y resuelve en
-   `resolve(in environment:)` leyendo `environment.theme`, `colorScheme` y
-   `colorSchemeContrast`. Vale en cualquier modificador nativo que acepte un
-   `ShapeStyle`: `foregroundStyle`, `background`, `fill`, `stroke`, `border`.
-   Sin sobrecargas.
-2. **Lo que SwiftUI pide como valor concreto** (fuente, padding, radios, y `tint`
-   porque recibe un opcional): sobrecargas de `View` que resuelven vía
-   `ThemeValue`, una vista que lee el entorno y aplica el valor. `ThemeValue` es
-   público para los casos que ninguna sobrecarga cubre (`spacing` de un `VStack`).
-
-Cuando hace falta el valor en lógica, no en un modificador:
+Aplicar un tema es poner un valor en el entorno, una vez, en la raíz:
 
 ```swift
-@Environment(\.theme) var theme
-let spacing = theme.space.md          // o theme[theme.space.md]
-let shade = theme.color[.accent]      // subscript por caso, para galerías y exportadores
+ContentView().environment(\.theme, .light)
+PlayerView().environment(\.theme, adding: .playerDense)
+BrandedView().environment(\.theme, adding: Brand(accent: Shade(.purple)))
 ```
 
-Un estilo se aplica por subárbol, con el acceso corto que genera el plugin o con
-una instancia cuando el tema tiene parámetros:
+No hay inyección automática: el valor por defecto del entorno lo define Livery,
+que no conoce los temas de la app, y evitarlo exigiría `@_dynamicReplacement` o
+escanear clases ObjC al arrancar. La línea en la raíz es además la que necesitan
+los previews: `#Preview { Card().environment(\.theme, .light) }`.
 
-```swift
-ContentView().environment(\\.theme, .light)
-PlayerView().environment(\\.theme, adding: .playerDense)
-BrandedView().environment(\\.theme, adding: Brand(accent: Shade(.purple)))
-```
+Cuando hace falta el valor en lógica, no en un modificador, la misma propiedad
+sirve: `theme.color[.accent]` (subscript por caso, para galerías y exportadores).
 
 Varios estilos por app: cada uno es un `@Theme` distinto. Un conjunto de roles
 que un subárbol no resuelve es un fallo en debug con mensaje claro

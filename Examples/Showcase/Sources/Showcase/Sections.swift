@@ -3,7 +3,6 @@
 //  Showcase
 //
 //  La galería recorre los roles con `CaseIterable` y los lee con el subscript `theme.color[.accent]`.
-//  Aquí sí hace falta `@Environment(\.theme)`: es lógica, no un modificador.
 //
 
 import DesignSystem
@@ -11,6 +10,7 @@ import Livery
 import SwiftUI
 
 struct SectionTitle: View {
+    @Environment(\.theme) private var theme
     let text: String
     var body: some View {
         Text(text)
@@ -48,14 +48,13 @@ struct ColorsSection: View {
 }
 
 private struct Swatch: View {
+    @Environment(\.theme) private var theme
     let color: Color
     var body: some View {
-        ThemeValue(theme.shape.small) { radius in
-            RoundedRectangle(cornerRadius: radius, style: .continuous)
-                .fill(color)
-                .frame(width: 56, height: 28)
-                .overlay(RoundedRectangle(cornerRadius: radius, style: .continuous).stroke(theme.color.outline))
-        }
+        RoundedRectangle(cornerRadius: theme.shape.small, style: .continuous)
+            .fill(color)
+            .frame(width: 56, height: 28)
+            .overlay(RoundedRectangle(cornerRadius: theme.shape.small, style: .continuous).stroke(theme.color.outline))
     }
 }
 

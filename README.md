@@ -45,23 +45,28 @@ import Livery
     let sm: CGFloat = 8, md: CGFloat = 16, lg: CGFloat = 24
 }
 
-// Las vistas hablan solo en roles. Sin `@Environment`, sin primitivos, sin strings.
-// `theme` es un valor global: cada paso autocompleta con los roles que existen.
+// Las vistas leen el tema del entorno y hablan solo en roles: sin primitivos, sin strings.
+// `theme` tiene su tipo declarado aquí, así que cada paso autocompleta con los roles que existen.
 struct Card: View {
+    @Environment(\.theme) private var theme
+
     var body: some View {
         Text("Hola")
             .font(theme.type.body)
             .foregroundStyle(theme.color.onSurface)
             .padding(theme.space.lg)
-            .background(theme.color.surface, cornerRadius: theme.shape.medium)
+            .background(theme.color.surface, in: .rect(cornerRadius: theme.shape.medium))
     }
 }
 
+// Una vez, en la raíz. Es el entorno de SwiftUI, no un mecanismo propio.
 ContentView().environment(\.theme, .carbon)
 ```
 
-Con `import Livery` basta: Livery reexporta SwiftUI. `theme.color` y `.carbon` los genera el
-plugin de build `LiveryRegistry`, el `aapt` de Livery:
+Con `import Livery` basta: Livery reexporta SwiftUI. Para una vista pequeña que no quiera
+declarar la propiedad, el global `theme` ofrece las mismas cadenas (`.font(theme.type.body)`) y
+se resuelve al dibujar. `theme.color` y `.carbon` los genera el plugin de build `LiveryRegistry`,
+el `aapt` de Livery:
 recorre los fuentes del target antes de compilar y escribe la extensión de `Theme` que un macro
 no puede escribir. Actívalo en el target que declara el sistema de diseño:
 

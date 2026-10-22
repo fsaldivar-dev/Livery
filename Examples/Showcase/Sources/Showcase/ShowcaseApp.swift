@@ -56,6 +56,7 @@ enum ThemeChoice: String, CaseIterable, Identifiable {
 }
 
 struct ShowcaseView: View {
+    @Environment(\.theme) private var theme
     @State private var choice: ThemeChoice = .daylight
     @State private var scheme: ColorScheme = .light
     @State private var dense = false
@@ -75,8 +76,8 @@ struct ShowcaseView: View {
     }
 
     private var controls: some View {
-        ThemeValue(theme.space.md) { gap in
-            HStack(spacing: gap) {
+        Group {
+            HStack(spacing: theme.space.md) {
                 Picker("Tema", selection: $choice) {
                     ForEach(ThemeChoice.allCases) { Text($0.rawValue).tag($0) }
                 }
@@ -96,16 +97,16 @@ struct ShowcaseView: View {
 
 /// La galería: una tarjeta real y las secciones de roles.
 struct GalleryView: View {
+    @Environment(\.theme) private var theme
+
     var body: some View {
-        ThemeValue(theme.space.xl) { gap in
-            VStack(alignment: .leading, spacing: gap) {
-                SampleCard()
-                ColorsSection()
-                TypographySection()
-                SpacingSection()
-                ShapesSection()
-                LegacyCard()
-            }
+        VStack(alignment: .leading, spacing: theme.space.xl) {
+            SampleCard()
+            ColorsSection()
+            TypographySection()
+            SpacingSection()
+            ShapesSection()
+            LegacyCard()
         }
         .padding(theme.space.xl)
         .frame(maxWidth: .infinity, alignment: .leading)

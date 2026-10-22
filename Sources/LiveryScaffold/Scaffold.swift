@@ -95,7 +95,8 @@ public struct Scaffold {
              colores, fuentes y medidas decididas fuera del sistema (Xcode: Build Phases ›
              Run Build Tool Plug-ins; SwiftPM: `plugins: [.plugin(name: "LiveryRegistry", package: "Livery")]`).
 
-        Las vistas hablan solo en roles: `.foregroundStyle(theme.color.onSurface)`, `.padding(theme.space.md)`.
+        Las vistas leen el tema con `@Environment(\\.theme) var theme` y hablan solo en roles:
+        `.foregroundStyle(theme.color.onSurface)`, `.padding(theme.space.md)`.
         Nunca importes \(primitivesModule) desde una vista: ahí viven los valores crudos.
         """
     }
@@ -325,12 +326,17 @@ public struct Scaffold {
         import \(name)
         import Livery
 
-        ContentView().environment(\\.theme, .base)
+        ContentView().environment(\\.theme, .base)   // una vez, en la raíz
 
-        Text("Hola")
-            .font(theme.type.body)
-            .foregroundStyle(theme.color.onSurface)
-            .padding(theme.space.md)
+        struct Card: View {
+            @Environment(\\.theme) private var theme
+            var body: some View {
+                Text("Hola")
+                    .font(theme.type.body)
+                    .foregroundStyle(theme.color.onSurface)
+                    .padding(theme.space.md)
+            }
+        }
         ```
 
         """

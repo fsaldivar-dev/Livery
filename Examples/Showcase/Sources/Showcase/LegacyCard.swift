@@ -12,6 +12,8 @@ import Livery
 import SwiftUI
 
 struct LegacyCard: View {
+    @Environment(\.theme) private var theme
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             SectionTitle(text: "Migración · vista sin migrar (ColorsV1)")
@@ -27,7 +29,7 @@ struct LegacyCard: View {
                     .font(theme.type.body)
                     .foregroundStyle(theme.color.onSurface)
                     .padding(theme.space.sm)
-                    .background(theme.color.cardBackground, cornerRadius: theme.shape.small)
+                    .background(theme.color.cardBackground, in: .rect(cornerRadius: theme.shape.small))
             }
             .padding(.top, theme.space.sm)
         }

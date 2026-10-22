@@ -2,7 +2,8 @@
 //  SampleCard.swift
 //  Showcase
 //
-//  Una vista "real": habla solo en roles, por referencia `.theme…`, sin `@Environment` ni valores sueltos.
+//  Una vista "real": lee el tema del entorno y habla solo en roles. `theme` es un `Theme` con
+//  tipo declarado aquí mismo, así que cada paso autocompleta y todo va a modificadores nativos.
 //
 
 import DesignSystem
@@ -10,12 +11,13 @@ import Livery
 import SwiftUI
 
 struct SampleCard: View {
+    @Environment(\.theme) private var theme
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             Text("Sajaru Corner")
                 .font(theme.type.title)
                 .foregroundStyle(theme.color.onSurface)
-            Text("This is a some text")
             Text("Round 3 · 2:14 · Sparring")
                 .font(theme.type.caption)
                 .foregroundStyle(theme.color.onSurfaceSecondary)
@@ -30,7 +32,7 @@ struct SampleCard: View {
                     .foregroundStyle(theme.color.onAccent)
                     .padding(.vertical, theme.space.sm)
                     .padding(.horizontal, theme.space.md)
-                    .background(theme.color.accent, cornerRadius: theme.shape.small)
+                    .background(theme.color.accent, in: .rect(cornerRadius: theme.shape.small))
                 Label("Descartar", systemImage: "trash")
                     .font(theme.type.headline)
                     .foregroundStyle(theme.color.danger)
@@ -41,12 +43,16 @@ struct SampleCard: View {
         }
         .padding(theme.space.lg)
         .frame(maxWidth: 520, alignment: .leading)
-        .background(theme.color.surfaceElevated, cornerRadius: theme.shape.medium)
+        .background(theme.color.surfaceElevated, in: .rect(cornerRadius: theme.shape.medium))
         .overlay {
-            ThemeValue(theme.shape.medium) { radius in
-                RoundedRectangle(cornerRadius: radius, style: .continuous)
-                    .stroke(theme.color.outline)
-            }
+            RoundedRectangle(cornerRadius: theme.shape.medium, style: .continuous)
+                .stroke(theme.color.outline)
         }
     }
+}
+
+#Preview {
+    SampleCard()
+        .padding()
+        .environment(\.theme, .daylight)
 }
