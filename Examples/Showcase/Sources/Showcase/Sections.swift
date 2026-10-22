@@ -14,9 +14,27 @@ struct SectionTitle: View {
     let text: String
     var body: some View {
         Text(text)
-            .font(theme.type.headline)
+            .font(theme.type.caption)
             .foregroundStyle(theme.color.onSurfaceSecondary)
             .textCase(.uppercase)
+            .padding(.bottom, theme.space.xs)
+    }
+}
+
+/// Una sección de la galería: una tarjeta sobre el fondo, como lo haría una app.
+struct Panel<Content: View>: View {
+    @Environment(\.theme) private var theme
+    @ViewBuilder let content: Content
+
+    var body: some View {
+        content
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(theme.space.lg)
+            .background(theme.color.surfaceElevated, in: .rect(cornerRadius: theme.shape.medium))
+            .overlay {
+                RoundedRectangle(cornerRadius: theme.shape.medium, style: .continuous)
+                    .stroke(theme.color.outline)
+            }
     }
 }
 

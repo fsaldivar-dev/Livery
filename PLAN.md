@@ -120,6 +120,7 @@ valor:
 | `TypeRoles` | `theme.type` | `Font` |
 | `SpaceRoles` | `theme.space` | `CGFloat` |
 | `ShapeRoles` | `theme.shape` | `CGFloat` (radio) |
+| `MotionRoles` | `theme.motion` | `Motion`: animación y variante para reducir movimiento |
 
 ```swift
 // Primitives/Palette.swift
@@ -225,7 +226,7 @@ que un subárbol no resuelve es un fallo en debug con mensaje claro
 Ver riesgo R2.
 
 Lo que la raíz `Theme` expone es el vocabulario del proyecto: `theme.color`,
-`theme.type`, `theme.space`, `theme.shape`, `theme.elevation`, `theme.motion`.
+`theme.type`, `theme.space`, `theme.shape`, `theme.motion`; `theme.elevation` pendiente.
 Los nombres de las categorías los fija el kernel; los roles dentro de cada una
 los pone el proyecto.
 
@@ -239,7 +240,7 @@ decide con su tipo de valor a qué responde:
 | Claro / oscuro | `Shade`, obligatorio | Hecho |
 | Contraste aumentado | `Shade`, variantes opcionales | Hecho |
 | Dynamic Type | `TypeStyle` relativo a un estilo de texto | Pendiente (slice 2) |
-| Reducir movimiento | categoría `motion` con variante reducida | Pendiente |
+| Reducir movimiento | `Motion`, con variante reducida opcional; sin ella, no anima | Hecho |
 | Clase de tamaño | variantes de `space` | Pendiente |
 
 Reglas verificables en build, en el plugin: contraste WCAG entre pares por
@@ -258,7 +259,7 @@ por separado, y esa separación es lo que lo hace legible para quien llega:
 |---|---|---|---|
 | ¿De qué color es? | `Look` | variante | `Look(background: .accent, foreground: .onAccent)` |
 | ¿Cuánto mide? | `Metrics` | tamaño | `Metrics(font: .headline, vertical: .sm, horizontal: .md, radius: .small)` |
-| ¿Qué le pasa? | `Effect` | estado | `Effect(opacity: 0.4)` |
+| ¿Qué le pasa, y con qué movimiento? | `Effect` | estado | `Effect(opacity: 0.85, scale: 0.97, motion: .quick)` |
 
 Variantes y tamaños los declara el proyecto; los estados (`normal`, `pressed`,
 `disabled`, `focused`, `selected`) los fija el kernel. `Style` tiene un campo por

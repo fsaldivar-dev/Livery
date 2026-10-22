@@ -243,6 +243,7 @@ enum RoleCategory: String, CaseIterable {
     case type = "TypeRoles"
     case space = "SpaceRoles"
     case shape = "ShapeRoles"
+    case motion = "MotionRoles"
 
     /// Nombre de la propiedad generada en `Theme`.
     var property: String { String(describing: self) }
@@ -253,6 +254,7 @@ enum RoleCategory: String, CaseIterable {
         case .color: "Livery.Shade"
         case .type: "SwiftUI.Font"
         case .space, .shape: "CGFloat"
+        case .motion: "Livery.Motion"
         }
     }
 }

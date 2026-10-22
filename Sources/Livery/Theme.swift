@@ -11,7 +11,7 @@ import OSLog
 ///
 /// Las vistas lo leen con `@Environment(\.theme) var theme` y hablan en roles:
 /// `theme.color.onSurface`, `theme.space.md`. Las propiedades por categoría (`color`, `type`,
-/// `space`, `shape`) las escribe el generador de Livery a partir de los enums `@Roles` del
+/// `space`, `shape`, `motion`) las escribe el generador de Livery a partir de los enums `@Roles` del
 /// módulo. El kernel solo conoce las categorías; los nombres de cada rol los pone el proyecto.
 public struct Theme: Sendable {
     private var storage: [ObjectIdentifier: any Sendable] = [:]

@@ -52,10 +52,17 @@ public enum Button {
         }
     }
 
-    /// Qué le pasa en un estado.
+    /// Qué le pasa en un estado, y con qué movimiento se llega a él.
     public struct Effect: Sendable {
         public var opacity: Double
-        public init(opacity: Double = 1) { self.opacity = opacity }
+        public var scale: Double
+        public var motion: Motions
+
+        public init(opacity: Double = 1, scale: Double = 1, motion: Motions = .quick) {
+            self.opacity = opacity
+            self.scale = scale
+            self.motion = motion
+        }
     }
 
     /// El estilo completo: un `Look` por variante, un `Metrics` por tamaño, un `Effect` por estado.
@@ -77,7 +84,7 @@ public enum Button {
         public init(
             primary: Look, secondary: Look, destructive: Look,
             small: Metrics, medium: Metrics, large: Metrics,
-            pressed: Effect = Effect(opacity: 0.7),
+            pressed: Effect = Effect(opacity: 0.85, scale: 0.97),
             disabled: Effect = Effect(opacity: 0.4),
             focused: Effect = Effect(),
             selected: Effect = Effect()

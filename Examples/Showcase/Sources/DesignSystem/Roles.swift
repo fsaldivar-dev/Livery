@@ -24,3 +24,7 @@ import Livery
 @Roles public enum Shapes: ShapeRoles, CaseIterable {
     case small, medium, large
 }
+
+@Roles public enum Motions: MotionRoles, CaseIterable {
+    case quick, normal, slow
+}

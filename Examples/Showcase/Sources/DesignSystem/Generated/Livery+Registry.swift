@@ -7,6 +7,7 @@ extension Livery.Theme {
     public var type: Typography.Values { values(Typography.self) }
     public var space: Spacing.Values { values(Spacing.self) }
     public var shape: Shapes.Values { values(Shapes.self) }
+    public var motion: Motions.Values { values(Motions.self) }
     public static var daylight: Livery.Theme { Daylight().resolvedTheme }
     public static var carbon: Livery.Theme { Carbon().resolvedTheme }
     public static var dense: Livery.Theme { Dense().resolvedTheme }

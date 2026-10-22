@@ -18,6 +18,7 @@ public struct ThemedButtonStyle: ButtonStyle {
     @Environment(\.theme) private var theme
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.controlSize) private var controlSize
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     public func makeBody(configuration: Configuration) -> some View {
         // 1. Qué botón es: la variante pedida, salvo que SwiftUI diga que es destructivo.
@@ -46,9 +47,10 @@ public struct ThemedButtonStyle: ButtonStyle {
                     RoundedRectangle(cornerRadius: theme.shape[metrics.radius]).stroke(theme.color[border])
                 }
             }
-            .opacity(effect.opacity)
             .contentShape(.rect(cornerRadius: theme.shape[metrics.radius]))
-            .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
+            .opacity(effect.opacity)
+            .scaleEffect(effect.scale)
+            .animation(theme.motion[effect.motion].resolve(reduceMotion: reduceMotion), value: state)
     }
 }
 

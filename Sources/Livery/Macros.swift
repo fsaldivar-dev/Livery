@@ -5,8 +5,9 @@
 
 /// Declara un conjunto de roles: un enum con un caso por decisión de diseño.
 ///
-/// La categoría se declara por conformance (``ColorRoles``, ``TypeRoles``, ``SpaceRoles`` o
-/// ``ShapeRoles``) y fija el tipo de cada rol y el nombre bajo el que se expone en ``Theme``.
+/// La categoría se declara por conformance (``ColorRoles``, ``TypeRoles``, ``SpaceRoles``,
+/// ``ShapeRoles`` o ``MotionRoles``) y fija el tipo de cada rol y el nombre bajo el que se expone
+/// en ``Theme``.
 ///
 /// ```swift
 /// @Roles enum Colors: ColorRoles { case surface, onSurface, accent }

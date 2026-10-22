@@ -11,7 +11,7 @@ import Primitives
 import SwiftUI
 
 /// El tema de la app: papel y tinta, acento índigo.
-@Theme public struct Daylight: Colors.Resolver, Typography.Resolver, Spacing.Resolver, Shapes.Resolver, Button.Styler {
+@Theme public struct Daylight: Colors.Resolver, Typography.Resolver, Spacing.Resolver, Shapes.Resolver, Motions.Resolver, Button.Styler {
     public init() {}
 
     /// El botón, en roles: sirve igual para Carbon, que solo cambia los colores.
@@ -25,7 +25,7 @@ import SwiftUI
             medium: Button.Metrics(font: .headline, vertical: .sm, horizontal: .md, radius: .small),
             large:  Button.Metrics(font: .headline, vertical: .md, horizontal: .lg, radius: .medium),
 
-            pressed:  Button.Effect(opacity: 0.7),
+            pressed:  Button.Effect(opacity: 0.85, scale: 0.97, motion: .quick),
             disabled: Button.Effect(opacity: 0.4)
         )
     }
@@ -53,6 +53,10 @@ import SwiftUI
     public let small: CGFloat  = 6
     public let medium: CGFloat = 12
     public let large: CGFloat  = 20
+
+    public let quick  = Motion(.easeOut(duration: 0.12))
+    public let normal = Motion(.snappy(duration: 0.25), reduced: .easeOut(duration: 0.1))
+    public let slow   = Motion(.smooth(duration: 0.4), reduced: .easeOut(duration: 0.15))
 }
 
 /// Un rebrand completo: misma estructura, otra pintura. Grafito y ámbar. Hereda tipografía,

@@ -247,6 +247,10 @@ public struct Scaffold {
             case small, medium, large
         }
 
+        @Roles public enum Motions: MotionRoles, CaseIterable {
+            case quick, normal, slow
+        }
+
         """
     }
 
@@ -264,7 +268,7 @@ public struct Scaffold {
         import Livery
         import \(primitivesModule)
 
-        @Theme public struct Base: Colors.Resolver, Typography.Resolver, Spacing.Resolver, Shapes.Resolver {
+        @Theme public struct Base: Colors.Resolver, Typography.Resolver, Spacing.Resolver, Shapes.Resolver, Motions.Resolver {
             public init() {}
 
             public let surface            = Shade(light: Palette.neutral50, dark: Palette.neutral950)
@@ -290,6 +294,11 @@ public struct Scaffold {
             public let small: CGFloat  = 6
             public let medium: CGFloat = 12
             public let large: CGFloat  = 20
+
+            // Movimiento: con variante para "Reducir movimiento"; sin ella, la animación se omite.
+            public let quick  = Motion(.easeOut(duration: 0.12))
+            public let normal = Motion(.snappy(duration: 0.25), reduced: .easeOut(duration: 0.1))
+            public let slow   = Motion(.smooth(duration: 0.4), reduced: .easeOut(duration: 0.15))
         }
 
         """
@@ -308,6 +317,7 @@ public struct Scaffold {
                 #expect(theme.resolves(Typography.self))
                 #expect(theme.resolves(Spacing.self))
                 #expect(theme.resolves(Shapes.self))
+                #expect(theme.resolves(Motions.self))
             }
 
             @Test func spacingScaleIsIncreasing() {

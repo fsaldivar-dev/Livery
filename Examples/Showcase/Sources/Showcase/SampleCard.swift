@@ -35,7 +35,7 @@ struct SampleCard: View {
             .padding(.top, theme.space.lg)
         }
         .padding(theme.space.lg)
-        .frame(maxWidth: 520, alignment: .leading)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .background(theme.color.surfaceElevated, in: .rect(cornerRadius: theme.shape.medium))
         .overlay {
             RoundedRectangle(cornerRadius: theme.shape.medium, style: .continuous)

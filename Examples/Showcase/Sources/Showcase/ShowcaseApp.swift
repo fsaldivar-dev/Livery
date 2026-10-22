@@ -92,6 +92,7 @@ struct ShowcaseView: View {
             }
         }
         .padding(theme.space.md)
+        .background(theme.color.surfaceElevated)
     }
 }
 
@@ -100,14 +101,16 @@ struct GalleryView: View {
     @Environment(\.theme) private var theme
 
     var body: some View {
-        VStack(alignment: .leading, spacing: theme.space.xl) {
+        VStack(alignment: .leading, spacing: theme.space.lg) {
             SampleCard()
-            ButtonsSection()
-            ColorsSection()
-            TypographySection()
-            SpacingSection()
-            ShapesSection()
-            LegacyCard()
+            Panel { ButtonsSection() }
+            Panel { ColorsSection() }
+            Panel { TypographySection() }
+            HStack(alignment: .top, spacing: theme.space.lg) {
+                Panel { SpacingSection() }
+                Panel { ShapesSection() }
+            }
+            Panel { LegacyCard() }
         }
         .padding(theme.space.xl)
         .frame(maxWidth: .infinity, alignment: .leading)
