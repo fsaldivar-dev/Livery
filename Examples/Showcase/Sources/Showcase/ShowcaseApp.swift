@@ -28,6 +28,10 @@ struct ShowcaseApp: App {
             Snapshot.write(to: CommandLine.arguments[index + 1])
             exit(0)
         }
+        if let index = CommandLine.arguments.firstIndex(of: "--export"), index + 1 < CommandLine.arguments.count {
+            Export.write(to: CommandLine.arguments[index + 1])
+            exit(0)
+        }
         NSApplication.shared.setActivationPolicy(.regular)
         NSApplication.shared.activate(ignoringOtherApps: true)
         #endif
@@ -140,6 +144,22 @@ struct GalleryContent: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(theme.color.surface)
         .tint(theme.color.accent)   // los controles nativos (Toggle, Slider…) siguen el acento del tema
+    }
+}
+
+/// Escribe los tokens W3C de cada tema y modo, para abrirlos en Penpot o Figma.
+enum Export {
+    static func write(to directory: String) {
+        try? FileManager.default.createDirectory(atPath: directory, withIntermediateDirectories: true)
+        let themes: [(String, Theme)] = [("daylight", .daylight), ("carbon", Theme.daylight.merging(.carbon))]
+        for (name, theme) in themes {
+            for mode in [TokenMode.light, .dark] {
+                let json = theme.w3cTokens(mode: mode)
+                let file = "\(name)-\(mode.rawValue).tokens.json"
+                try? json.write(toFile: directory + "/" + file, atomically: true, encoding: .utf8)
+                print("export: \(file)")
+            }
+        }
     }
 }
 

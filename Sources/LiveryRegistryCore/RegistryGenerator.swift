@@ -157,6 +157,10 @@ public struct RegistryGenerator {
         if !members.isEmpty {
             code += "extension Livery.Theme {\n" + members.joined(separator: "\n") + "\n}\n"
         }
+        let active = roles.filter { !legacy.contains(Self.lastComponent($0.qualifiedName)) }
+        if !active.isEmpty {
+            code += "\n" + Self.exporter(active)
+        }
         for ext in extensions {
             code += "\n" + ext
         }
@@ -232,6 +236,35 @@ public struct RegistryGenerator {
                 lines.append("    \(to.access)var \(member.name): \(to.category.valueType) { \(bridge.qualifiedName).\(member.name)(self) }")
             }
         }
+        lines.append("}")
+        return lines.joined(separator: "\n") + "\n"
+    }
+
+    /// Genera `Theme.w3cTokens(mode:)`, que recorre cada rol y lo vuelca a W3C Design Tokens.
+    static func exporter(_ roles: [RoleSetDecl]) -> String {
+        var lines = ["extension Livery.Theme {",
+                     "    /// Exporta este tema a W3C Design Tokens (JSON) para Penpot y Figma.",
+                     "    public func w3cTokens(mode: Livery.TokenMode = .light) -> String {",
+                     "        let document = Livery.W3CDocument()"]
+        for role in roles {
+            let each = "role"
+            let name = "String(describing: \(each))"
+            let loop = "        for \(each) in \(role.qualifiedName).allCases {"
+            switch role.category {
+            case .color:
+                lines.append(#"\#(loop) document.color("color", \#(name), self.color[\#(each)], mode: mode) }"#)
+            case .space:
+                lines.append(#"\#(loop) document.dimension("spacing", \#(name), self.space[\#(each)]) }"#)
+            case .shape:
+                lines.append(#"\#(loop) document.dimension("radius", \#(name), self.shape[\#(each)]) }"#)
+            case .type:
+                lines.append(#"\#(loop) document.typography("font", \#(name), self.type[\#(each)]) }"#)
+            case .motion:
+                lines.append("        // \(role.qualifiedName): el movimiento no tiene token W3C estándar; se omite.")
+            }
+        }
+        lines.append("        return document.json")
+        lines.append("    }")
         lines.append("}")
         return lines.joined(separator: "\n") + "\n"
     }

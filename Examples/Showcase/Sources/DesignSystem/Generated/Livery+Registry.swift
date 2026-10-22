@@ -16,6 +16,19 @@ extension Livery.Theme {
     // `Brand` necesita argumentos: aplícalo con `.environment(\.theme, Brand(…).resolvedTheme)`.
 }
 
+extension Livery.Theme {
+    /// Exporta este tema a W3C Design Tokens (JSON) para Penpot y Figma.
+    public func w3cTokens(mode: Livery.TokenMode = .light) -> String {
+        let document = Livery.W3CDocument()
+        for role in Colors.allCases { document.color("color", String(describing: role), self.color[role], mode: mode) }
+        for role in Typography.allCases { document.typography("font", String(describing: role), self.type[role]) }
+        for role in Spacing.allCases { document.dimension("spacing", String(describing: role), self.space[role]) }
+        for role in Shapes.allCases { document.dimension("radius", String(describing: role), self.shape[role]) }
+        // Motions: el movimiento no tiene token W3C estándar; se omite.
+        return document.json
+    }
+}
+
 extension Colors.Values {
     @available(*, deprecated, renamed: "accent")
     public var primary: Livery.Shade { accent }

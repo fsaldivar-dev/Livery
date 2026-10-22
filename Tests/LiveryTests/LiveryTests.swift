@@ -169,3 +169,38 @@ enum Chip {
         #expect(ComponentState.allCases.count == 5)
     }
 }
+
+@Suite struct ExportTests {
+    @Test func shadeExportsHexPerMode() {
+        let shade = Shade(light: Color(red: 1, green: 0, blue: 0), dark: Color(red: 0, green: 0, blue: 0))
+        #expect(shade.hex(mode: .light) == "#FF0000")
+        #expect(shade.hex(mode: .dark) == "#000000")
+    }
+
+    @Test func documentBuildsW3CTokens() throws {
+        let document = W3CDocument()
+        document.color("color", "accent", Shade(Color(red: 0, green: 0.5, blue: 1)), mode: .light)
+        document.dimension("spacing", "md", 16)
+        document.typography("font", "title", TypeStyle(.title, weight: .semibold))
+
+        let object = try JSONSerialization.jsonObject(with: Data(document.json.utf8)) as! [String: Any]
+        let color = (object["color"] as! [String: Any])["accent"] as! [String: Any]
+        #expect(color["$type"] as? String == "color")
+        #expect((color["$value"] as? String)?.hasPrefix("#") == true)
+
+        let spacing = (object["spacing"] as! [String: Any])["md"] as! [String: Any]
+        #expect(spacing["$value"] as? String == "16px")
+
+        let font = ((object["font"] as! [String: Any])["title"] as! [String: Any])["$value"] as! [String: Any]
+        #expect(font["fontSize"] as? String == "28px")
+        #expect(font["fontWeight"] as? Int == 600)
+    }
+
+    @Test func themeExportsEveryRoleSet() throws {
+        let object = try JSONSerialization.jsonObject(with: Data(Theme.light.w3cTokens(mode: .light).utf8)) as! [String: Any]
+        // Light resuelve Colors y Spacing; cada rol aparece como token.
+        let colors = object["color"] as! [String: Any]
+        #expect(colors["accent"] != nil && colors["surface"] != nil)
+        #expect((object["spacing"] as! [String: Any])["md"] != nil)
+    }
+}

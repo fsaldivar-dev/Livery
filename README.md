@@ -151,6 +151,29 @@ ContentView().tint(theme.color.accent)                 // el acento, una vez, en
 Se construye un componente propio (como el campo de texto de arriba) solo cuando SwiftUI no
 ofrece el control; para todo lo demás, tokens y estilos nativos.
 
+## Sincronizar con diseño (W3C Design Tokens)
+
+Swift es la fuente; Penpot y Figma son destino. El tema se exporta a W3C Design Tokens, que abren
+Penpot y Figma (Tokens Studio).
+
+**Exportar** necesita los valores resueltos, así que es una API de runtime que el plugin genera:
+
+```swift
+let json = Theme.daylight.w3cTokens(mode: .light)   // String W3C, listo para escribir a un archivo
+```
+
+Produce colores (hex por modo), espaciado y radios (`dimension`) y tipografía (compuesta). Un
+archivo es de un modo; exporta claro y oscuro por separado.
+
+**Importar** convierte un archivo de tokens del diseñador en primitivos Swift, como andamio:
+
+```bash
+swift run --package-path Livery theme import marca.tokens.json --name Marca --out Marca.swift
+```
+
+Escribe `@Primitives` con los colores y medidas; luego los nombras como roles. El ciclo cierra:
+lo que exportas se vuelve a importar con los mismos valores.
+
 ## Migrar de un sistema a otro
 
 Cuando llega DS2 con más tokens, menos tokens y renombres, no se tocan vistas: se escribe un

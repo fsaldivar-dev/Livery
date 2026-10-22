@@ -448,7 +448,7 @@ usos legítimos de layout para una regla sintáctica.
 | 0.1 Núcleo | `@Primitives`, `@Roles`, `@Theme`, `Shade`, plugin `LiveryRegistry`, `livery-generate`, `.environment(\.theme, adding:)`, `theme init`. **Hecho.** | Sajaru Corner tiene su DS declarado y una pantalla migrada a `@Environment(\.theme)`. |
 | 0.2 Cambio | `@Bridge` con reenvíos deprecados y reporte de usos pendientes, lint en el plugin. **Hecho.** | Migrar un conjunto de roles V1→V2 en Sajaru sin tocar vistas, y bajar warnings a cero. |
 | 0.3 Componentes | `@Component`, `@Style`, catálogo base (Button, Card, TextField). | Botón de Sajaru declarado como contrato con estilo exhaustivo. |
-| 0.4 Diseño | `theme export` / `theme import` W3C, catálogo visual generado. | Tokens de Sajaru abren en Penpot. |
+| 0.4 Diseño | Export runtime `theme.w3cTokens(mode:)` (hecho), `theme import` CLI (hecho). Catálogo visual: pendiente. | Tokens de Sajaru abren en Penpot. |
 
 Fuera de alcance: patrones y principios como tipos (quedan como documentación),
 catálogo de componentes cerrado, soporte de UIKit más allá de lectura de roles.

@@ -55,3 +55,40 @@ import Testing
         #expect(throws: ScaffoldError.self) { try scaffold.write(into: directory) }
     }
 }
+
+@Suite struct ImporterTests {
+    @Test func turnsW3CColorsAndDimensionsIntoPrimitives() {
+        let root: [String: Any] = [
+            "color": [
+                "accent": ["$type": "color", "$value": "#4F46E5"],
+                "on-surface": ["$type": "color", "$value": "#0F172A"],
+            ],
+            "spacing": [
+                "md": ["$type": "dimension", "$value": "16px"],
+            ],
+        ]
+        let result = Importer.swift(from: root, enumName: "Marca")
+        #expect(result.colors == 2)
+        #expect(result.dimensions == 1)
+        #expect(result.swift.contains("@Primitives public enum MarcaColors {"))
+        #expect(result.swift.contains("public static let accent = Color(hex: 0x4F46E5)"))
+        #expect(result.swift.contains("public static let onSurface = Color(hex: 0x0F172A)"), "on-surface → onSurface")
+        #expect(result.swift.contains("public static let md: CGFloat = 16"))
+    }
+
+    @Test func ignoresNonColorNonDimensionTokens() {
+        let root: [String: Any] = [
+            "font": ["title": ["$type": "typography", "$value": ["fontSize": "28px"]]],
+            "color": ["brand": ["$type": "color", "$value": "#FF8800"]],
+        ]
+        let result = Importer.swift(from: root, enumName: "DS")
+        #expect(result.colors == 1 && result.dimensions == 0)
+        #expect(!result.swift.contains("typography"))
+    }
+
+    @Test func numericLeadingNamesAreEscaped() {
+        let root: [String: Any] = ["size": ["2xl": ["$type": "dimension", "$value": "40px"]]]
+        let result = Importer.swift(from: root, enumName: "DS")
+        #expect(result.swift.contains("public static let _2xl: CGFloat = 40"))
+    }
+}

@@ -17,6 +17,7 @@ import LiveryScaffold
 let usage = """
     uso:
       theme init [Nombre] [--at <carpeta>] [--livery <url|ruta>] [--branch <rama>]
+      theme import <tokens.json> [--name <Nombre>] [--out <archivo.swift>]
 
     Genera un paquete Swift con la estructura de un sistema de diseño construido con Livery:
       <Nombre>Primitives   la paleta y las medidas crudas (solo <Nombre> lo importa)
@@ -27,6 +28,9 @@ let usage = """
       --at <carpeta>        dónde crear la carpeta <Nombre> (por defecto, la actual)
       --livery <url|ruta>   de dónde tomar Livery (por defecto, GitHub); una ruta local la usa tal cual
       --branch <rama>       rama de Livery cuando es una URL (por defecto, master)
+
+    `theme import` convierte un archivo W3C Design Tokens (Penpot, Figma/Tokens Studio) en
+    primitivos Swift (@Primitives). Es un andamio: luego nombras los valores como roles.
     """
 
 func fail(_ message: String) -> Never {
@@ -86,6 +90,29 @@ case "init":
         }
         print()
         print(scaffold.nextSteps)
+    } catch {
+        fail("\(error)")
+    }
+
+case "import":
+    guard let file = arguments.first, !file.hasPrefix("-") else { fail("import necesita un archivo de tokens.\n\(usage)") }
+    var name = "ImportedTokens"
+    var output: String?
+    var iterator = arguments.dropFirst().makeIterator()
+    while let argument = iterator.next() {
+        switch argument {
+        case "--name": name = iterator.next() ?? name
+        case "--out": output = iterator.next()
+        default: fail("opción desconocida: \(argument)\n\(usage)")
+        }
+    }
+    guard Scaffold.isValidName(name) else { fail(ScaffoldError.invalidName(name).description) }
+    do {
+        let result = try Importer.swift(fromFile: file, enumName: name)
+        let path = output ?? "\(name).swift"
+        try result.swift.write(toFile: path, atomically: true, encoding: .utf8)
+        print("Escrito \(path): \(result.colors) colores, \(result.dimensions) medidas.")
+        print("Siguiente paso: nombra estos primitivos como roles (@Roles) y resuélvelos en tu tema.")
     } catch {
         fail("\(error)")
     }

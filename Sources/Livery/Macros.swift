@@ -24,7 +24,7 @@
 /// `LiveryRegistry`, que debe estar activo en el target. Una categoría solo puede declararse
 /// una vez por módulo; el plugin lo verifica.
 @attached(member, names: named(Resolver), named(Values), named(unresolved))
-@attached(extension, conformances: RoleSet, Sendable)
+@attached(extension, conformances: RoleSet, Sendable, CaseIterable)
 public macro Roles() = #externalMacro(module: "LiveryMacros", type: "RolesMacro")
 
 /// Declara un tema: la resolución de uno o más conjuntos de roles.
