@@ -131,6 +131,22 @@ tema conforma, y el plugin genera `theme.button`; el autor solo escribe el estil
 trae también un campo de texto (`FormField`) con estados de foco y error, para mostrar que el
 modelo sirve más allá de un botón.
 
+## Primitivos nativos
+
+Para lo que SwiftUI ya da —`Text`, `Button`, `Toggle`, iconos SF Symbols— el sistema no inventa
+componentes: aplica los roles del tema y los estilos nativos. El acento se pone una vez con `.tint`
+y los controles del sistema lo siguen.
+
+```swift
+Text("Título").font(theme.type.title).foregroundStyle(theme.color.onSurface)
+Label("Reproducir", systemImage: "play.circle.fill").foregroundStyle(theme.color.accent)
+Toggle("Notificaciones", isOn: $on)        // sigue el .tint(theme.color.accent) de la raíz
+ContentView().tint(theme.color.accent)
+```
+
+Se construye un componente propio (como el campo de texto de arriba) solo cuando SwiftUI no
+ofrece el control; para todo lo demás, tokens y estilos nativos.
+
 ## Migrar de un sistema a otro
 
 Cuando llega DS2 con más tokens, menos tokens y renombres, no se tocan vistas: se escribe un

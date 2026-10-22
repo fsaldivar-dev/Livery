@@ -125,6 +125,7 @@ struct GalleryContent: View {
     var body: some View {
         VStack(alignment: .leading, spacing: theme.space.lg) {
             SampleCard()
+            Panel { PrimitivesSection() }
             Panel { ButtonsSection() }
             Panel { FieldsSection() }
             Panel { ColorsSection() }
@@ -138,6 +139,7 @@ struct GalleryContent: View {
         .padding(theme.space.xl)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(theme.color.surface)
+        .tint(theme.color.accent)   // los controles nativos (Toggle, Slider…) siguen el acento del tema
     }
 }
 
