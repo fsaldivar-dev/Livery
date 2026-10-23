@@ -145,10 +145,15 @@ Un estilo de texto junta fuente y color en una sola llamada, para no repetir `.f
 
 ```swift
 Text("Título").textStyle(.title)
-Label("Reproducir", systemImage: "play.circle.fill").textStyle(.accent)
+Image(theme.icon.play).foregroundStyle(theme.color.accent)   // icono semántico, no "play.circle.fill"
+Image(theme.icon.favorite).symbolEffect(.bounce, value: tapped)   // animación nativa
 Toggle("Notificaciones", isOn: $on).textStyle(.body)   // y sigue el .tint del tema
 ContentView().tint(theme.color.accent)                 // el acento, una vez, en la raíz
 ```
+
+Los iconos son semánticos como los colores: la vista pide `theme.icon.delete`, no `"trash"`. El
+tema resuelve el rol a un SF Symbol (o a un símbolo propio empaquetado con `Bundle.module`), y se
+anima con `symbolEffect`. Si el símbolo cambia, se cambia en el tema, no en cada vista.
 
 Se construye un componente propio (como el campo de texto de arriba) solo cuando SwiftUI no
 ofrece el control; para todo lo demás, tokens y estilos nativos.

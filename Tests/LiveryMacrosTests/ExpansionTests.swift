@@ -138,7 +138,7 @@ extension ExpansionTests {
             }
             """,
             diagnostics: [DiagnosticSpec(
-                message: "`Colors` debe declarar su categoría conformando exactamente a una de: ColorRoles, TypeRoles, SpaceRoles, ShapeRoles, MotionRoles, ElevationRoles.",
+                message: "`Colors` debe declarar su categoría conformando exactamente a una de: ColorRoles, TypeRoles, SpaceRoles, ShapeRoles, MotionRoles, ElevationRoles, IconRoles.",
                 line: 1, column: 13)],
             macroSpecs: specs
         )

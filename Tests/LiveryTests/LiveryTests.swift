@@ -252,3 +252,17 @@ enum Chip {
         #expect((value["color"] as? String)?.hasPrefix("#") == true)
     }
 }
+
+@Suite struct IconTests {
+    @Test func systemIconMakesASymbolImage() {
+        let icon = Icon("trash")
+        #expect(icon.name == "trash")
+        #expect(icon.source == .system)
+        _ = Image(icon)   // compila: un rol de icono es un Image
+    }
+
+    @Test func bundledIconKeepsItsBundle() {
+        let icon = Icon("brand.logo", in: .main)
+        #expect(icon.source == .bundled(.main))
+    }
+}

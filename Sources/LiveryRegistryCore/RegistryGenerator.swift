@@ -266,6 +266,8 @@ public struct RegistryGenerator {
                 lines.append(#"\#(loop) document.shadow("shadow", \#(name), self.elevation[\#(each)], mode: mode) }"#)
             case .motion:
                 lines.append("        // \(role.qualifiedName): el movimiento no tiene token W3C estándar; se omite.")
+            case .icon:
+                lines.append("        // \(role.qualifiedName): los iconos no son un token W3C; se omiten.")
             }
         }
         lines.append("        return document.json")
@@ -302,6 +304,7 @@ enum RoleCategory: String, CaseIterable {
     case shape = "ShapeRoles"
     case motion = "MotionRoles"
     case elevation = "ElevationRoles"
+    case icon = "IconRoles"
 
     /// Nombre de la propiedad generada en `Theme`.
     var property: String { String(describing: self) }
@@ -314,6 +317,7 @@ enum RoleCategory: String, CaseIterable {
         case .space, .shape: "CGFloat"
         case .motion: "Livery.Motion"
         case .elevation: "Livery.Elevation"
+        case .icon: "Livery.Icon"
         }
     }
 }

@@ -122,6 +122,7 @@ valor:
 | `ShapeRoles` | `theme.shape` | `CGFloat` (radio) |
 | `MotionRoles` | `theme.motion` | `Motion`: animación y variante para reducir movimiento |
 | `ElevationRoles` | `theme.elevation` | `Elevation`: sombra con color por modo (claro/oscuro) |
+| `IconRoles` | `theme.icon` | `Icon`: SF Symbol del sistema o símbolo propio (`Bundle.module`) |
 
 ```swift
 // Primitives/Palette.swift

@@ -255,6 +255,10 @@ public struct Scaffold {
             case card, popover
         }
 
+        @Roles public enum Icons: IconRoles, CaseIterable {
+            case add, delete, edit, search
+        }
+
         """
     }
 
@@ -272,7 +276,7 @@ public struct Scaffold {
         import Livery
         import \(primitivesModule)
 
-        @Theme public struct Base: Colors.Resolver, Typography.Resolver, Spacing.Resolver, Shapes.Resolver, Motions.Resolver, Elevations.Resolver {
+        @Theme public struct Base: Colors.Resolver, Typography.Resolver, Spacing.Resolver, Shapes.Resolver, Motions.Resolver, Elevations.Resolver, Icons.Resolver {
             public init() {}
 
             public let surface            = Shade(light: Palette.neutral50, dark: Palette.neutral950)
@@ -307,6 +311,12 @@ public struct Scaffold {
             // Elevación: sombra más fuerte en oscuro, donde el negro casi no se ve.
             public let card    = Elevation(color: Shade(light: .black.opacity(0.10), dark: .black.opacity(0.45)), radius: 10, y: 4)
             public let popover = Elevation(color: Shade(light: .black.opacity(0.18), dark: .black.opacity(0.6)), radius: 22, y: 10)
+
+            // Iconos semánticos: la vista pide la intención (@Roles Icons), no el nombre del símbolo.
+            public let add    = Icon("plus")
+            public let delete = Icon("trash")
+            public let edit   = Icon("pencil")
+            public let search = Icon("magnifyingglass")
         }
 
         """
@@ -327,6 +337,7 @@ public struct Scaffold {
                 #expect(theme.resolves(Shapes.self))
                 #expect(theme.resolves(Motions.self))
                 #expect(theme.resolves(Elevations.self))
+                #expect(theme.resolves(Icons.self))
             }
 
             @Test func spacingScaleIsIncreasing() {

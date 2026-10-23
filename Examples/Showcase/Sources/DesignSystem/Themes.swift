@@ -11,7 +11,7 @@ import Primitives
 import SwiftUI
 
 /// El tema de la app: papel y tinta, acento índigo.
-@Theme public struct Daylight: Colors.Resolver, Typography.Resolver, Spacing.Resolver, Shapes.Resolver, Motions.Resolver, Elevations.Resolver, Button.Styler, Field.Styler {
+@Theme public struct Daylight: Colors.Resolver, Typography.Resolver, Spacing.Resolver, Shapes.Resolver, Motions.Resolver, Elevations.Resolver, Icons.Resolver, Button.Styler, Field.Styler {
     public init() {}
 
     /// El botón, siguiendo la HIG: un tinte (`accent`) y las medidas por tamaño. Los tres estilos
@@ -69,6 +69,13 @@ import SwiftUI
     // En oscuro una sombra negra casi no se ve: se usa más fuerte.
     public let card    = Elevation(color: Shade(light: .black.opacity(0.10), dark: .black.opacity(0.45)), radius: 10, y: 4)
     public let popover = Elevation(color: Shade(light: .black.opacity(0.18), dark: .black.opacity(0.6)), radius: 22, y: 10)
+
+    // Iconos semánticos: la vista pide la intención, no el símbolo.
+    public let play         = Icon("play.circle.fill")
+    public let delete       = Icon("trash")
+    public let favorite     = Icon("star.fill")
+    public let notification = Icon("bell.badge")
+    public let search       = Icon("magnifyingglass")
 }
 
 /// Un rebrand completo: misma estructura, otra pintura. Grafito y ámbar. Hereda tipografía,

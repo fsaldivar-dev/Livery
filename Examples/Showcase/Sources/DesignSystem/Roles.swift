@@ -32,3 +32,7 @@ import Livery
 @Roles public enum Elevations: ElevationRoles, CaseIterable {
     case card, popover
 }
+
+@Roles public enum Icons: IconRoles, CaseIterable {
+    case play, delete, favorite, notification, search
+}

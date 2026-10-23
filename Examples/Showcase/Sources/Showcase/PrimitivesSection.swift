@@ -17,6 +17,7 @@ import SwiftUI
 struct PrimitivesSection: View {
     @Environment(\.theme) private var theme
     @State private var activo = true
+    @State private var favorito = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: theme.space.md) {
@@ -30,11 +31,18 @@ struct PrimitivesSection: View {
 
             Divider()
 
-            // Icono: un SF Symbol con color y tamaño del tema.
-            HStack(spacing: theme.space.md) {
-                Label("Reproducir", systemImage: "play.circle.fill").textStyle(.accent)
-                Label("Favorito", systemImage: "star.fill").textStyle(.accent)
-                Label("Alerta", systemImage: "bell.badge").textStyle(.danger)
+            // Iconos semánticos: la vista pide `theme.icon.play`, no "play.circle.fill".
+            HStack(spacing: theme.space.lg) {
+                Label { Text("Reproducir") } icon: { Image(theme.icon.play) }.textStyle(.accent)
+                Label { Text("Buscar") } icon: { Image(theme.icon.search) }.textStyle(.body)
+                // Un icono animado con symbolEffect, enganchado al toque.
+                Button { favorito.toggle() } label: {
+                    Image(theme.icon.favorite)
+                        .symbolEffect(.bounce, value: favorito)
+                        .foregroundStyle(favorito ? theme.color.accent : theme.color.onSurfaceSecondary)
+                }
+                .buttonStyle(.plain)
+                .font(theme.type.title)
             }
 
             Divider()
