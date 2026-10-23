@@ -33,6 +33,9 @@ struct PrimitivesSection: View {
 
             // Iconos semánticos: la vista pide `theme.icon.play`, no "play.circle.fill".
             HStack(spacing: theme.space.lg) {
+                Image(theme.icon.brand)   // icono propio, SVG empaquetado, teñido como cualquier símbolo
+                    .foregroundStyle(theme.color.accent)
+                    .font(theme.type.title)
                 Label { Text("Reproducir") } icon: { Image(theme.icon.play) }.textStyle(.accent)
                 Label { Text("Buscar") } icon: { Image(theme.icon.search) }.textStyle(.body)
                 // Un icono animado con symbolEffect, enganchado al toque.

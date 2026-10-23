@@ -76,6 +76,7 @@ import SwiftUI
     public let favorite     = Icon("star.fill")
     public let notification = Icon("bell.badge")
     public let search       = Icon("magnifyingglass")
+    public let brand        = Icon("BrandMark", in: .module)   // símbolo propio, del SVG empaquetado
 }
 
 /// Un rebrand completo: misma estructura, otra pintura. Grafito y ámbar. Hereda tipografía,

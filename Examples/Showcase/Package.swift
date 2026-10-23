@@ -23,6 +23,7 @@ let package = Package(
         .target(
             name: "DesignSystem",
             dependencies: ["Primitives", .product(name: "Livery", package: "Livery")],
+            resources: [.process("Resources/Symbols.xcassets")],
             plugins: [.plugin(name: "LiveryRegistry", package: "Livery")]
         ),
         // La app: importa DesignSystem y Livery, nunca Primitives. Con el plugin activo, el lint

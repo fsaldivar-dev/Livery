@@ -34,5 +34,5 @@ import Livery
 }
 
 @Roles public enum Icons: IconRoles, CaseIterable {
-    case play, delete, favorite, notification, search
+    case play, delete, favorite, notification, search, brand
 }

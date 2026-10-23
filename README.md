@@ -152,8 +152,13 @@ ContentView().tint(theme.color.accent)                 // el acento, una vez, en
 ```
 
 Los iconos son semánticos como los colores: la vista pide `theme.icon.delete`, no `"trash"`. El
-tema resuelve el rol a un SF Symbol (o a un símbolo propio empaquetado con `Bundle.module`), y se
-anima con `symbolEffect`. Si el símbolo cambia, se cambia en el tema, no en cada vista.
+tema resuelve el rol a un SF Symbol o a un símbolo propio: un SVG en un asset catalog del módulo,
+tratado como plantilla, resuelto con `Icon("BrandMark", in: .module)`. Se tiñe como cualquier
+símbolo y se anima con `symbolEffect`. Si el símbolo cambia, se cambia en el tema, no en cada vista.
+
+> Nota: un asset catalog lo compila `actool`, que solo corre en builds de Xcode. Un `swift run` de
+> línea de comandos copia el catálogo sin compilar, así que el símbolo propio aparece en Xcode (y en
+> la app), no en una captura headless.
 
 Se construye un componente propio (como el campo de texto de arriba) solo cuando SwiftUI no
 ofrece el control; para todo lo demás, tokens y estilos nativos.
