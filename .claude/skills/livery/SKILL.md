@@ -1,6 +1,6 @@
 ---
 name: livery
-description: Build, theme, or edit a SwiftUI app's design system with Livery (semantic tokens, themes, components). Use when the task involves design tokens, theming, dark mode, colors/typography/spacing/shape/motion/elevation/icon roles, a themed button or text field, migrating a design system, or exporting tokens to W3C/Penpot/Figma — anytime a file declares @Roles, @Theme, @Component or @Bridge, reads theme.color/theme.type/etc, or the repo depends on the Livery package.
+description: Build, theme, or edit a SwiftUI app's design system with Livery (semantic tokens, themes, components). Use when the task involves design tokens, theming, dark mode, colors/typography/spacing/shape/motion/elevation/icon roles, a themed button or text field, migrating a design system, building a design-system catalog, showcase or gallery, documenting a component (what/why/when/how, do/don't) or writing a DocC documentation catalog for a design system, or exporting tokens to W3C/Penpot/Figma — anytime a file declares @Roles, @Theme, @Component or @Bridge, reads theme.color/theme.type/etc, or the repo depends on the Livery package.
 ---
 
 # Livery
@@ -125,7 +125,9 @@ generates the `Styler` protocol; the plugin generates `theme.<component>`. The a
 `ButtonStyle`, or a custom view for controls SwiftUI can't style (like a text field). Follow Apple's
 HIG — for buttons that means a tint plus prominent/bordered/plain styles, with destructive as a role.
 Build a bespoke component only when SwiftUI has no native control; for Text/Button/Toggle/icons,
-theme the native primitive.
+theme the native primitive. Every component you add also earns a row in the catalog and a documented
+showcase page — see "Ship a catalog" below; a component a dev can't find or doesn't know how to use
+is only half built.
 
 ## Migration between design systems
 
@@ -141,6 +143,69 @@ enum ColorsV1toV2 {
 The plugin verifies the bridge covers every old role, generates deprecated forwards on the new
 `Values` (so old views compile and get the new colors), and reports remaining uses on the bridge line.
 Warnings are the progress bar; at zero, delete the old set and the bridge.
+
+## Ship a catalog and DocC: document and show the system
+
+A design system is not finished when the tokens compile — a dev still cannot see what exists, read what
+is allowed, or know how to call it. The good practice is to ship, as part of the system and in code,
+not a wiki: a **live catalog** (the system running), **DocC** (the system written down, its limits and
+its API), and a **documented component** for every control. The reference implementation of the catalog
+is `Examples/Showcase/Sources/Showcase/LiveryCatalog.swift`; build the app's catalog in its shape.
+
+**A live catalog.** One screen that browses the whole system, in the iOS pattern: a large title, a
+segmented menu of categories (Colors, Typography, Spacing, Components…), and below it only the selected
+category. It is a **token-driven composition** — every color, font, space, shape and elevation comes
+from `theme.*`, nothing hard-coded — so it repaints when you switch theme or mode (that repaint *is*
+the demo), and it renders headless for snapshots. The token lists are **data-driven from the role
+enums**, which are `CaseIterable`: the colors are `ForEach(Colors.allCases) { role in … theme.color[role] }`,
+and the same for `Typography`/`Spacing`. Add a role or change a theme and the catalog follows with no
+edit of its own.
+
+**Components as a list → detail.** Components don't fit inline — there can be hundreds. List them: one
+row per component (name, a one-line summary, a disclosure chevron), driven by a `CaseIterable` of
+components, inside a `NavigationStack`. Tapping a row opens that component's **showcase**: a detail page
+with the component in its variants, sizes and states (for a button: prominent/bordered/plain, the
+destructive role, the sizes, disabled). One component, one row, one page; the list scales because it
+iterates the enum. (On macOS there is no system navigation bar, so give the detail its own Back control
+with `@Environment(\.dismiss)`.)
+
+**Per-component docs, Apple-style.** Each showcase page documents the component the way Apple's HIG
+does, in this order, one or two sentences each: **description** (what it is and does), **why** (why this
+and not the similar control it is confused with), **when** (when to use it and when not), **how** (its
+options, content and behavior), then **do** and **don't** (three to five concrete, checkable lines
+each). Keep the doc next to the live example, so the word and the thing are on one screen. Follow the
+HIG itself: a button is a tint plus prominent/bordered/plain with destructive as a role; a toggle lives
+only in a list row; a segmented control switches between closely related subviews, tabs switch sections;
+content goes in grouped inset lists, not shadow cards.
+
+**Document it with DocC.** The live catalog shows the system running; **DocC says what the system *is***.
+DocC is Apple's documentation compiler — the same tool behind the SwiftUI reference and the docs inside
+Xcode — and here it is the design system's single source of truth and its **limits**. Like a design-
+system page in Figma, it is the board every screen plugs into: it states the **closed grammar** (the
+seven categories, each role set, and the value type a role must be — a color is a `Shade`, a font a
+`TypeStyle`), so a dev reads what is allowed *before* writing a view, not after the compiler stops them.
+The style of the DocC is that boundary: document the system, not a gallery of pretty screens. Put a
+`.docc` catalog in the design-system target with a landing page that lays out the system (categories,
+themes, how to apply one), one **article per component** carrying its description / why / when / how and
+do / don't (the same content as its showcase page), and `///` doc comments on every public symbol — the
+roles, the themes, the components, the `theme.*` accessors — so the **API is consulted** in Xcode's
+documentation window and on a static site built with `swift package generate-documentation`. A component
+is not finished until its symbols are documented and it has a DocC article; a token category is not
+finished until the landing page names its grammar.
+
+**Old and new, side by side.** The catalog is where a migration becomes visible instead of a
+spreadsheet. The legacy role set and the new one both resolve, a `@Bridge` forwards old to new (see
+Migration above), and a component's page can show the deprecated variant next to its replacement while
+the bridge's warning count drops to zero. A dev sees what changed and what to move to, in the running
+app.
+
+**See it.** `swift run --package-path <app>` opens the catalog in a window; add a headless-snapshot path
+(an `ImageRenderer` over the same composition, one PNG per theme and mode) for CI and design review. A
+`ScrollView` collapses under `ImageRenderer` unless given a height, and live controls (`TextField`,
+`Toggle`) draw as placeholders there — factor the scrolling content out of the `ScrollView` for the
+snapshot, and verify those controls in the window. For the DocC, `swift package generate-documentation`
+(the Swift-DocC plugin) builds it; open it in Xcode's documentation window, or add
+`--transform-for-static-hosting` to export the site.
 
 ## Accessibility and interop, verified not promised
 

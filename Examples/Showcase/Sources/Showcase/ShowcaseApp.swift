@@ -32,6 +32,10 @@ struct ShowcaseApp: App {
             Export.write(to: CommandLine.arguments[index + 1])
             exit(0)
         }
+        if let index = CommandLine.arguments.firstIndex(of: "--catalog"), index + 1 < CommandLine.arguments.count {
+            CatalogSnapshot.write(to: CommandLine.arguments[index + 1])
+            exit(0)
+        }
         if CommandLine.arguments.contains("--contrast") {
             for (name, theme) in [("Daylight", Theme.daylight), ("Carbon", Theme.daylight.merging(.carbon))] {
                 let issues = theme.contrastReport()
@@ -71,10 +75,17 @@ enum ThemeChoice: String, CaseIterable, Identifiable {
     }
 }
 
+enum DemoView: String, CaseIterable, Identifiable {
+    case catalogo = "Catálogo"
+    case galeria = "Galería"
+    var id: String { rawValue }
+}
+
 struct ShowcaseView: View {
     @State private var choice: ThemeChoice = .daylight
     @State private var scheme: ColorScheme = .light
     @State private var dense = false
+    @State private var demo: DemoView = .catalogo
 
     /// El tema activo: el elegido, más densidad si está activa. Se aplica una vez, aquí.
     private var activeTheme: Theme {
@@ -83,12 +94,34 @@ struct ShowcaseView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            ControlBar(choice: $choice, scheme: $scheme, dense: $dense)
+            ControlBar(choice: $choice, scheme: $scheme, dense: $dense, demo: $demo)
             Divider()
-            Gallery()
+            switch demo {
+            case .catalogo: CatalogStage()
+            case .galeria:  Gallery()
+            }
         }
         .environment(\.theme, activeTheme)
         .environment(\.colorScheme, scheme)
+    }
+}
+
+/// El catálogo demo, enmarcado como una pantalla de iPhone sobre el fondo, para verlo como app.
+private struct CatalogStage: View {
+    @Environment(\.theme) private var theme
+
+    var body: some View {
+        LiveryCatalog()
+            .frame(width: 390, height: 844)
+            .clipShape(.rect(cornerRadius: theme.shape.large, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: theme.shape.large, style: .continuous)
+                    .stroke(theme.color.outline)
+            }
+            .elevation(theme.elevation.popover)
+            .padding(theme.space.lg)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(theme.color.surfaceElevated)
     }
 }
 
@@ -98,9 +131,15 @@ private struct ControlBar: View {
     @Binding var choice: ThemeChoice
     @Binding var scheme: ColorScheme
     @Binding var dense: Bool
+    @Binding var demo: DemoView
 
     var body: some View {
         HStack(spacing: theme.space.md) {
+            Picker("Vista", selection: $demo) {
+                ForEach(DemoView.allCases) { Text($0.rawValue).tag($0) }
+            }
+            .pickerStyle(.segmented)
+            .frame(width: 180)
             Picker("Tema", selection: $choice) {
                 ForEach(ThemeChoice.allCases) { Text($0.rawValue).tag($0) }
             }
@@ -172,6 +211,45 @@ enum Export {
 }
 
 #if os(macOS)
+/// Renderiza el catálogo iOS a tamaño de iPhone, un PNG por modo, para revisarlo sin simulador.
+enum CatalogSnapshot {
+    @MainActor static func write(to directory: String) {
+        try? FileManager.default.createDirectory(atPath: directory, withIntermediateDirectories: true)
+        for scheme in [ColorScheme.light, .dark] {
+            for category in LiveryCatalog.Category.allCases {
+                let view = LiveryCatalog(category: category)
+                    .frame(width: 390, height: 844)
+                    .environment(\.theme, .daylight)
+                    .environment(\.colorScheme, scheme)
+                let renderer = ImageRenderer(content: view)
+                renderer.scale = 2
+                guard let cgImage = renderer.cgImage else { continue }
+                let rep = NSBitmapImageRep(cgImage: cgImage)
+                let tag = category.rawValue.lowercased().filter(\.isLetter)
+                let name = "catalog-\(tag)-\(scheme == .dark ? "dark" : "light").png"
+                try? rep.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: directory).appending(path: name))
+                print("catalog: \(name)")
+            }
+        }
+        // Las carteleras de cada componente (el detalle que abre una fila).
+        for component in ShowcaseComponent.allCases {
+            let view = ComponentShowcaseContent(component: component)
+                .frame(width: 390, alignment: .top)
+                .background(Theme.daylight.color.surface)
+                .environment(\.theme, .daylight)
+                .environment(\.colorScheme, .light)
+            let renderer = ImageRenderer(content: view)
+            renderer.scale = 2
+            guard let cgImage = renderer.cgImage else { continue }
+            let rep = NSBitmapImageRep(cgImage: cgImage)
+            let tag = component.rawValue.lowercased().filter(\.isLetter)
+            let name = "showcase-\(tag).png"
+            try? rep.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: directory).appending(path: name))
+            print("showcase: \(name)")
+        }
+    }
+}
+
 enum Snapshot {
     @MainActor static func write(to directory: String) {
         try? FileManager.default.createDirectory(atPath: directory, withIntermediateDirectories: true)
