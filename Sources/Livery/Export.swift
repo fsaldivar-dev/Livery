@@ -43,6 +43,17 @@ public final class W3CDocument {
         ])
     }
 
+    /// Un token de sombra W3C, con el color resuelto para el modo.
+    public func shadow(_ group: String, _ name: String, _ elevation: Elevation, mode: TokenMode) {
+        put(group, name, type: "shadow", value: [
+            "color": elevation.color.hex(mode: mode),
+            "offsetX": "\(Int(elevation.x.rounded()))px",
+            "offsetY": "\(Int(elevation.y.rounded()))px",
+            "blur": "\(Int(elevation.radius.rounded()))px",
+            "spread": "0px",
+        ])
+    }
+
     private func put(_ group: String, _ name: String, type: String, value: Any) {
         groups[group, default: [:]][name] = ["$type": type, "$value": value]
     }

@@ -105,6 +105,7 @@ swift run --package-path Examples/Showcase
 - **Tema incompleto.** Un tema que olvida un rol es un error de conformance en la línea del tema, con fix-it.
 - **Modo olvidado.** Un rol de color es un `Shade`, no un `Color`: claro y oscuro se deciden siempre, y el contraste aumentado es opcional. Se resuelve al dibujar según el entorno, también para UIKit y AppKit.
 - **Movimiento sin respeto a accesibilidad.** Un rol de movimiento es un `Motion` con su variante para "Reducir movimiento"; sin ella, la animación se omite cuando el ajuste está activo.
+- **Sombra plana en oscuro.** Un rol de elevación es un `Elevation` cuyo color es un `Shade`: la sombra se decide para claro y oscuro, porque un negro al 10% casi no se ve sobre un fondo oscuro. Se aplica con `.elevation(theme.elevation.card)`.
 - **Tipografía que no escala.** Un rol de tipografía es un `TypeStyle`, no un `Font`: se construye relativo a un estilo de texto del sistema, así escala con Dynamic Type por construcción; un tamaño fijo en puntos no compila.
 - **Vistas sin primitivos.** La paleta vive en un módulo que las vistas no importan. Leer `Palette.jade500` desde una vista no compila.
 - **Roles mal declarados.** Un enum sin categoría, una categoría repetida o un caso con valores asociados son diagnósticos del macro.

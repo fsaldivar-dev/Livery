@@ -34,6 +34,7 @@ struct Panel<Content: View>: View {
                 RoundedRectangle(cornerRadius: theme.shape.medium, style: .continuous)
                     .stroke(theme.color.outline)
             }
+            .elevation(theme.elevation.card)
     }
 }
 

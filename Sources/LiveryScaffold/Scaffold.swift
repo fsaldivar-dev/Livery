@@ -251,6 +251,10 @@ public struct Scaffold {
             case quick, normal, slow
         }
 
+        @Roles public enum Elevations: ElevationRoles, CaseIterable {
+            case card, popover
+        }
+
         """
     }
 
@@ -268,7 +272,7 @@ public struct Scaffold {
         import Livery
         import \(primitivesModule)
 
-        @Theme public struct Base: Colors.Resolver, Typography.Resolver, Spacing.Resolver, Shapes.Resolver, Motions.Resolver {
+        @Theme public struct Base: Colors.Resolver, Typography.Resolver, Spacing.Resolver, Shapes.Resolver, Motions.Resolver, Elevations.Resolver {
             public init() {}
 
             public let surface            = Shade(light: Palette.neutral50, dark: Palette.neutral950)
@@ -299,6 +303,10 @@ public struct Scaffold {
             public let quick  = Motion(.easeOut(duration: 0.12))
             public let normal = Motion(.snappy(duration: 0.25), reduced: .easeOut(duration: 0.1))
             public let slow   = Motion(.smooth(duration: 0.4), reduced: .easeOut(duration: 0.15))
+
+            // Elevación: sombra más fuerte en oscuro, donde el negro casi no se ve.
+            public let card    = Elevation(color: Shade(light: .black.opacity(0.10), dark: .black.opacity(0.45)), radius: 10, y: 4)
+            public let popover = Elevation(color: Shade(light: .black.opacity(0.18), dark: .black.opacity(0.6)), radius: 22, y: 10)
         }
 
         """
@@ -318,6 +326,7 @@ public struct Scaffold {
                 #expect(theme.resolves(Spacing.self))
                 #expect(theme.resolves(Shapes.self))
                 #expect(theme.resolves(Motions.self))
+                #expect(theme.resolves(Elevations.self))
             }
 
             @Test func spacingScaleIsIncreasing() {

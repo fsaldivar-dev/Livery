@@ -8,6 +8,7 @@ extension Livery.Theme {
     public var space: Spacing.Values { values(Spacing.self) }
     public var shape: Shapes.Values { values(Shapes.self) }
     public var motion: Motions.Values { values(Motions.self) }
+    public var elevation: Elevations.Values { values(Elevations.self) }
     public var button: Button.Style { style(for: Button.self) ?? Button.unstyled }
     public var field: Field.Style { style(for: Field.self) ?? Field.unstyled }
     public static var daylight: Livery.Theme { Daylight().resolvedTheme }
@@ -25,6 +26,7 @@ extension Livery.Theme {
         for role in Spacing.allCases { document.dimension("spacing", String(describing: role), self.space[role]) }
         for role in Shapes.allCases { document.dimension("radius", String(describing: role), self.shape[role]) }
         // Motions: el movimiento no tiene token W3C estándar; se omite.
+        for role in Elevations.allCases { document.shadow("shadow", String(describing: role), self.elevation[role], mode: mode) }
         return document.json
     }
 }

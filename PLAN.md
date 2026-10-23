@@ -121,6 +121,7 @@ valor:
 | `SpaceRoles` | `theme.space` | `CGFloat` |
 | `ShapeRoles` | `theme.shape` | `CGFloat` (radio) |
 | `MotionRoles` | `theme.motion` | `Motion`: animación y variante para reducir movimiento |
+| `ElevationRoles` | `theme.elevation` | `Elevation`: sombra con color por modo (claro/oscuro) |
 
 ```swift
 // Primitives/Palette.swift
@@ -226,7 +227,7 @@ que un subárbol no resuelve es un fallo en debug con mensaje claro
 Ver riesgo R2.
 
 Lo que la raíz `Theme` expone es el vocabulario del proyecto: `theme.color`,
-`theme.type`, `theme.space`, `theme.shape`, `theme.motion`; `theme.elevation` pendiente.
+`theme.type`, `theme.space`, `theme.shape`, `theme.motion`, `theme.elevation`.
 Los nombres de las categorías los fija el kernel; los roles dentro de cada una
 los pone el proyecto.
 

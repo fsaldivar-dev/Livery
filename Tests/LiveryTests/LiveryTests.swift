@@ -233,3 +233,22 @@ enum Chip {
         #expect(issues.map(\.mode) == [.dark], "solo el modo oscuro falla")
     }
 }
+
+@Suite struct ElevationTests {
+    @Test func shadowColorAdaptsToMode() {
+        let elevation = Elevation(color: Shade(light: .black, dark: .white), radius: 8, y: 4)
+        #expect(elevation.color.color(for: .light) == .black)
+        #expect(elevation.color.color(for: .dark) == .white)
+        #expect(elevation.radius == 8 && elevation.y == 4)
+    }
+
+    @Test func exportsAsW3CShadowToken() throws {
+        let document = W3CDocument()
+        document.shadow("shadow", "card", Elevation(color: Shade(Color(red: 0, green: 0, blue: 0)), radius: 10, y: 4), mode: .light)
+        let object = try JSONSerialization.jsonObject(with: Data(document.json.utf8)) as! [String: Any]
+        let value = ((object["shadow"] as! [String: Any])["card"] as! [String: Any])["$value"] as! [String: Any]
+        #expect(value["blur"] as? String == "10px")
+        #expect(value["offsetY"] as? String == "4px")
+        #expect((value["color"] as? String)?.hasPrefix("#") == true)
+    }
+}

@@ -37,6 +37,7 @@ struct SampleCard: View {
             RoundedRectangle(cornerRadius: theme.shape.medium, style: .continuous)
                 .stroke(theme.color.outline)
         }
+        .elevation(theme.elevation.popover)
     }
 }
 

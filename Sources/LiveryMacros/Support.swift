@@ -10,6 +10,7 @@ enum RoleCategory: String, CaseIterable {
     case space = "SpaceRoles"
     case shape = "ShapeRoles"
     case motion = "MotionRoles"
+    case elevation = "ElevationRoles"
 
     /// Tipo de cada rol, cualificado para no chocar con tipos anidados del usuario.
     var valueType: String {
@@ -18,6 +19,7 @@ enum RoleCategory: String, CaseIterable {
         case .type: "Livery.TypeStyle"
         case .space, .shape: "CGFloat"
         case .motion: "Livery.Motion"
+        case .elevation: "Livery.Elevation"
         }
     }
 
@@ -28,6 +30,7 @@ enum RoleCategory: String, CaseIterable {
         case .type: "Livery.TypeStyle.unresolved"
         case .space, .shape: "0"
         case .motion: "Livery.Motion.unresolved"
+        case .elevation: "Livery.Elevation.unresolved"
         }
     }
 

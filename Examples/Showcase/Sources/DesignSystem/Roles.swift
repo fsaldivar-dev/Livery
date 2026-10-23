@@ -28,3 +28,7 @@ import Livery
 @Roles public enum Motions: MotionRoles, CaseIterable {
     case quick, normal, slow
 }
+
+@Roles public enum Elevations: ElevationRoles, CaseIterable {
+    case card, popover
+}
