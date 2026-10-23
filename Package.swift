@@ -20,6 +20,8 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/swiftlang/swift-syntax.git", "600.0.0"..<"605.0.0"),
+        // Documentación DocC: `swift package generate-documentation`.
+        .package(url: "https://github.com/swiftlang/swift-docc-plugin", from: "1.3.0"),
     ],
     targets: [
         // Plugin del compilador: verifica declaraciones y genera lo que vive dentro del tipo decorado.

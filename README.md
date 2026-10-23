@@ -6,6 +6,10 @@
 
 **One airframe. Any livery.**
 
+[![CI](https://github.com/fsaldivar-dev/Livery/actions/workflows/ci.yml/badge.svg)](https://github.com/fsaldivar-dev/Livery/actions/workflows/ci.yml)
+[![Swift 6.2](https://img.shields.io/badge/Swift-6.2-F05138?logo=swift&logoColor=white)](https://swift.org)
+![Platforms](https://img.shields.io/badge/platforms-iOS%2017%20·%20macOS%2014%20·%20tvOS%20·%20watchOS%20·%20visionOS-blue)
+
 Livery es un framework para construir sistemas de diseño en Swift. No trae un look;
 trae la estructura que Apple nunca dio: capas, reglas y migraciones, verificadas por
 el compilador.
@@ -98,6 +102,23 @@ no puede leer `Palette` ni queriendo. Cambia de tema, de modo y de densidad en v
 
 ```bash
 swift run --package-path Examples/Showcase
+```
+
+Abre un **catálogo** del sistema con la forma de una pantalla iOS: un menú segmentado de categorías
+(Colores, Tipografía, Espaciado, Componentes) y, debajo, solo la elegida. Las listas salen de los
+roles (`CaseIterable`), así que el catálogo se repinta solo al cambiar de tema. Los componentes son
+una lista → cartelera: una fila por componente y, al tocar, su documentación estilo Apple (qué es, por
+qué, cuándo, cómo, hacer/no hacer) junto al componente vivo. El selector Catálogo/Galería cambia a la
+galería anterior.
+
+## Documentación (DocC)
+
+El catálogo muestra el sistema **funcionando**; DocC dice qué **es** y cuáles son sus **límites** —la
+gramática cerrada, como una página de design system en Figma— y cómo se consulta la API. Se genera con
+el plugin Swift-DocC y se abre en Xcode o se exporta a un sitio estático:
+
+```bash
+swift package generate-documentation --target Livery
 ```
 
 ## Qué verifica el compilador
@@ -212,9 +233,11 @@ Con eso, el plugin:
 
 ## Estado
 
-Fases 0.1 y 0.2: `@Roles`, `@Theme`, `@Primitives`, `@Bridge`, `Shade`, el plugin `LiveryRegistry`
-(registro, puentes, reporte y lint), la CLI `theme init`, `.environment(\.theme, …)`, `.environment(\.theme, adding:)` y
-sobrecargas de modificadores para fuente, espaciado y radio.
-Swift 6.2, iOS 17 / macOS 14.
+Las siete categorías de token (`color`, `type`, `space`, `shape`, `motion`, `elevation`, `icon`), las
+macros `@Roles`, `@Theme`, `@Primitives`, `@Component`, `@Bridge`, el plugin `LiveryRegistry` (registro,
+puentes, reporte y lint), la CLI `theme init` / `theme import`, el export/import W3C, el reporte de
+contraste WCAG, los símbolos propios, el catálogo del ejemplo con documentación por componente, la
+referencia DocC y el CI. Lectura con `.environment(\.theme, …)` y `.environment(\.theme, adding:)`.
+Swift 6.2, iOS 17 / macOS 14 (y tvOS / watchOS / visionOS).
 
 El diseño completo, las fases y los riesgos están en [PLAN.md](PLAN.md).

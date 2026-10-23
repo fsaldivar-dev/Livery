@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Build, test and docs
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Swift version
+        run: swift --version
+
+      # The macros, runtime, registry generator, bridge and scaffold suites. The contrast report
+      # lives in ContrastTests, so accessibility is gated here too.
+      - name: Build
+        run: swift build
+
+      - name: Test
+        run: swift test
+
+      # The example design system must keep compiling against the current API, with the build plugin
+      # (lint, generated-file check) active.
+      - name: Build the Showcase example
+        run: swift build --package-path Examples/Showcase
+
+      # The DocC reference must stay valid — unresolved symbol links fail the build.
+      - name: Build documentation
+        run: >
+          swift package --allow-writing-to-directory "$RUNNER_TEMP/docs"
+          generate-documentation --target Livery --output-path "$RUNNER_TEMP/docs"
